@@ -212,6 +212,18 @@
         @define-color background         {color5};
         @define-color primary_background rgba({color1.rgb},0.81);
         @define-color tertiary_background {color0};
+        @define-color A-colour  {color3};
+        @define-color B-Colour  {color6};
+        @define-color C-colour  {color7};
+        @define-color D-colour  {color8};
+        @define-color E-colour  {color9};
+        @define-color F-colour  {color10};
+        @define-color G-colour  {color11};
+        @define-color H-colour  {color12};
+        @define-color I-colour  {color13};
+        @define-color J-colour  {color14};
+        @define-color K-colour  {color15};
+
       '';
     };
 
@@ -300,28 +312,200 @@
   '';
     };
 
-    #Rofi
+    # #Rofi
+    # ".config/wal/templates/colors-rofi.rasi" = {
+    #   text = ''
+
+    #       background: {background};
+    #     foreground: {foreground};
+    #     color0: {color0};
+    #     color1: {color1};
+    #     color2: {color2};
+    #     color3: {color3};
+    #     color4: {color4};
+    #     color5: {color5};
+    #     color6: {color6};
+    #     color7: {color7};
+    #     color8: {color8};
+    #     color9: {color9};
+    #     color10: {color10};
+    #     color11: {color11};
+    #     color12: {color12};
+    #     color13: {color13};
+    #     color14: {color14};
+    #     color15: {color15};
+
+    #   '';
+    # };
+
+
+
+    #Rofi 2
     ".config/wal/templates/colors-rofi.rasi" = {
       text = ''
+* {{
+    active-background: {color2}88;
+    active-foreground: @foreground;
+    normal-background: transparent;
+    normal-foreground: @foreground;
+    urgent-background: {color1}88;
+    urgent-foreground: @foreground;
 
-          background: {background};
-        foreground: {foreground};
-        color0: {color0};
-        color1: {color1};
-        color2: {color2};
-        color3: {color3};
-        color4: {color4};
-        color5: {color5};
-        color6: {color6};
-        color7: {color7};
-        color8: {color8};
-        color9: {color9};
-        color10: {color10};
-        color11: {color11};
-        color12: {color12};
-        color13: {color13};
-        color14: {color14};
-        color15: {color15};
+    alternate-active-background: @background;
+    alternate-active-foreground: @foreground;
+    alternate-normal-background: transparent;
+    alternate-normal-foreground: @foreground;
+    alternate-urgent-background: @background;
+    alternate-urgent-foreground: @foreground;
+
+    selected-active-background: {color1}AA;
+    selected-active-foreground: @foreground;
+    selected-normal-background: {color2}AA;
+    selected-normal-foreground: @foreground;
+    selected-urgent-background: {color3}AA;
+    selected-urgent-foreground: @foreground;
+
+    background-color: @background;
+    background: {background}88;
+    foreground: {foreground};
+    border-color: @background;
+    spacing: 2;
+}}
+
+#window {{
+    background-color: @background;
+    border: 0;
+    padding: 2.5ch;
+}}
+
+#mainbox {{
+    border: 0;
+    padding: 0;
+}}
+
+#message {{
+    border: 2px 0px 0px;
+    border-color: @border-color;
+    padding: 1px;
+}}
+
+#textbox {{
+    text-color: @foreground;
+}}
+
+#inputbar {{
+    children:   [ prompt,textbox-prompt-colon,entry,case-indicator ];
+}}
+
+#textbox-prompt-colon {{
+    expand: false;
+    str: ">";
+    margin: 0px 0.3em 0em 0em;
+    text-color: @normal-foreground;
+}}
+
+#listview {{
+    fixed-height: 0;
+    border-color: @border-color;
+    spacing: 2px;
+    scrollbar: true;
+    padding: 2px 0px 0px;
+}}
+
+#element {{
+    border: 0;
+    padding: 1px;
+}}
+
+#element-text, element-icon {{
+    background-color: @normal-background;
+    text-color:       inherit;
+}}
+
+#element.normal.normal {{
+    background-color: @normal-background;
+    text-color: @normal-foreground;
+}}
+
+#element.normal.urgent {{
+    background-color: @urgent-background;
+    text-color: @urgent-foreground;
+}}
+
+#element.normal.active {{
+    background-color: @active-background;
+    text-color: @active-foreground;
+}}
+
+#element.selected.normal {{
+    background-color: @selected-normal-background;
+    text-color: @selected-normal-foreground;
+}}
+
+#element.selected.urgent {{
+    background-color: @selected-urgent-background;
+    text-color: @selected-urgent-foreground;
+}}
+
+#element.selected.active {{
+    background-color: @selected-active-background;
+    text-color: @selected-active-foreground;
+}}
+
+#element.alternate.normal {{
+    background-color: @alternate-normal-background;
+    text-color: @alternate-normal-foreground;
+}}
+
+#element.alternate.urgent {{
+    background-color: @alternate-urgent-background;
+    text-color: @alternate-urgent-foreground;
+}}
+
+#element.alternate.active {{
+    background-color: @alternate-active-background;
+    text-color: @alternate-active-foreground;
+}}
+
+#scrollbar {{
+    width: 4px;
+    handle-width: 8px;
+    padding: 0;
+    border-radius: 100px;
+}}
+
+#sidebar {{
+    border-radius: 100px;
+}}
+
+#button {{
+    text-color: @normal-foreground;
+}}
+
+#button.selected {{
+    background-color: @selected-normal-background;
+    text-color: @selected-normal-foreground;
+}}
+
+#inputbar {{
+    spacing: 0;
+    text-color: @normal-foreground;
+}}
+
+#case-indicator {{
+    spacing: 0;
+    text-color: @normal-foreground;
+}}
+
+#entry {{
+    spacing: 0;
+    text-color: @normal-foreground;
+}}
+
+#prompt {{
+    spacing: 0;
+    text-color: @normal-foreground;
+}}
 
       '';
     };

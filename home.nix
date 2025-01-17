@@ -8,7 +8,16 @@
   ...
 }:
 
-let # variable declaration section
+let 
+
+
+
+  
+
+
+###############################
+# variable declaration section #
+###############################
 
   # #for Spicitify
   spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
@@ -44,6 +53,17 @@ let # variable declaration section
 
     primary_background_rgba = "@primary_background";
     tertiary_background_hex = "@tertiary_background";
+     A-colour = "@A-colour";  
+     B-Colour = "@B-Colour";  
+     C-colour = "@C-colour";  
+     D-colour = "@D-colour";  
+     E-colour = "@E-colour";  
+     F-colour = "@F-colour";  
+     G-colour = "@G-colour";  
+     H-colour = "@H-colour";  
+     I-colour = "@I-colour";  
+     J-colour = "@J-colour";  
+     K-colour = "@K-colour";
 
   };
 
@@ -144,6 +164,7 @@ in
       brightnessctl
       pamixer # Audio control
       networkmanagerapplet
+      localsend
 
       #Productivity
       hugo
@@ -220,8 +241,78 @@ in
       btop
       tokyo-night-gtk
 
+
+      ##Scripts
+       (pkgs.writeShellScriptBin "keybindings-hint" ''
+#!/bin/bash
+
+# Kill yad if present to not interfere with this binds
+pkill yad || true
+
+# Check if rofi is already running
+if pidof rofi > /dev/null; then
+  pkill rofi
+fi
+
+# Define the config files
+KEYBINDS_CONF="$HOME/.config/hypr/hyprland.conf"
+
+# Combine the contents of the keybinds files and filter for only 'bind ='
+KEYBINDS=$(cat "$KEYBINDS_CONF" "$USER_KEYBINDS_CONF" | grep -E '^bind[[:space:]]*=')
+
+# Check for any keybinds to display
+if [[ -z "$KEYBINDS" ]]; then
+    echo "No keybinds found."
+    exit 1
+fi
+
+# Process keybindings:
+# 1. Remove 'bind' prefix and '=' sign
+# 2. Replace '$mainMod' with ''
+# 3. Remove 'exec' text
+MODIFIED_KEYBINDS=$(echo "$KEYBINDS" \
+    | sed -E 's/^bind[[:space:]]*=[[:space:]]*//g' \
+    | sed 's/\$mainMod//g' \
+    | sed 's/, exec//g')
+
+# Use rofi to display the modified keybindings
+echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/config-keybinds.rasi
+
+    '')
+
     ];
   };
+
+  
+ home.file = {
+
+  ##############
+  ##Key Binds###
+  ##############
+# Ensure the custom Rofi config is placed in the expected directory
+  ".config/rofi/config-keybinds.rasi" = {
+    text = ''
+ @import "~/.config/rofi/config.rasi"
+
+    /* ---- Entry ---- */
+    entry {
+      width: 85%;
+      placeholder: ' 🧮 Search Keybinds NOTE "ESC will close this app  " "=" "SUPER KEY is (Windows Key)" ';
+      
+    }
+
+    /* ---- Listview ---- */
+    listview {
+      columns: 2;
+      lines: 12;
+    }
+
+    window {
+        width: 95%;
+    }
+  '';
+  };
+ };
 
   # Enable Mullvad VPN
   # services.mullvad-vpn.enable = true;
@@ -1008,12 +1099,13 @@ in
         "custom/keybindhint" = {
           format = " ";
           rotate = 0;
-          #on-click = "keybinds_hint.sh";
+          on-click = "keybindings-hint";
         };
 
         "custom/wallchange" = {
           format = "󰸉";
           rotate = 0;
+          # on-click = "waypaper";
           on-click = "waypaper --random";
           #"interval" = 86400, # once every day;
           tooltip = true;
@@ -1035,286 +1127,317 @@ in
       style = ''
          @import url("../../.cache/wal/colors-waybar.css");
 
-                      * {
-                          border: none;
-                          border-radius: 0px;
-                          font-family: ${custom.font};
-                          font-size: 14px;
-                          min-height: 0;
-                      }
+          * {
+              border: none;
+              border-radius: 0px;
+              font-family: ${custom.font};
+              font-size: 14px;
+              min-height: 0;
+             }
 
 
-                    /*  window#waybar {
-                           background: transparent;
-                      }*/
+         /*  window#waybar {
+                background: transparent;
+           }*/
                    
-        window#waybar {
-            background:  rgba(0,9,15,0.25);
+        /* window#waybar {
+          background:  rgba(0,9,15,0.25);
             border-radius: 4px;
           }
+          */
+
+        window#waybar {
+          background-color: rgba(26, 27, 38, 0.5);
+          color: #ffffff;
+          transition-property: background-color;
+          transition-duration: 0.5s;
+          border-top: 8px transparent;
+          border-radius: 8px;
+          transition-duration: 0.5s;
+          margin: 16px 16px;
+        }
 
 
-                      tooltip {
-                       background: ${custom.tertiary_background_hex};
-                       color: ${custom.primary_accent};
-                       border-radius: 7px;
-                       border-width: 0px;
-                             }
+        tooltip {
+         background: ${custom.tertiary_background_hex};
+         color: ${custom.primary_accent};
+         border-radius: 7px;
+         border-width: 0px;
+               }
 
-                      #cava.left, #cava.right {
-                          background: ${custom.tertiary_background_hex};
-                          margin: 5px; 
-                          padding: 8px 16px;
-                          color: ${custom.primary_accent};
-                      }
-                      #cava.left {
-                          border-radius: 24px 10px 24px 10px;
-                      }
-                      #cava.right {
-                          border-radius: 10px 24px 10px 24px;
-                      }
-                      #workspaces {
-                          background: ${custom.tertiary_background_hex};
-                          margin: 5px 5px;
-                          padding: 8px 5px;
-                          border-radius: 16px;
-                          color: ${custom.primary_accent}
-                      }
-                      #workspaces button {
-                          padding: 0px 5px;
-                          margin: 0px 3px;
-                          border-radius: 16px;
-                         /* color: transparent;*/
-                          color: ${custom.primary_accent}; 
-                        /*  background: ${custom.tertiary_background_hex};*/
-                          background: ${custom.primary_background_rgba};
-                          transition: all 0.3s ease-in-out;
-                      }
+      #cava.left, #cava.right {
+          background: ${custom.tertiary_background_hex};
+          margin: 5px; 
+          padding: 8px 16px;
+          color: ${custom.primary_accent};
+      }
+      #cava.left {
+          border-radius: 24px 10px 24px 10px;
+      }
+      #cava.right {
+          border-radius: 10px 24px 10px 24px;
+      }
+      #workspaces {
+          background: ${custom.tertiary_background_hex};
+          margin: 5px 5px;
+          padding: 8px 5px;
+          border-radius: 16px;
+          color: ${custom.primary_accent}
+          }
+      #workspaces button {
+          padding: 0px 5px;
+          margin: 0px 3px;
+          border-radius: 16px;
+         /* color: transparent;*/
+          color: ${custom.primary_accent}; 
+            /*  background: ${custom.tertiary_background_hex};*/
+              background: ${custom.primary_background_rgba};
+              transition: all 0.3s ease-in-out;
+          }
                       
 
 
 
-                      #workspaces button.active {
-                          background-color: ${custom.secondary_accent};
-                           color: ${custom.background}; 
-                          border-radius: 16px;
-                          min-width: 50px;
-                          background-size: 400% 400%;
-                          transition: all 0.3s ease-in-out;
-                      }
+     #workspaces button.active {
+         background-color: ${custom.secondary_accent};
+          color: ${custom.background}; 
+         border-radius: 16px;
+         min-width: 50px;
+         background-size: 400% 400%;
+         transition: all 0.3s ease-in-out;
+     }
 
-                      #workspaces button:hover {
-                          background-color: ${custom.tertiary_accent};
-                          color: ${custom.background};
-                          border-radius: 16px;
-                          min-width: 50px;
-                          background-size: 400% 400%;
-                      }
+      #workspaces button:hover {
+          background-color: ${custom.tertiary_accent};
+          color: ${custom.background};
+          border-radius: 16px;
+          min-width: 50px;
+          background-size: 400% 400%;
+      }
 
                       
-                      #custom-playerctl.backward, #custom-playerctl.play, #custom-playerctl.foward{
-                          background: ${custom.tertiary_background_hex};
-                          font-weight: bold;
-                          margin: 5px 0px;
-                      }
-                      #tray  {
-                          color: ${custom.tertiary_accent};
-                          background: ${custom.tertiary_background_hex};
-                          border-radius: 10px 24px 10px 24px;
-                          padding: 2px 10px;
-                          margin: 4px;
-                          margin-left: 7px;
-                      }
-                      #clock {
-                          color: ${custom.tertiary_accent};
-                          background: ${custom.tertiary_background_hex};
-                          margin: 4px;
-          	              padding: 2px 10px;
-          	              border-radius: 10px;
-                          font-weight: bold;
-                          font-size: 16px;
-                      }
-                      #custom-launcher {
-                          color: ${custom.secondary_accent};
-                          background: ${custom.tertiary_background_hex};
-                          
-                          border-radius: 0px 0px 30px 0px;
-                          margin: 0px;
-                          padding: 0px 30px 0px 12px;
-                          font-size: 28px;
-                       }
-                         #custom-notifications{
-                         color: ${custom.secondary_accent};
-                          background: ${custom.tertiary_background_hex};
-                          margin: 4px;
-          	              padding: 2px 6px;
-          	              /* border-radius: 10px 24px 10px 24px; */
-                          border-radius: 20px;
-                          font-weight: bold;
-                          font-size: 16px;
-                         }
+    #custom-playerctl.backward, #custom-playerctl.play, #custom-playerctl.foward{
+        background: ${custom.tertiary_background_hex};
+        font-weight: bold;
+        margin: 5px 0px;
+    }
+    #tray  {
+        color: ${custom.tertiary_accent};
+        background: ${custom.tertiary_background_hex};
+        border-radius: 10px 24px 10px 24px;
+        padding: 2px 10px;
+        margin: 4px;
+        margin-left: 7px;
+    }
+    #clock {
+        color: ${custom.tertiary_accent};
+        background: ${custom.tertiary_background_hex};
+        margin: 4px;
+        padding: 2px 10px;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    #custom-launcher {
+        color: ${custom.A-colour};
+        background: ${custom.tertiary_background_hex};
+        
+        border-radius: 0px 0px 30px 0px;
+        margin: 0px;
+        padding: 0px 30px 0px 12px;
+        font-size: 28px;
+     }
+       #custom-notifications{
+       color: ${custom.C-colour};
+        background: ${custom.tertiary_background_hex};
+        margin: 4px;
+        padding: 2px 6px;
+        /* border-radius: 10px 24px 10px 24px; */
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 16px;
+       }
 
-                      #custom-launcher:hover {
-                         background-color: ${custom.primary_accent};
-                         color: ${custom.background};
-                         transition: all 0.3s ease-in-out;
-                      }
-
-
-                      #custom-playerctl.backward, #custom-playerctl.play, #custom-playerctl.foward {
-                          background: ${custom.tertiary_background_hex};
-                          font-size: 22px;
-                      }
-                      #custom-playerctl.backward:hover, #custom-playerctl.play:hover, #custom-playerctl.foward:hover{
-                          color: ${custom.tertiary_accent};
-                      }
-                      #custom-playerctl.backward {
-                          color: ${custom.primary_accent};
-                          border-radius: 24px 0px 0px 10px;
-                          padding-left: 16px;
-                          margin-left: 7px;
-                      }
-                      #custom-playerctl.play {
-                          color: ${custom.secondary_accent};
-                          padding: 0 5px;
-                      }
-                      #custom-playerctl.foward {
-                          color: ${custom.primary_accent};
-                          border-radius: 0px 10px 24px 0px;
-                          padding-right: 12px;
-                          margin-right: 7px
-                      }
-                      #custom-playerlabel {
-                          background: ${custom.tertiary_background_hex};
-                          color: ${custom.tertiary_accent};
-                          padding: 0 20px;
-                          border-radius: 24px 10px 24px 10px;
-                          margin: 5px 0;
-                          font-weight: bold;
-                      }
-                     #window {
-                                background: ${custom.tertiary_background_hex};
-                                color: ${custom.tertiary_accent};
-                                padding: 0px 10px;
-                                margin: 5px;
-                                border-radius: 16px;
-                                font-weight: normal;
-                              }
-
-          #taskbar {
-            background: ${custom.tertiary_background_hex};
-            margin: 5px;
-            padding: 2px;
-            border-radius: 16px;
-          }
-
-          #taskbar button {
-            padding: 0px 5px;
-            margin: 0px 3px;
-            border-radius: 16px;
-            color: ${custom.primary_accent};
-            background: transparent;
-            animation: tb_normal 20s ease-in-out 1;
-          }
-
-          #taskbar button.active {
-            background-color: ${custom.secondary_accent};
-            color: ${custom.background};
-            margin-left: 3px;
-            padding-left: 12px;
-            padding-right: 12px;
-            margin-right: 3px;
-            animation: tb_active 20s ease-in-out 1;
-          }
-           #custom-wallchange,#custom-themechange
-           {
-              background: ${custom.tertiary_background_hex};
-              color: ${custom.tertiary_accent};
-              border-radius: 50px 50px 50px 50px;
-              padding: 0 20px;
-              margin: 5px 7px;
-              font-weight: bold;
-            }
-            #custom-wallchange:hover,#custom-themechange:hover{
-                          color: ${custom.secondary_accent};
-                          }
-          
-          #custom-r_end {
-              border-radius: 0px 21px 21px 0px;
-              margin-right: 9px;
-              padding-right: 3px;
-          }
-
-          #custom-l_end {
-              border-radius: 21px 0px 0px 21px;
-              margin-left: 9px;
-              padding-left: 3px;
-          }
-
-            
-          #custom-power,#network, #battery , #backlight
-           {
-              background: ${custom.tertiary_background_hex};
-              color: ${custom.tertiary_accent};
-              /* border-radius: 10px 24px 10px 24px; */
-              border-radius: 16px;
-              padding: 0 20px;
-              margin: 5px 7px;
-              font-weight: bold;
-            }
+      #custom-launcher:hover {
+         background-color: ${custom.primary_accent};
+         color: ${custom.background};
+         transition: all 0.3s ease-in-out;
+      }
 
 
-            #custom-power {
-              padding: 0 15px;
-              font-size: 16px;
-            }
+      #custom-playerctl.backward, #custom-playerctl.play, #custom-playerctl.foward {
+          background: ${custom.tertiary_background_hex};
+          font-size: 22px;
+      }
+      #custom-playerctl.backward:hover, #custom-playerctl.play:hover, #custom-playerctl.foward:hover{
+          color: ${custom.tertiary_accent};
+      }
+      #custom-playerctl.backward {
+          color: ${custom.primary_accent};
+          border-radius: 24px 0px 0px 10px;
+          padding-left: 16px;
+          margin-left: 7px;
+      }
+      #custom-playerctl.play {
+          color: ${custom.secondary_accent};
+          padding: 0 5px;
+      }
+      #custom-playerctl.foward {
+          color: ${custom.primary_accent};
+          border-radius: 0px 10px 24px 0px;
+          padding-right: 12px;
+          margin-right: 7px
+      }
+      #custom-playerlabel {
+          background: ${custom.tertiary_background_hex};
+          color: ${custom.tertiary_accent};
+          padding: 0 20px;
+          border-radius: 24px 10px 24px 10px;
+          margin: 5px 0;
+          font-weight: bold;
+      }
+     #window {
+        background: ${custom.tertiary_background_hex};
+        color: ${custom.tertiary_accent};
+        padding: 0px 10px;
+        margin: 5px;
+        border-radius: 16px;
+        font-weight: normal;
+      }
+
+    #taskbar {
+      background: ${custom.tertiary_background_hex};
+      margin: 5px;
+      padding: 2px;
+      border-radius: 16px;
+    }
+
+    #taskbar button {
+      padding: 0px 5px;
+      margin: 0px 3px;
+      border-radius: 16px;
+      color: ${custom.primary_accent};
+      background: transparent;
+      animation: tb_normal 20s ease-in-out 1;
+    }
+
+    #taskbar button.active {
+      background-color: ${custom.secondary_accent};
+      color: ${custom.background};
+      margin-left: 3px;
+      padding-left: 12px;
+      padding-right: 12px;
+      margin-right: 3px;
+      animation: tb_active 20s ease-in-out 1;
+    }
+     #custom-wallchange,#custom-themechange
+     {
+        background: ${custom.tertiary_background_hex};
+        color: ${custom.tertiary_accent};
+        border-radius: 50px 50px 50px 50px;
+        padding: 0 20px;
+        margin: 5px 7px;
+        font-weight: bold;
+      }
+      #custom-wallchange:hover,#custom-themechange:hover{
+                    color: ${custom.secondary_accent};
+                    }
+    
+    #custom-r_end {
+        border-radius: 0px 21px 21px 0px;
+        margin-right: 9px;
+        padding-right: 3px;
+    }
+
+    #custom-l_end {
+        border-radius: 21px 0px 0px 21px;
+        margin-left: 9px;
+        padding-left: 3px;
+    }
+
+      
+    #custom-power,#network, #battery , #backlight
+     {
+        background: ${custom.tertiary_background_hex};
+        
+        /* border-radius: 10px 24px 10px 24px; */
+        border-radius: 16px;
+        padding: 0 20px;
+        margin: 5px 7px;
+        font-weight: bold;
+      }
 
 
-            #backlight {
-              padding: 0 8px;
-              font-size: 10px;
-            }
-
-            #network {
-              padding: 0 8px;
-              font-size: 12px;
-            }
-               #battery {
-              padding: 0 6px;
-              font-size: 10px;
-            }
-              
+      #custom-power {
+      color: ${custom.A-colour};
+        padding: 0 15px;
+        font-size: 16px;
+      }
 
 
-          #cpu,#disk,#network, #memory, #custom-cliphist, #custom-keybindhint, #pulseaudio {
-            background: ${custom.tertiary_background_hex};
-            font-weight: bold;
-            
-          }
+      #backlight {
+      color: ${custom.B-Colour};
+        padding: 0 8px;
+        font-size: 10px;
+      }
+
+      #network {
+      color: ${custom.C-colour};
+        padding: 0 8px;
+        font-size: 12px;
+      }
+         #battery {
+         color: ${custom.D-colour};
+        padding: 0 6px;
+        font-size: 10px;
+      }
+        
 
 
-          #cpu {
-              color: ${custom.primary_accent};
-              margin: 4px 0px;
-          	  padding: 2px 5px 2px 10px;
-          	  border-radius: 10px 0px 0px 20px;
-          }
-
-          #memory, #custom-cliphist, #custom-keybindhint,#disk {
-            color: ${custom.primary_accent};
-            margin: 4px 0px;
-            padding: 2px 14px;
-            border-radius: 0px;
-           }
+    #cpu,#disk,#network, #memory, #custom-cliphist, #custom-keybindhint, #pulseaudio {
+      background: ${custom.tertiary_background_hex};
+      font-weight: bold;
+      
+    }
 
 
+    #cpu {
+        color: ${custom.G-colour};
+        margin: 4px 0px;
+    	  padding: 2px 5px 2px 10px;
+    	  border-radius: 10px 0px 0px 20px;
+    }
 
-          #pulseaudio {
-                    color: ${custom.primary_accent};
-          	  margin: 4px 0px;
-          	  padding: 2px 10px 2px 5px;
-          	  border-radius: 0px 20px 10px 0px;
-          }
+    #memory, #custom-cliphist, #custom-keybindhint,#disk {
+      color: ${custom.E-colour};
+      margin: 4px 0px;
+      padding: 2px 14px;
+      border-radius: 0px;
+     }
+ 
+    #memory{
+      color:${custom.H-colour};
+      } 
+    
+    #custom-cliphist{
+      color:${custom.I-colour};
+      } 
+    
+    #custom-keybindhint{
+      color:${custom.K-colour};
+      }
+    
+    #disk{
+      color:${custom.J-colour};
+      }
+
+
+    #pulseaudio {
+              color: ${custom.A-colour};
+    	  margin: 4px 0px;
+    	  padding: 2px 10px 2px 5px;
+    	  border-radius: 0px 20px 10px 0px;
+    }
            
 
 
@@ -1749,7 +1872,7 @@ btop = {
 
       background = [
         {
-          path = "/home/vamsi/Downloads/wallpaper.jpg";
+          path = "/etc/nixos/wallpaper.jpg";
           blur_passes = 3;
           blur_size = 8;
           # monitor =
@@ -1857,390 +1980,221 @@ btop = {
       };
     };
 
-    # Rofi configuration
-    rofi = {
-      enable = true;
-      package = pkgs.rofi-wayland;
-      font = "JetBrains Mono Nerd Font 12";
-      # terminal = "${pkgs.alacritty}/bin/alacritty";
-      terminal = "${pkgs.kitty}/bin/kitty";
-      extraConfig = {
-        modi = "drun,run,filebrowser,window";
-        icon-theme = "Papirus";
-        show-icons = true;
-        drun-display-format = "{icon} {name}";
-        #drun-display-format = "{name}";
-        location = 0;
-        disable-history = false;
-        hide-scrollbar = true;
-
-        sidebar-mode = true;
-        border-radius = 10;
-
-        #display-drun = " Apps ";
-        display-drun = " Apps";
-        display-run = " Run";
-        display-filebrowser = " Files";
-        display-window = " Windows";
-        window-format = "{w} · {c} · {t}";
-
-      };
-      theme =
-        let
-          inherit (config.lib.formats.rasi) mkLiteral;
-          import = [
-            "~/.cache/wal/colors-rofi.rasi"
-          ];
-        in
-        {
-
-          "*" = {
-            bg-col = mkLiteral "#24273a";
-            bg-col-light = mkLiteral "#24273a";
-            border-col = mkLiteral "#24273a";
-            selected-col = mkLiteral "#24273a";
-            blue = mkLiteral "#8aadf4";
-            fg-col = mkLiteral "#cad3f5";
-            fg-col2 = mkLiteral "#ed8796";
-            grey = mkLiteral "#6e738d";
-            teal = mkLiteral "#8bd5ca";
-
-            # bg-col = mkLiteral "@background";
-            # bg-col-light = mkLiteral "@background";
-            # border-col = mkLiteral "@color2";
-            # selected-col = mkLiteral "@color3";
-            # blue = mkLiteral "@color4";
-            # fg-col = mkLiteral "@foreground";
-            # fg-col2 = mkLiteral "@color1";
-            # grey = mkLiteral "@color8";
-            # teal = mkLiteral "@color6";
-
-            width = mkLiteral "600";
-            border-radius = mkLiteral "15px";
-          };
-
-          "element-text, element-icon, mode-switcher" = {
-            background-color = mkLiteral "inherit";
-            text-color = mkLiteral "inherit";
-          };
-          "window" = {
-            height = mkLiteral "360px";
-            border = mkLiteral "2px";
-            border-color = mkLiteral "@teal";
-            background-color = mkLiteral "@bg-col";
-          };
-          "mainbox" = {
-            background-color = mkLiteral "@bg-col";
-          };
-          "inputbar" = {
-            children = map mkLiteral [
-              "prompt"
-              "entry"
-            ];
-            background-color = mkLiteral "@bg-col";
-            border-radius = mkLiteral "5px";
-            padding = mkLiteral "2px";
-          };
-          "prompt" = {
-            background-color = mkLiteral "@blue";
-            padding = mkLiteral "6px";
-            text-color = mkLiteral "@bg-col";
-            border-radius = mkLiteral "3px";
-            margin = mkLiteral "20px 0px 0px 20px";
-          };
-          "entry" = {
-            padding = mkLiteral "6px";
-            margin = mkLiteral "20px 0px 0px 10px";
-            text-color = mkLiteral "@fg-col";
-            background-color = mkLiteral "@bg-col";
-          };
-          "listview" = {
-            border = mkLiteral "0px 0px 0px";
-            padding = mkLiteral "6px 0px 0px";
-            margin = mkLiteral "10px 0px 0px 20px";
-            columns = mkLiteral "2";
-            lines = mkLiteral "5";
-            background-color = mkLiteral "@bg-col";
-          };
-          "element" = {
-            padding = mkLiteral "5px";
-            background-color = mkLiteral "@bg-col";
-            text-color = mkLiteral "@fg-col";
-          };
-          "element-icon" = {
-            size = mkLiteral "25px";
-          };
-          "element selected" = {
-            background-color = mkLiteral "@selected-col";
-            text-color = mkLiteral "@teal";
-          };
-          "button" = {
-            padding = mkLiteral "10px";
-            background-color = mkLiteral "@bg-col-light";
-            text-color = mkLiteral "@grey";
-            vertical-align = mkLiteral "0.5";
-            horizontal-align = mkLiteral "0.5";
-          };
-          "button selected" = {
-            background-color = mkLiteral "@bg-col";
-            text-color = mkLiteral "@blue";
-          };
-          "message" = {
-            background-color = mkLiteral "@bg-col-light";
-            margin = mkLiteral "2px";
-            padding = mkLiteral "2px";
-            border-radius = mkLiteral "5px";
-          };
-          "textbox" = {
-            padding = mkLiteral "6px";
-            margin = mkLiteral "20px 0px 0px 20px";
-            text-color = mkLiteral "@blue";
-            background-color = mkLiteral "@bg-col-light";
-          };
-        };
-    };
-
-    ##Rofi configuration-2
+    # # Rofi configuration
     # rofi = {
-    #     enable = true;
-    #     package = pkgs.rofi-wayland;
-    #     extraConfig = {
-    #       modi = "drun,filebrowser,run";
-    #       show-icons = true;
-    #       icon-theme = "Papirus";
-    #       location = 0;
-    #       font = "JetBrainsMono Nerd Font Mono 12";
-    #       drun-display-format = "{icon} {name}";
-    #       display-drun = " Apps";
-    #       display-run = " Run";
-    #       display-filebrowser = " File";
-    #     };
-    #     theme =
-    #       let
-    #         inherit (config.lib.formats.rasi) mkLiteral;
-    #       in
-    #       {
-    #         "*" = {
-    #           #With Stylix
-    #           # bg = mkLiteral "#${config.stylix.base16Scheme.base00}";
-    #           # bg-alt = mkLiteral "#${config.stylix.base16Scheme.base09}";
-    #           # foreground = mkLiteral "#${config.stylix.base16Scheme.base01}";
-    #           # selected = mkLiteral "#${config.stylix.base16Scheme.base08}";
-    #           # active = mkLiteral "#${config.stylix.base16Scheme.base0B}";
-    #           # text-selected = mkLiteral "#${config.stylix.base16Scheme.base00}";
-    #           # text-color = mkLiteral "#${config.stylix.base16Scheme.base05}";
-    #           # border-color = mkLiteral "#${config.stylix.base16Scheme.base0F}";
-    #           # urgent = mkLiteral "#${config.stylix.base16Scheme.base0E}";
+    #   enable = true;
+    #   package = pkgs.rofi-wayland;
+    #   font = "JetBrains Mono Nerd Font 12";
+    #   # terminal = "${pkgs.alacritty}/bin/alacritty";
+    #   terminal = "${pkgs.kitty}/bin/kitty";
+    #   extraConfig = {
+    #     modi = "drun,run,filebrowser,window";
+    #     icon-theme = "Papirus";
+    #     show-icons = true;
+    #     drun-display-format = "{icon} {name}";
+    #     #drun-display-format = "{name}";
+    #     location = 0;
+    #     disable-history = false;
+    #     hide-scrollbar = true;
 
-    #           #Alternative Without Stylix
-    #           bg = mkLiteral "#24273a";
-    #           bg-alt = mkLiteral "#24273a";
-    #           foreground = mkLiteral "#cad3f5";
-    #           selected = mkLiteral "#dd97e8";
-    #           active = mkLiteral "#c9272e";
-    #           text-selected = mkLiteral "#52bfbf";
-    #           text-color = mkLiteral "#f3e6e4";
-    #           border-color = mkLiteral "#fd94e2";
-    #           urgent = mkLiteral "#67caa2";
+    #     sidebar-mode = true;
+    #     border-radius = 10;
 
-    #         };
-    #         "window" = {
-    #           width = mkLiteral "50%";
-    #           transparency = "real";
-    #           orientation = mkLiteral "vertical";
-    #           cursor = mkLiteral "default";
-    #           spacing = mkLiteral "0px";
-    #           border = mkLiteral "2px";
-    #           border-color = "@border-color";
-    #           border-radius = mkLiteral "20px";
-    #           background-color = mkLiteral "@bg";
-    #         };
-    #         "mainbox" = {
-    #           padding = mkLiteral "15px";
-    #           enabled = true;
-    #           orientation = mkLiteral "vertical";
-    #           children = map mkLiteral [
-    #             "inputbar"
-    #             "listbox"
-    #           ];
-    #           background-color = mkLiteral "transparent";
-    #         };
-    #         "inputbar" = {
-    #           enabled = true;
-    #           padding = mkLiteral "10px 10px 200px 10px";
-    #           margin = mkLiteral "10px";
-    #           background-color = mkLiteral "transparent";
-    #           border-radius = "25px";
-    #           orientation = mkLiteral "horizontal";
-    #           children = map mkLiteral [
-    #             "entry"
-    #             "dummy"
-    #             "mode-switcher"
-    #           ];
-    #           background-image = mkLiteral ''url("~/Pictures/Wallpapers/beautifulmountainscape.jpg", width)'';
-    #         };
-    #         "entry" = {
-    #           enabled = true;
-    #           expand = false;
-    #           width = mkLiteral "20%";
-    #           padding = mkLiteral "10px";
-    #           border-radius = mkLiteral "12px";
-    #           background-color = mkLiteral "@selected";
-    #           text-color = mkLiteral "@text-selected";
-    #           cursor = mkLiteral "text";
-    #           placeholder = "🖥️ Search ";
-    #           placeholder-color = mkLiteral "inherit";
-    #         };
-    #         "listbox" = {
-    #           spacing = mkLiteral "10px";
-    #           padding = mkLiteral "10px";
-    #           background-color = mkLiteral "transparent";
-    #           orientation = mkLiteral "vertical";
-    #           children = map mkLiteral [
-    #             "message"
-    #             "listview"
-    #           ];
-    #         };
-    #         "listview" = {
-    #           enabled = true;
-    #           columns = 2;
-    #           lines = 6;
-    #           cycle = true;
-    #           dynamic = true;
-    #           scrollbar = false;
-    #           layout = mkLiteral "vertical";
-    #           reverse = false;
-    #           fixed-height = false;
-    #           fixed-columns = true;
-    #           spacing = mkLiteral "10px";
-    #           background-color = mkLiteral "transparent";
-    #           border = mkLiteral "0px";
-    #         };
-    #         "dummy" = {
-    #           expand = true;
-    #           background-color = mkLiteral "transparent";
-    #         };
-    #         "mode-switcher" = {
-    #           enabled = true;
-    #           spacing = mkLiteral "10px";
-    #           background-color = mkLiteral "transparent";
-    #         };
-    #         "button" = {
-    #           width = mkLiteral "5%";
-    #           padding = mkLiteral "12px";
-    #           border-radius = mkLiteral "12px";
-    #           background-color = mkLiteral "@text-selected";
-    #           text-color = mkLiteral "@text-color";
-    #           cursor = mkLiteral "pointer";
-    #         };
-    #         "button selected" = {
-    #           background-color = mkLiteral "@selected";
-    #           text-color = mkLiteral "@text-selected";
-    #         };
-    #         "scrollbar" = {
-    #           width = mkLiteral "4px";
-    #           border = 0;
-    #           handle-color = mkLiteral "@border-color";
-    #           handle-width = mkLiteral "8px";
-    #           padding = 0;
-    #         };
-    #         "element" = {
-    #           enabled = true;
-    #           spacing = mkLiteral "10px";
-    #           padding = mkLiteral "10px";
-    #           border-radius = mkLiteral "12px";
-    #           background-color = mkLiteral "transparent";
-    #           cursor = mkLiteral "pointer";
-    #         };
-    #         "element normal.normal" = {
-    #           background-color = mkLiteral "inherit";
-    #           text-color = mkLiteral "inherit";
-    #         };
-    #         "element normal.urgent" = {
-    #           background-color = mkLiteral "@urgent";
-    #           text-color = mkLiteral "@foreground";
-    #         };
-    #         "element normal.active" = {
-    #           background-color = mkLiteral "@active";
-    #           text-color = mkLiteral "@foreground";
-    #         };
-    #         "element selected.normal" = {
-    #           background-color = mkLiteral "@selected";
-    #           text-color = mkLiteral "@text-selected";
-    #         };
-    #         "element selected.urgent" = {
-    #           background-color = mkLiteral "@urgent";
-    #           text-color = mkLiteral "@text-selected";
-    #         };
-    #         "element selected.active" = {
-    #           background-color = mkLiteral "@urgent";
-    #           text-color = mkLiteral "@text-selected";
-    #         };
-    #         "element alternate.normal" = {
-    #           background-color = mkLiteral "transparent";
-    #           text-color = mkLiteral "inherit";
-    #         };
-    #         "element alternate.urgent" = {
-    #           background-color = mkLiteral "transparent";
-    #           text-color = mkLiteral "inherit";
-    #         };
-    #         "element alternate.active" = {
-    #           background-color = mkLiteral "transparent";
-    #           text-color = mkLiteral "inherit";
-    #         };
-    #         "element-icon" = {
-    #           background-color = mkLiteral "transparent";
-    #           text-color = mkLiteral "inherit";
-    #           size = mkLiteral "36px";
-    #           cursor = mkLiteral "inherit";
-    #         };
-    #         "element-text" = {
-    #           background-color = mkLiteral "transparent";
-    #           font = "JetBrainsMono Nerd Font Mono 12";
-    #           text-color = mkLiteral "inherit";
-    #           cursor = mkLiteral "inherit";
-    #           vertical-align = mkLiteral "0.5";
-    #           horizontal-align = mkLiteral "0.0";
-    #         };
-    #         "message" = {
-    #           background-color = mkLiteral "transparent";
-    #           border = mkLiteral "0px";
-    #         };
-    #         "textbox" = {
-    #           padding = mkLiteral "12px";
-    #           border-radius = mkLiteral "10px";
-    #           background-color = mkLiteral "@bg-alt";
-    #           text-color = mkLiteral "@bg";
-    #           vertical-align = mkLiteral "0.5";
-    #           horizontal-align = mkLiteral "0.0";
-    #         };
-    #         "error-message" = {
-    #           padding = mkLiteral "12px";
-    #           border-radius = mkLiteral "20px";
-    #           background-color = mkLiteral "@bg-alt";
-    #           text-color = mkLiteral "@bg";
-    #         };
-    #       };
+    #     #display-drun = " Apps ";
+    #     display-drun = " Apps";
+    #     display-run = " Run";
+    #     display-filebrowser = " Files";
+    #     display-window = " Windows";
+    #     window-format = "{w} · {c} · {t}";
+
     #   };
+    #   theme =
+    #     let
+    #       inherit (config.lib.formats.rasi) mkLiteral;
+    #       import = [
+    #         "~/.cache/wal/colors-rofi.rasi"
+    #       ];
+    #     in
+    #     {
 
-    #SwayOSD
-    # swayosd = {
-    #     enable = true;
-    #     settings = {
-    #       style = {
-    #         timeout = 2;
-    #         margin = 20;
-    #         padding = 20;
-    #         border_width = 2;
-    #         border_radius = 10;
-    #         bar_width = 200;
-    #         bar_height = 20;
-    #         bar_radius = 5;
+    #       "*" = {
+    #         bg-col = mkLiteral "#24273a";
+    #         bg-col-light = mkLiteral "#24273a";
+    #         border-col = mkLiteral "#24273a";
+    #         selected-col = mkLiteral "#24273a";
+    #         blue = mkLiteral "#8aadf4";
+    #         fg-col = mkLiteral "#cad3f5";
+    #         fg-col2 = mkLiteral "#ed8796";
+    #         grey = mkLiteral "#6e738d";
+    #         teal = mkLiteral "#8bd5ca";
+
+            
+
+    #         width = mkLiteral "600";
+    #         border-radius = mkLiteral "15px";
+    #       };
+
+    #       "element-text, element-icon, mode-switcher" = {
+    #         background-color = mkLiteral "inherit";
+    #         text-color = mkLiteral "inherit";
+    #       };
+    #       "window" = {
+    #         height = mkLiteral "360px";
+    #         border = mkLiteral "2px";
+    #         border-color = mkLiteral "@teal";
+    #         background-color = mkLiteral "@bg-col";
+    #       };
+    #       "mainbox" = {
+    #         background-color = mkLiteral "@bg-col";
+    #       };
+    #       "inputbar" = {
+    #         children = map mkLiteral [
+    #           "prompt"
+    #           "entry"
+    #         ];
+    #         background-color = mkLiteral "@bg-col";
+    #         border-radius = mkLiteral "5px";
+    #         padding = mkLiteral "2px";
+    #       };
+    #       "prompt" = {
+    #         background-color = mkLiteral "@blue";
+    #         padding = mkLiteral "6px";
+    #         text-color = mkLiteral "@bg-col";
+    #         border-radius = mkLiteral "3px";
+    #         margin = mkLiteral "20px 0px 0px 20px";
+    #       };
+    #       "entry" = {
+    #         padding = mkLiteral "6px";
+    #         margin = mkLiteral "20px 0px 0px 10px";
+    #         text-color = mkLiteral "@fg-col";
+    #         background-color = mkLiteral "@bg-col";
+    #       };
+    #       "listview" = {
+    #         border = mkLiteral "0px 0px 0px";
+    #         padding = mkLiteral "6px 0px 0px";
+    #         margin = mkLiteral "10px 0px 0px 20px";
+    #         columns = mkLiteral "2";
+    #         lines = mkLiteral "5";
+    #         background-color = mkLiteral "@bg-col";
+    #       };
+    #       "element" = {
+    #         padding = mkLiteral "5px";
+    #         background-color = mkLiteral "@bg-col";
+    #         text-color = mkLiteral "@fg-col";
+    #       };
+    #       "element-icon" = {
+    #         size = mkLiteral "25px";
+    #       };
+    #       "element selected" = {
+    #         background-color = mkLiteral "@selected-col";
+    #         text-color = mkLiteral "@teal";
+    #       };
+    #       "button" = {
+    #         padding = mkLiteral "10px";
+    #         background-color = mkLiteral "@bg-col-light";
+    #         text-color = mkLiteral "@grey";
+    #         vertical-align = mkLiteral "0.5";
+    #         horizontal-align = mkLiteral "0.5";
+    #       };
+    #       "button selected" = {
+    #         background-color = mkLiteral "@bg-col";
+    #         text-color = mkLiteral "@blue";
+    #       };
+    #       "message" = {
+    #         background-color = mkLiteral "@bg-col-light";
+    #         margin = mkLiteral "2px";
+    #         padding = mkLiteral "2px";
+    #         border-radius = mkLiteral "5px";
+    #       };
+    #       "textbox" = {
+    #         padding = mkLiteral "6px";
+    #         margin = mkLiteral "20px 0px 0px 20px";
+    #         text-color = mkLiteral "@blue";
+    #         background-color = mkLiteral "@bg-col-light";
     #       };
     #     };
-    #   };
+    
+    
+    
+     };
 
-  };
+   
+
+
+
+
+   # Rofi configuration
+ xdg.configFile."rofi/config.rasi".text = ''
+          @import "~/.config/rofi/pywal.rasi"
+
+configuration {
+  modi: "window,drun,ssh,combi,filebrowser,recursivebrowser";
+  display-drun: "  ";
+  icon-theme: "Papirus";
+  show-icons: true;
+  drun-display-format: "{icon} {name}";
+  font: "Roboto Mono Nerd 12";
+  combi-modi: "window,drun,ssh";
+  terminal: "kitty";
+  run-shell-command: "{terminal} -e {cmd}";
+  sidebar-mode: true;
+}
+      '';
+   
+
+
+xdg.configFile."rofi/pywal.rasi".text  =  ''
+       @import "~/.cache/wal/colors-rofi"
+*{
+  background-color: rgba(0, 0, 0, 0.41);
+}
+
+window{
+	width: env(WIDTH, 35%);
+	height: env(HEIGHT, 65%);
+  	border: 2px;
+	border-color: @active-background;
+	border-radius: 15px;
+}
+
+element-icon{
+  border-radius: 10px;
+}
+
+textbox{
+	padding: 2em;
+}
+
+inputbar{
+	padding: 0.82em;
+}
+
+mainbox{
+  	background-position: center;
+  	border-radius: 15px     ;	
+}
+
+entry {
+  placeholder: "Type anything";
+  cursor: pointer;
+ }
+
+listview{
+    border: 0px 0px 0px;
+}
+
+element {
+  orientation: horizontal ;
+  spacing: 15px;
+  border-radius: 15px;
+  padding: 0.45em;
+}
+
+element-icon {
+  size: 2em;
+}
+      '';
+    
 
   # Hyprland configuration
   wayland.windowManager.hyprland = {
@@ -2376,18 +2330,18 @@ btop = {
 
       bind = [
         "$mainMod , Return, exec, $terminal"
-        "$mainMod,      Q, killactive,"
+        "$mainMod,       Q, killactive,"
         "$mainMod SHIFT, Q, exit,"
         "$mainMod,       E, exec, $fileManager"
         "$mainMod,       F, togglefloating,"
         # "$mainMod,       A, exec, $menu -show drun"
         "$mainMod,       A, exec, pkill rofi || rofi -show drun -replace -i"
         "$mainMod,       P, pseudo,"
-        "$mainMod,      M, exec, missioncenter" # Open Mission Center
-        "$mainMod,      W, exec, waypaper " # Open wallpaper selector
+        "$mainMod,       M, exec, missioncenter" # Open Mission Center
+        "$mainMod,       W, exec, waypaper " # Open wallpaper selector
         "$mainMod SHIFT, W, exec,waypaper --random "
         "$mainMod SHIFT, B, exec,pkill waybar || waybar" # Waybar toggle
-        "$mainMod , D, exec, bash -c 'pkill -f nwg-dock-hyprland || nwg-dock-hyprland'" # Dock Toggle
+        "$mainMod,       D, exec, bash -c 'pkill -f nwg-dock-hyprland || nwg-dock-hyprland'" # Dock Toggle
         "$mainMod,       J, togglesplit,"
         "$mainMod,       R, exec, bemoji -cn"
         "$mainMod,       C, exec, code"
@@ -2398,7 +2352,7 @@ btop = {
         "$mainMod,       P, exec, hyprpicker -an"
         "$mainMod,       N, exec, swaync-client -t"
         ", Print, exec, grimblast --notify --freeze copysave area"
-        "$mainMod CTRL, Q, exec, wlogout -p layer-shell"
+        "$mainMod CTRL,  Q, exec, wlogout -p layer-shell"
         "$mainMod,       PRINT, exec, flameshot gui"
         # Moving focus
         "$mainMod, left, movefocus, l"
