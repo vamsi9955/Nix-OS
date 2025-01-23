@@ -27,6 +27,25 @@ boot.loader.grub.theme = pkgs.stdenv.mkDerivation {
     installPhase = "cp -r customize/nixos $out";
   };
 
+########
+##Ntfs##
+########
+
+#Disadvantages of Each
+
+#    ntfs3:
+#        Cannot mount dirty volumes without using the "force" option, which risks data corruption.
+#        May have compatibility issues with certain NTFS features or metadata created by Windows.
+#        Still relatively new and may not be as thoroughly tested as ntfs-3g.
+#    ntfs-3g:
+#        Slower performance due to the overhead of operating in userspace via FUSE.
+#        Higher CPU usage during large file operations.
+
+#I have to use ntfs-3g as my external drive is marked as dirty and there seems to no stability and performance/speed issues with using this.
+#Instead of doining it manually using command: "echo "blacklist ntfs3" | sudo tee /etc/modprobe.d/blacklist-ntfs3.conf"
+
+#Add the following line to blacklist the ntfs3 module:
+boot.blacklistedKernelModules = [ "ntfs3" ];
 
 
 
@@ -296,7 +315,7 @@ services.xserver.videoDrivers = ["nvidia"];
     alsa.support32Bit = true;
     pulse.enable = true;
     # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
+    jack.enable = true; # Optional for professional audio tools
 
     # use the example session manager (no others are packaged yet so this is enabled by default,
     # no need to redefine it in your config for now)
@@ -370,8 +389,10 @@ programs.steam = {
     xdg-desktop-portal-hyprland  
     xdg-desktop-portal-gtk  # For Cinnamon
     sddm-astronaut
+    ntfs3g
     swayosd
     google-chrome
+    cudaPackages.cudatoolkit  # Automatically resolves to the latest version
   ];
   
   # Enable XDG Portal

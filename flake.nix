@@ -24,10 +24,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+  # #Zen-Browser
+     zen-browser.url = "github:0xc000022070/zen-browser-flake";
           
 };
 
-outputs = { self, nixpkgs, home-manager, hyprland,spicetify-nix, ... }@inputs: {
+outputs = { self, nixpkgs, home-manager, hyprland,spicetify-nix,zen-browser, ... }@inputs: {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };

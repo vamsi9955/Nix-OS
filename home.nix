@@ -8,16 +8,11 @@
   ...
 }:
 
-let 
+let
 
-
-
-  
-
-
-###############################
-# variable declaration section #
-###############################
+  ###############################
+  # variable declaration section #
+  ###############################
 
   # #for Spicitify
   spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
@@ -53,17 +48,17 @@ let
 
     primary_background_rgba = "@primary_background";
     tertiary_background_hex = "@tertiary_background";
-     A-colour = "@A-colour";  
-     B-Colour = "@B-Colour";  
-     C-colour = "@C-colour";  
-     D-colour = "@D-colour";  
-     E-colour = "@E-colour";  
-     F-colour = "@F-colour";  
-     G-colour = "@G-colour";  
-     H-colour = "@H-colour";  
-     I-colour = "@I-colour";  
-     J-colour = "@J-colour";  
-     K-colour = "@K-colour";
+    A-colour = "@A-colour";
+    B-Colour = "@B-Colour";
+    C-colour = "@C-colour";
+    D-colour = "@D-colour";
+    E-colour = "@E-colour";
+    F-colour = "@F-colour";
+    G-colour = "@G-colour";
+    H-colour = "@H-colour";
+    I-colour = "@I-colour";
+    J-colour = "@J-colour";
+    K-colour = "@K-colour";
 
   };
 
@@ -98,12 +93,18 @@ in
     stateVersion = "24.11";
 
     packages = with pkgs; [
+      # Only 'x86_64-linux' and 'aarch64-linux' are supported
+      inputs.zen-browser.packages."${system}".default # beta
+      #inputs.zen-browser.packages."${system}".beta
+      #inputs.zen-browser.packages."${system}".twilight
+
       # Add your user-specific packages here
       fastfetch
       nautilus
       xfce.thunar
       mission-center
-
+      gnome-disk-utility
+      
       # bluetooth manager
       blueman
       # ntfs support
@@ -115,9 +116,12 @@ in
       hyprland
       waybar
       rofi-wayland
-      #dunst
+      #dunst # notification deammon /replaced with swaync
       grim
       slurp
+      swappy
+      jq
+      wl-clipboard
       swww # Wallpaper setter
       wlogout
       waypaper
@@ -136,6 +140,8 @@ in
       wl-clipboard
       fish
       showmethekey
+      nil # nix language server
+      any-nix-shell #fish, xonsh and zsh support for nix-shell
 
       # Applications
       alacritty
@@ -155,6 +161,7 @@ in
       solaar
       #wallust
       pywal
+      pywalfox-native
 
       # music
       #spotify
@@ -165,27 +172,38 @@ in
       pamixer # Audio control
       networkmanagerapplet
       localsend
+      qdirstat
+      ncdu
+      kdePackages.filelight
+      easyeffects
 
       #Productivity
       hugo
       glow
+      nodejs_23
 
       # dev tools
       #postman
       nixfmt-rfc-style
       #mongodb-compass
 
+      #AI
+      ollama
+      #ollama-cuda
+
       #User Apps
       celluloid
       discord
+      vesktop # modded discord
       librewolf
       cool-retro-term
       bibata-cursors
       vscode
+      code-cursor
       lollypop
       lutris
       #openrgb
-      betterdiscord-installer
+      #betterdiscord-installer
 
       #utils
       ranger
@@ -199,7 +217,8 @@ in
 
       swaynotificationcenter # notification service
       flameshot
-      warp-terminal
+      #warp-terminal dosent open
+      ulauncher
 
       gcc
       rustup
@@ -241,78 +260,128 @@ in
       btop
       tokyo-night-gtk
 
+      ##Python##
+      (python3.withPackages (
+        ps: with ps; [
+          numpy
+          #pytorch-bin  # Prebuilt PyTorch binary that includes CUDA support
+        ]
+      ))
 
-      ##Scripts
-       (pkgs.writeShellScriptBin "keybindings-hint" ''
-#!/bin/bash
+      ##Scripts##
 
-# Kill yad if present to not interfere with this binds
-pkill yad || true
+      #Keybinds Hint
+      (pkgs.writeShellScriptBin "keybindings-hint" ''
+        #!/bin/bash
 
-# Check if rofi is already running
-if pidof rofi > /dev/null; then
-  pkill rofi
-fi
+        # Kill yad if present to not interfere with this binds
+        pkill yad || true
 
-# Define the config files
-KEYBINDS_CONF="$HOME/.config/hypr/hyprland.conf"
+        # Check if rofi is already running
+        if pidof rofi > /dev/null; then
+          pkill rofi
+        fi
 
-# Combine the contents of the keybinds files and filter for only 'bind ='
-KEYBINDS=$(cat "$KEYBINDS_CONF" "$USER_KEYBINDS_CONF" | grep -E '^bind[[:space:]]*=')
+        # Define the config files
+        KEYBINDS_CONF="$HOME/.config/hypr/hyprland.conf"
 
-# Check for any keybinds to display
-if [[ -z "$KEYBINDS" ]]; then
-    echo "No keybinds found."
-    exit 1
-fi
+        # Combine the contents of the keybinds files and filter for only 'bind ='
+        KEYBINDS=$(cat "$KEYBINDS_CONF" "$USER_KEYBINDS_CONF" | grep -E '^bind[[:space:]]*=')
 
-# Process keybindings:
-# 1. Remove 'bind' prefix and '=' sign
-# 2. Replace '$mainMod' with ''
-# 3. Remove 'exec' text
-MODIFIED_KEYBINDS=$(echo "$KEYBINDS" \
-    | sed -E 's/^bind[[:space:]]*=[[:space:]]*//g' \
-    | sed 's/\$mainMod//g' \
-    | sed 's/, exec//g')
+        # Check for any keybinds to display
+        if [[ -z "$KEYBINDS" ]]; then
+            echo "No keybinds found."
+            exit 1
+        fi
 
-# Use rofi to display the modified keybindings
-echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/config-keybinds.rasi
+        # Process keybindings:
+        # 1. Remove 'bind' prefix and '=' sign
+        # 2. Replace '$mainMod' with ''
+        # 3. Remove 'exec' text
+        MODIFIED_KEYBINDS=$(echo "$KEYBINDS" \
+            | sed -E 's/^bind[[:space:]]*=[[:space:]]*//g' \
+            | sed 's/\$mainMod//g' \
+            | sed 's/, exec//g')
 
-    '')
+        # Use rofi to display the modified keybindings
+        echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/config-keybinds.rasi
+
+      '')
+
+      #Rofi-wifi menu
+
+      (pkgs.writeShellScriptBin "rofi-wifi" ''
+        #!/bin/env bash
+
+                notify-send "Getting list of available Wi-Fi networks..."
+                # Get a list of available wifi connections and morph it into a nice-looking list
+                wifi_list=$(nmcli --fields "SECURITY,SSID" device wifi list | sed 1d | sed 's/  */ /g' | sed -E "s/WPA*.?\S/ /g" | sed "s/^--/ /g" | sed "s/  //g" | sed "/--/d")
+
+                connected=$(nmcli -fields WIFI g)
+                if [[ "$connected" =~ "enabled" ]]; then
+                  toggle="󰖪  Disable Wi-Fi"
+                elif [[ "$connected" =~ "disabled" ]]; then
+                  toggle="󰖩  Enable Wi-Fi"
+                fi
+
+                # Use rofi to select wifi network
+                chosen_network=$(echo -e "$toggle\n$wifi_list" | uniq -u | rofi -dmenu -i -selected-row 1 -p "Wi-Fi SSID: " )
+                # Get name of connection
+                read -r chosen_id <<< "$chosen_network: 3"
+
+                if [ "$chosen_network" = "" ]; then
+                  exit
+                elif [ "$chosen_network" = "󰖩  Enable Wi-Fi" ]; then
+                  nmcli radio wifi on
+                elif [ "$chosen_network" = "󰖪  Disable Wi-Fi" ]; then
+                  nmcli radio wifi off
+                else
+                  # Message to show when connection is activated successfully
+                    success_message="You are now connected to the Wi-Fi network \"$chosen_id\"."
+                  # Get saved connections
+                  saved_connections=$(nmcli -g NAME connection)
+                  if [[ $(echo "$saved_connections" | grep -w "$chosen_id") = "$chosen_id" ]]; then
+                    nmcli connection up id "$chosen_id" | grep "successfully" && notify-send "Connection Established" "$success_message"
+                  else
+                    if [[ "$chosen_network" =~ "" ]]; then
+                      wifi_password=$(rofi -dmenu -p "Password: " )
+                    fi
+                    nmcli device wifi connect "$chosen_id" password "$wifi_password" | grep "successfully" && notify-send "Connection Established" "$success_message"
+                    fi
+                fi'')
 
     ];
   };
 
-  
- home.file = {
+  home.file = {
 
-  ##############
-  ##Key Binds###
-  ##############
-# Ensure the custom Rofi config is placed in the expected directory
-  ".config/rofi/config-keybinds.rasi" = {
-    text = ''
- @import "~/.config/rofi/config.rasi"
+    ##############
+    ##Key Binds###
+    ##############
+    # Ensure the custom Rofi config is placed in the expected directory
+    ".config/rofi/config-keybinds.rasi" = {
+      text = ''
+        @import "~/.config/rofi/config.rasi"
 
-    /* ---- Entry ---- */
-    entry {
-      width: 85%;
-      placeholder: ' 🧮 Search Keybinds NOTE "ESC will close this app  " "=" "SUPER KEY is (Windows Key)" ';
-      
-    }
+           /* ---- Entry ---- */
+           entry {
+             width: 85%;
+             placeholder: ' 🧮 Search Keybinds NOTE "ESC will close this app  " "=" "SUPER KEY is (Windows Key)" ';
+             
+           }
 
-    /* ---- Listview ---- */
-    listview {
-      columns: 2;
-      lines: 12;
-    }
+           /* ---- Listview ---- */
+           listview {
+             columns: 2;
+             lines: 12;
+           }
 
-    window {
-        width: 95%;
-    }
-  '';
+           window {
+               width: 95%;
+           }
+      '';
+    };
   };
- };
 
   # Enable Mullvad VPN
   # services.mullvad-vpn.enable = true;
@@ -370,6 +439,12 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
   #    };
   #  };
 
+  #Ollama not required for ollama.cuda pacakge
+  #  services.ollama = {
+  #   enable = true;
+  #   acceleration = "cuda";
+  #   };
+
   #Sway Notification center configruration
   services.swaync = {
     enable = true;
@@ -409,6 +484,7 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
         "dnd"
         "backlight"
         "volume"
+        #"mpris"
         "buttons-grid"
         "mpris"
         "notifications"
@@ -447,7 +523,7 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
             {
               label = "⏹️";
               command = "systemctl poweroff";
-               tooltip = "Power Off";
+              tooltip = "Power Off";
             }
             {
               label = "🔄";
@@ -457,7 +533,7 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
             {
               label = "🚪";
               command = "hyprctl dispatch exit";
-               tooltip = "Exit Sway";
+              tooltip = "Exit Sway";
             }
             {
               label = "🗃️";
@@ -501,54 +577,53 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
 
     };
 
+    style = ''
+      @import url("$HOME/.cache/wal/colors-swaync.css");
 
- style='' 
-       @import url("$HOME/.cache/wal/colors-swaync.css");
+      * {
+        font-family: "JetBrainsMono Nerd Font"; 
+        font-weight: normal; 
+      }
 
-       * {
-         font-family: "JetBrainsMono Nerd Font"; 
-         font-weight: normal; 
-       }
+      .control-center { 
+        background: var(--background); 
+        border-radius: 10px; 
+        border: 2px solid var(--border); 
+        margin: 10px; 
+        padding: 5px; 
+      }
 
-       .control-center { 
-         background: var(--background); 
-         border-radius: 10px; 
-         border: 2px solid var(--border); 
-         margin: 10px; 
-         padding: 5px; 
-       }
+      .notification-content { 
+        background: var(--background); 
+        border-radius: 10px; 
+        border: 2px solid var(--accent); 
+        margin: 5px; 
+      }
 
-       .notification-content { 
-         background: var(--background); 
-         border-radius: 10px; 
-         border: 2px solid var(--accent); 
-         margin: 5px; 
-       }
+      .close-button { 
+        background: var(--primary); 
+        color: var(--background); 
+        text-shadow: none; 
+        padding: 0 5px; 
+        border-radius: 5px; 
+      }
 
-       .close-button { 
-         background: var(--primary); 
-         color: var(--background); 
-         text-shadow: none; 
-         padding: 0 5px; 
-         border-radius: 5px; 
-       }
+      .close-button:hover { 
+        background: var(--accent); 
+      }
 
-       .close-button:hover { 
-         background: var(--accent); 
-       }
+      .widget-title { 
+        color: var(--secondary); 
+        font-size: 1.5rem; 
+        margin: 10px; 
+        font-weight: bold; 
+      }
 
-       .widget-title { 
-         color: var(--secondary); 
-         font-size: 1.5rem; 
-         margin: 10px; 
-         font-weight: bold; 
-       }
-
-       .buttons-grid > button:hover { 
-         background: var(--accent); 
-         color: var(--background); 
-       }
-     '';
+      .buttons-grid > button:hover { 
+        background: var(--accent); 
+        color: var(--background); 
+      }
+    '';
     # style = ''
     #        @import url("../../.cache/wal/colors-swaync.css");
     #       * {
@@ -656,7 +731,6 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
     #     position: relative;
     #   }
 
-
     #       .buttons-grid > button:hover {
     #         background: #89b4fa;
     #         color: #11111b;
@@ -699,9 +773,6 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
     #       }
     # '';
   };
-
-
- 
 
   programs = {
 
@@ -763,7 +834,7 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
           #"custom/l_end"
 
           "battery"
-          "network"
+          #"network"
 
           ##grouped##
           "cpu"
@@ -852,7 +923,7 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
             default = " ";
             active = " ";
             urgent = " ";
-            
+
           };
           persistent-workspaces = {
             "1" = [ ];
@@ -866,7 +937,6 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
           on-scroll-down = "hyprctl dispatch workspace e-1";
         };
 
-        
         "hyprland/window" = {
           format = "{icon} {title}";
           separate-outputs = true;
@@ -984,7 +1054,7 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
           };
           format = "{icon}{capacity}%";
           format-charging = "󰂄 {capacity}%";
-          format-plugged = "󱘖 {capacity}%";
+          format-plugged = " {capacity}%";
           format-alt = "{icon} {time}";
           format-icons = [
             "󰁺"
@@ -1125,320 +1195,322 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
         };
       };
       style = ''
-         @import url("../../.cache/wal/colors-waybar.css");
+             @import url("../../.cache/wal/colors-waybar.css");
 
-          * {
-              border: none;
-              border-radius: 0px;
-              font-family: ${custom.font};
-              font-size: 14px;
-              min-height: 0;
-             }
+              * {
+                  border: none;
+                  border-radius: 0px;
+                  font-family: ${custom.font};
+                  font-size: 14px;
+                  min-height: 0;
+                 }
 
 
-         /*  window#waybar {
-                background: transparent;
-           }*/
-                   
-        /* window#waybar {
-          background:  rgba(0,9,15,0.25);
-            border-radius: 4px;
+             /*  window#waybar {
+                    background: transparent;
+               }*/
+                       
+            /* window#waybar {
+              background:  rgba(0,9,15,0.25);
+                border-radius: 4px;
+              }
+              */
+
+              
+
+            window#waybar {
+              /*background-color: rgba(26, 27, 38, 0.5);*/
+              background-color: rgba(0, 0, 0, 0.21); /* Semi-transparent */
+              /*color: #ffffff;*/
+              transition-property: background-color;
+              transition-duration: 0.5s;
+              border-top: 8px transparent;
+              border-radius: 8px;
+              margin: 16px 16px;
+            }
+
+
+            tooltip {
+             background: ${custom.tertiary_background_hex};
+             color: ${custom.primary_accent};
+             border-radius: 7px;
+             border-width: 0px;
+                   }
+
+          #cava.left, #cava.right {
+              background: ${custom.tertiary_background_hex};
+              margin: 5px; 
+              padding: 8px 16px;
+              color: ${custom.primary_accent};
           }
-          */
+          #cava.left {
+              border-radius: 24px 10px 24px 10px;
+          }
+          #cava.right {
+              border-radius: 10px 24px 10px 24px;
+          }
+          #workspaces {
+              background: ${custom.tertiary_background_hex};
+              margin: 5px 5px;
+              padding: 8px 5px;
+              border-radius: 16px;
+              color: ${custom.primary_accent}
+              }
+          #workspaces button {
+              padding: 0px 5px;
+              margin: 0px 3px;
+              border-radius: 16px;
+             /* color: transparent;*/
+              color: ${custom.primary_accent}; 
+                /*  background: ${custom.tertiary_background_hex};*/
+                  background: ${custom.primary_background_rgba};
+                  transition: all 0.3s ease-in-out;
+              }
+                          
 
-        window#waybar {
-          background-color: rgba(26, 27, 38, 0.5);
-          color: #ffffff;
-          transition-property: background-color;
-          transition-duration: 0.5s;
-          border-top: 8px transparent;
-          border-radius: 8px;
-          transition-duration: 0.5s;
-          margin: 16px 16px;
+
+
+         #workspaces button.active {
+             background-color: ${custom.secondary_accent};
+              color: ${custom.background}; 
+             border-radius: 16px;
+             min-width: 50px;
+             background-size: 400% 400%;
+             transition: all 0.3s ease-in-out;
+         }
+
+          #workspaces button:hover {
+              background-color: ${custom.tertiary_accent};
+              color: ${custom.background};
+              border-radius: 16px;
+              min-width: 50px;
+              background-size: 400% 400%;
+          }
+
+                          
+        #custom-playerctl.backward, #custom-playerctl.play, #custom-playerctl.foward{
+            background: ${custom.tertiary_background_hex};
+            font-weight: bold;
+            margin: 5px 0px;
+        }
+        #tray  {
+            color: ${custom.tertiary_accent};
+            background: ${custom.tertiary_background_hex};
+            border-radius: 10px 24px 10px 24px;
+            padding: 2px 10px;
+            margin: 4px;
+            margin-left: 7px;
+        }
+        #clock {
+            color: ${custom.tertiary_accent};
+            background: ${custom.tertiary_background_hex};
+            margin: 4px;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        #custom-launcher {
+            color: ${custom.A-colour};
+            background: ${custom.tertiary_background_hex};
+            
+            border-radius: 0px 0px 30px 0px;
+            margin: 0px;
+            padding: 0px 30px 0px 12px;
+            font-size: 28px;
+         }
+           #custom-notifications{
+           color: ${custom.C-colour};
+            background: ${custom.tertiary_background_hex};
+            margin: 4px;
+            padding: 2px 6px;
+            /* border-radius: 10px 24px 10px 24px; */
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+           }
+
+          #custom-launcher:hover {
+             background-color: ${custom.primary_accent};
+             color: ${custom.background};
+             transition: all 0.3s ease-in-out;
+          }
+
+
+          #custom-playerctl.backward, #custom-playerctl.play, #custom-playerctl.foward {
+              background: ${custom.tertiary_background_hex};
+              font-size: 22px;
+          }
+          #custom-playerctl.backward:hover, #custom-playerctl.play:hover, #custom-playerctl.foward:hover{
+              color: ${custom.tertiary_accent};
+          }
+          #custom-playerctl.backward {
+              color: ${custom.primary_accent};
+              border-radius: 24px 0px 0px 10px;
+              padding-left: 16px;
+              margin-left: 7px;
+          }
+          #custom-playerctl.play {
+              color: ${custom.secondary_accent};
+              padding: 0 5px;
+          }
+          #custom-playerctl.foward {
+              color: ${custom.primary_accent};
+              border-radius: 0px 10px 24px 0px;
+              padding-right: 12px;
+              margin-right: 7px
+          }
+          #custom-playerlabel {
+              background: ${custom.tertiary_background_hex};
+              color: ${custom.tertiary_accent};
+              padding: 0 20px;
+              border-radius: 24px 10px 24px 10px;
+              margin: 5px 0;
+              font-weight: bold;
+          }
+         #window {
+            background: ${custom.tertiary_background_hex};
+            color: ${custom.tertiary_accent};
+            padding: 0px 10px;
+            margin: 5px;
+            border-radius: 16px;
+            font-weight: normal;
+          }
+
+        #taskbar {
+          background: ${custom.tertiary_background_hex};
+          margin: 5px;
+          padding: 2px;
+          border-radius: 16px;
         }
 
-
-        tooltip {
-         background: ${custom.tertiary_background_hex};
-         color: ${custom.primary_accent};
-         border-radius: 7px;
-         border-width: 0px;
-               }
-
-      #cava.left, #cava.right {
-          background: ${custom.tertiary_background_hex};
-          margin: 5px; 
-          padding: 8px 16px;
-          color: ${custom.primary_accent};
-      }
-      #cava.left {
-          border-radius: 24px 10px 24px 10px;
-      }
-      #cava.right {
-          border-radius: 10px 24px 10px 24px;
-      }
-      #workspaces {
-          background: ${custom.tertiary_background_hex};
-          margin: 5px 5px;
-          padding: 8px 5px;
-          border-radius: 16px;
-          color: ${custom.primary_accent}
-          }
-      #workspaces button {
+        #taskbar button {
           padding: 0px 5px;
           margin: 0px 3px;
           border-radius: 16px;
-         /* color: transparent;*/
-          color: ${custom.primary_accent}; 
-            /*  background: ${custom.tertiary_background_hex};*/
-              background: ${custom.primary_background_rgba};
-              transition: all 0.3s ease-in-out;
-          }
-                      
+          color: ${custom.primary_accent};
+          background: transparent;
+          animation: tb_normal 20s ease-in-out 1;
+        }
 
-
-
-     #workspaces button.active {
-         background-color: ${custom.secondary_accent};
-          color: ${custom.background}; 
-         border-radius: 16px;
-         min-width: 50px;
-         background-size: 400% 400%;
-         transition: all 0.3s ease-in-out;
-     }
-
-      #workspaces button:hover {
-          background-color: ${custom.tertiary_accent};
+        #taskbar button.active {
+          background-color: ${custom.secondary_accent};
           color: ${custom.background};
-          border-radius: 16px;
-          min-width: 50px;
-          background-size: 400% 400%;
-      }
-
-                      
-    #custom-playerctl.backward, #custom-playerctl.play, #custom-playerctl.foward{
-        background: ${custom.tertiary_background_hex};
-        font-weight: bold;
-        margin: 5px 0px;
-    }
-    #tray  {
-        color: ${custom.tertiary_accent};
-        background: ${custom.tertiary_background_hex};
-        border-radius: 10px 24px 10px 24px;
-        padding: 2px 10px;
-        margin: 4px;
-        margin-left: 7px;
-    }
-    #clock {
-        color: ${custom.tertiary_accent};
-        background: ${custom.tertiary_background_hex};
-        margin: 4px;
-        padding: 2px 10px;
-        border-radius: 10px;
-        font-weight: bold;
-        font-size: 16px;
-    }
-    #custom-launcher {
-        color: ${custom.A-colour};
-        background: ${custom.tertiary_background_hex};
-        
-        border-radius: 0px 0px 30px 0px;
-        margin: 0px;
-        padding: 0px 30px 0px 12px;
-        font-size: 28px;
-     }
-       #custom-notifications{
-       color: ${custom.C-colour};
-        background: ${custom.tertiary_background_hex};
-        margin: 4px;
-        padding: 2px 6px;
-        /* border-radius: 10px 24px 10px 24px; */
-        border-radius: 20px;
-        font-weight: bold;
-        font-size: 16px;
-       }
-
-      #custom-launcher:hover {
-         background-color: ${custom.primary_accent};
-         color: ${custom.background};
-         transition: all 0.3s ease-in-out;
-      }
-
-
-      #custom-playerctl.backward, #custom-playerctl.play, #custom-playerctl.foward {
-          background: ${custom.tertiary_background_hex};
-          font-size: 22px;
-      }
-      #custom-playerctl.backward:hover, #custom-playerctl.play:hover, #custom-playerctl.foward:hover{
-          color: ${custom.tertiary_accent};
-      }
-      #custom-playerctl.backward {
-          color: ${custom.primary_accent};
-          border-radius: 24px 0px 0px 10px;
-          padding-left: 16px;
-          margin-left: 7px;
-      }
-      #custom-playerctl.play {
-          color: ${custom.secondary_accent};
-          padding: 0 5px;
-      }
-      #custom-playerctl.foward {
-          color: ${custom.primary_accent};
-          border-radius: 0px 10px 24px 0px;
+          margin-left: 3px;
+          padding-left: 12px;
           padding-right: 12px;
-          margin-right: 7px
-      }
-      #custom-playerlabel {
+          margin-right: 3px;
+          animation: tb_active 20s ease-in-out 1;
+        }
+         #custom-wallchange,#custom-themechange
+         {
+            background: ${custom.tertiary_background_hex};
+            color: ${custom.tertiary_accent};
+            border-radius: 50px 50px 50px 50px;
+            padding: 0 20px;
+            margin: 5px 7px;
+            font-weight: bold;
+          }
+          #custom-wallchange:hover,#custom-themechange:hover{
+                        color: ${custom.secondary_accent};
+                        }
+
+        #custom-r_end {
+            border-radius: 0px 21px 21px 0px;
+            margin-right: 9px;
+            padding-right: 3px;
+        }
+
+        #custom-l_end {
+            border-radius: 21px 0px 0px 21px;
+            margin-left: 9px;
+            padding-left: 3px;
+        }
+
+          
+        #custom-power,#network, #battery , #backlight
+         {
+            background: ${custom.tertiary_background_hex};
+            
+            /* border-radius: 10px 24px 10px 24px; */
+            border-radius: 16px;
+            padding: 0 20px;
+            margin: 5px 7px;
+            font-weight: bold;
+          }
+
+
+          #custom-power {
+          color: ${custom.A-colour};
+            padding: 0 15px;
+            font-size: 16px;
+          }
+
+
+          #backlight {
+          color: ${custom.B-Colour};
+            padding: 0 8px;
+            font-size: 10px;
+          }
+
+          #network {
+          color: ${custom.C-colour};
+            padding: 0 8px;
+            font-size: 12px;
+          }
+             #battery {
+             color: ${custom.D-colour};
+            padding: 0 6px;
+            font-size: 10px;
+          }
+            
+
+
+        #cpu,#disk,#network, #memory, #custom-cliphist, #custom-keybindhint, #pulseaudio {
           background: ${custom.tertiary_background_hex};
-          color: ${custom.tertiary_accent};
-          padding: 0 20px;
-          border-radius: 24px 10px 24px 10px;
-          margin: 5px 0;
           font-weight: bold;
-      }
-     #window {
-        background: ${custom.tertiary_background_hex};
-        color: ${custom.tertiary_accent};
-        padding: 0px 10px;
-        margin: 5px;
-        border-radius: 16px;
-        font-weight: normal;
-      }
-
-    #taskbar {
-      background: ${custom.tertiary_background_hex};
-      margin: 5px;
-      padding: 2px;
-      border-radius: 16px;
-    }
-
-    #taskbar button {
-      padding: 0px 5px;
-      margin: 0px 3px;
-      border-radius: 16px;
-      color: ${custom.primary_accent};
-      background: transparent;
-      animation: tb_normal 20s ease-in-out 1;
-    }
-
-    #taskbar button.active {
-      background-color: ${custom.secondary_accent};
-      color: ${custom.background};
-      margin-left: 3px;
-      padding-left: 12px;
-      padding-right: 12px;
-      margin-right: 3px;
-      animation: tb_active 20s ease-in-out 1;
-    }
-     #custom-wallchange,#custom-themechange
-     {
-        background: ${custom.tertiary_background_hex};
-        color: ${custom.tertiary_accent};
-        border-radius: 50px 50px 50px 50px;
-        padding: 0 20px;
-        margin: 5px 7px;
-        font-weight: bold;
-      }
-      #custom-wallchange:hover,#custom-themechange:hover{
-                    color: ${custom.secondary_accent};
-                    }
-    
-    #custom-r_end {
-        border-radius: 0px 21px 21px 0px;
-        margin-right: 9px;
-        padding-right: 3px;
-    }
-
-    #custom-l_end {
-        border-radius: 21px 0px 0px 21px;
-        margin-left: 9px;
-        padding-left: 3px;
-    }
-
-      
-    #custom-power,#network, #battery , #backlight
-     {
-        background: ${custom.tertiary_background_hex};
-        
-        /* border-radius: 10px 24px 10px 24px; */
-        border-radius: 16px;
-        padding: 0 20px;
-        margin: 5px 7px;
-        font-weight: bold;
-      }
+          
+        }
 
 
-      #custom-power {
-      color: ${custom.A-colour};
-        padding: 0 15px;
-        font-size: 16px;
-      }
+        #cpu {
+            color: ${custom.G-colour};
+            margin: 4px 0px;
+        	  padding: 2px 5px 2px 10px;
+        	  border-radius: 10px 0px 0px 20px;
+        }
+
+        #memory, #custom-cliphist, #custom-keybindhint,#disk {
+          color: ${custom.E-colour};
+          margin: 4px 0px;
+          padding: 2px 14px;
+          border-radius: 0px;
+         }
+
+        #memory{
+          color:${custom.H-colour};
+          } 
+
+        #custom-cliphist{
+          color:${custom.I-colour};
+          } 
+
+        #custom-keybindhint{
+          color:${custom.K-colour};
+          }
+
+        #disk{
+          color:${custom.J-colour};
+          }
 
 
-      #backlight {
-      color: ${custom.B-Colour};
-        padding: 0 8px;
-        font-size: 10px;
-      }
-
-      #network {
-      color: ${custom.C-colour};
-        padding: 0 8px;
-        font-size: 12px;
-      }
-         #battery {
-         color: ${custom.D-colour};
-        padding: 0 6px;
-        font-size: 10px;
-      }
-        
-
-
-    #cpu,#disk,#network, #memory, #custom-cliphist, #custom-keybindhint, #pulseaudio {
-      background: ${custom.tertiary_background_hex};
-      font-weight: bold;
-      
-    }
-
-
-    #cpu {
-        color: ${custom.G-colour};
-        margin: 4px 0px;
-    	  padding: 2px 5px 2px 10px;
-    	  border-radius: 10px 0px 0px 20px;
-    }
-
-    #memory, #custom-cliphist, #custom-keybindhint,#disk {
-      color: ${custom.E-colour};
-      margin: 4px 0px;
-      padding: 2px 14px;
-      border-radius: 0px;
-     }
- 
-    #memory{
-      color:${custom.H-colour};
-      } 
-    
-    #custom-cliphist{
-      color:${custom.I-colour};
-      } 
-    
-    #custom-keybindhint{
-      color:${custom.K-colour};
-      }
-    
-    #disk{
-      color:${custom.J-colour};
-      }
-
-
-    #pulseaudio {
-              color: ${custom.A-colour};
-    	  margin: 4px 0px;
-    	  padding: 2px 10px 2px 5px;
-    	  border-radius: 0px 20px 10px 0px;
-    }
-           
+        #pulseaudio {
+                  color: ${custom.A-colour};
+        	  margin: 4px 0px;
+        	  padding: 2px 10px 2px 5px;
+        	  border-radius: 0px 20px 10px 0px;
+        }
+               
 
 
 
@@ -1639,21 +1711,18 @@ echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/
       };
     };
 
-btop = {
-  enable = true;
-  settings = {
-    color_theme = "pywal";
-    theme_background = false;
-    vim_keys = true;
-    rounded_corners = true;
-    graph_symbol = "braille";
-    shown_boxes = "cpu mem net proc";
-    update_ms = 1000;
-  };
-};
-
-
-
+    btop = {
+      enable = true;
+      settings = {
+        color_theme = "pywal";
+        theme_background = false;
+        vim_keys = true;
+        rounded_corners = true;
+        graph_symbol = "braille";
+        shown_boxes = "cpu mem net proc";
+        update_ms = 1000;
+      };
+    };
 
     #Starship
     starship = {
@@ -1848,62 +1917,67 @@ btop = {
         fullAppDisplay
         volumePercentage
         history
+        #oneko #cat follow mouse
+        beautifulLyrics
+        autoSkipVideo
+        powerBar # Spotlight-like search bar for spotify
       ];
+      theme = spicePkgs.themes.comfy;
+      #theme = spicePkgs.themes.lucid;
+      #theme = spicePkgs.themes.hazy;
 
       enabledCustomApps = with spicePkgs.apps; [
         newReleases
         lyricsPlus
         ncsVisualizer
+        marketplace
+        betterLibrary
       ];
 
     };
 
     #hyprlock
     hyprlock = {
-    enable = true;
-    settings = {
-      general = {
-        disable_loading_bar = true;
-        grace = 0; # Disable unlocking on mouse movement
-        #grace = 10;
-        hide_cursor = true;
-        no_fade_in = false;
+      enable = true;
+      settings = {
+        general = {
+          disable_loading_bar = true;
+          grace = 0; # Disable unlocking on mouse movement
+          #grace = 10;
+          hide_cursor = true;
+          no_fade_in = false;
+        };
+
+        background = [
+          {
+            path = "/etc/nixos/wallpaper.jpg";
+            blur_passes = 3;
+            blur_size = 8;
+            # monitor =
+            #path = $XDG_CONFIG_HOME/hypr/scripts/current_wal;   # only png supported for now
+            # color = $color0;
+
+          }
+        ];
+
+        input-field = [
+          {
+            size = "200, 50";
+            position = "0, -80";
+            dots_center = true;
+            fade_on_empty = false;
+            font_color = "rgb(CFE6F4)";
+            inner_color = "rgb(657DC2)";
+            outer_color = "rgb(0D0E15)";
+            outline_thickness = 5;
+            placeholder_text = "Password...";
+            shadow_passes = 2;
+          }
+        ];
       };
-
-      background = [
-        {
-          path = "/etc/nixos/wallpaper.jpg";
-          blur_passes = 3;
-          blur_size = 8;
-          # monitor =
-          #path = $XDG_CONFIG_HOME/hypr/scripts/current_wal;   # only png supported for now
-          # color = $color0;
-
-        }
-      ];
-
-      input-field = [
-        {
-          size = "200, 50";
-          position = "0, -80";
-          dots_center = true;
-          fade_on_empty = false;
-          font_color = "rgb(CFE6F4)";
-          inner_color = "rgb(657DC2)";
-          outer_color = "rgb(0D0E15)";
-          outline_thickness = 5;
-          placeholder_text = "Password...";
-          shadow_passes = 2;
-        }
-      ];
     };
-  };
 
-
-
-
-
-#Fish
+    #Fish
     fish = {
       enable = true;
 
@@ -1912,6 +1986,9 @@ btop = {
 
         # Add any custom initialization commands here
           nitch
+
+       #enable fish inside nix-shell
+        ${pkgs.any-nix-shell}/bin/any-nix-shell fish --info-right | source
       '';
 
       shellAliases = {
@@ -2028,8 +2105,6 @@ btop = {
     #         grey = mkLiteral "#6e738d";
     #         teal = mkLiteral "#8bd5ca";
 
-            
-
     #         width = mkLiteral "600";
     #         border-radius = mkLiteral "15px";
     #       };
@@ -2113,103 +2188,93 @@ btop = {
     #         background-color = mkLiteral "@bg-col-light";
     #       };
     #     };
-    
-    
-    
-     };
 
-   
+  };
 
+  # Rofi configuration
+  xdg.configFile."rofi/config.rasi".text = ''
+              @import "~/.config/rofi/pywal.rasi"
 
+    configuration {
+      modi: "window,drun,ssh,combi,filebrowser,recursivebrowser";
+      display-drun: "  ";
+      icon-theme: "Papirus";
+      show-icons: true;
+      drun-display-format: "{icon} {name}";
+      font: "Roboto Mono Nerd 12";
+      combi-modi: "window,drun,ssh";
+      terminal: "kitty";
+      run-shell-command: "{terminal} -e {cmd}";
+      sidebar-mode: true;
+    }
+  '';
 
+  xdg.configFile."rofi/pywal.rasi".text = ''
+           @import "~/.cache/wal/colors-rofi"
+    *{
+      background-color: rgba(0, 0, 0, 0.41);
+    }
 
-   # Rofi configuration
- xdg.configFile."rofi/config.rasi".text = ''
-          @import "~/.config/rofi/pywal.rasi"
+    window{
+    	width: env(WIDTH, 35%);
+    	height: env(HEIGHT, 65%);
+      	border: 2px;
+    	border-color: @active-background;
+    	border-radius: 15px;
+    }
 
-configuration {
-  modi: "window,drun,ssh,combi,filebrowser,recursivebrowser";
-  display-drun: "  ";
-  icon-theme: "Papirus";
-  show-icons: true;
-  drun-display-format: "{icon} {name}";
-  font: "Roboto Mono Nerd 12";
-  combi-modi: "window,drun,ssh";
-  terminal: "kitty";
-  run-shell-command: "{terminal} -e {cmd}";
-  sidebar-mode: true;
-}
-      '';
-   
+    element-icon{
+      border-radius: 10px;
+    }
 
+    textbox{
+    	padding: 2em;
+    }
 
-xdg.configFile."rofi/pywal.rasi".text  =  ''
-       @import "~/.cache/wal/colors-rofi"
-*{
-  background-color: rgba(0, 0, 0, 0.41);
-}
+    inputbar{
+    	padding: 0.82em;
+    }
 
-window{
-	width: env(WIDTH, 35%);
-	height: env(HEIGHT, 65%);
-  	border: 2px;
-	border-color: @active-background;
-	border-radius: 15px;
-}
+    mainbox{
+      	background-position: center;
+      	border-radius: 15px     ;	
+    }
 
-element-icon{
-  border-radius: 10px;
-}
+    entry {
+      placeholder: "Type anything";
+      cursor: pointer;
+     }
 
-textbox{
-	padding: 2em;
-}
+    listview{
+        border: 0px 0px 0px;
+    }
 
-inputbar{
-	padding: 0.82em;
-}
+    element {
+      orientation: horizontal ;
+      spacing: 15px;
+      border-radius: 15px;
+      padding: 0.45em;
+    }
 
-mainbox{
-  	background-position: center;
-  	border-radius: 15px     ;	
-}
-
-entry {
-  placeholder: "Type anything";
-  cursor: pointer;
- }
-
-listview{
-    border: 0px 0px 0px;
-}
-
-element {
-  orientation: horizontal ;
-  spacing: 15px;
-  border-radius: 15px;
-  padding: 0.45em;
-}
-
-element-icon {
-  size: 2em;
-}
-      '';
-    
+    element-icon {
+      size: 2em;
+    }
+  '';
 
   # Hyprland configuration
   wayland.windowManager.hyprland = {
     enable = true;
 
-      #  plugins = [
+    #  plugins = [
     # Format these which are build from source
     # inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
 
     #To import prebuilt plugins
     #pkgs.hyprlandPlugins.<plugin name>
-      #  pkgs.hyprlandPlugins.hyprtrails
-      #  pkgs.hyprlandPlugins.hyprbars
+    #  pkgs.hyprlandPlugins.hyprtrails
+    #  pkgs.hyprlandPlugins.hyprbars
 
-      #  ];
+    #  ];
 
     settings = {
 
@@ -2230,56 +2295,56 @@ element-icon {
         # ",preferred,auto,1"
       ];
 
-#############
-### INPUT ###
-#############
-             input = {
-      #   kb_layout = us;
-      #   kb_variant = "";
-      #   kb_model = "";
-      #   kb_options = "";
-      #   kb_rules = "";
-      #   repeat_rate = 50;
-      #   repeat_delay = 300;
+      #############
+      ### INPUT ###
+      #############
+      input = {
+        #   kb_layout = us;
+        #   kb_variant = "";
+        #   kb_model = "";
+        #   kb_options = "";
+        #   kb_rules = "";
+        #   repeat_rate = 50;
+        #   repeat_delay = 300;
 
-      #   sensitivity = 0; #mouse sensitivity
-      numlock_by_default = true;
-      #   left_handed = false;
-      #   follow_mouse = true;
-      #   float_switch_override_focus = false;
+        #   sensitivity = 0; #mouse sensitivity
+        numlock_by_default = true;
+        #   left_handed = false;
+        #   follow_mouse = true;
+        #   float_switch_override_focus = false;
 
-      #   touchpad {
-      #     disable_while_typing = true;
-      #     natural_scroll = false;
-      #     clickfinger_behavior = fals;e
-      #     middle_button_emulation = true;
-      #     tap-to-click = true;
-      #     drag_lock = false;
-      #           }
+        #   touchpad {
+        #     disable_while_typing = true;
+        #     natural_scroll = false;
+        #     clickfinger_behavior = fals;e
+        #     middle_button_emulation = true;
+        #     tap-to-click = true;
+        #     drag_lock = false;
+        #           }
 
-      #   # below for devices with touchdevice ie. touchscreen
-      # 	# touchdevice {
-      # 	# 	enabled = true;
-      # 	# }
+        #   # below for devices with touchdevice ie. touchscreen
+        # 	# touchdevice {
+        # 	# 	enabled = true;
+        # 	# }
 
-      # 	# below is for table see link above for proper variables
-      # 	# tablet {
-      # 	# 	transform = 0;
-      # 	# 	left_handed = 0;
-      # 	# }
-       };
+        # 	# below is for table see link above for proper variables
+        # 	# tablet {
+        # 	# 	transform = 0;
+        # 	# 	left_handed = 0;
+        # 	# }
+      };
 
-      # gestures {
-      #   workspace_swipe = true;
-      #   workspace_swipe_fingers = 3;
-      #   workspace_swipe_distance = 500;
-      #   workspace_swipe_invert = true;
-      #   workspace_swipe_min_speed_to_force = 30;
-      #   workspace_swipe_cancel_ratio = 0.5;
-      #   workspace_swipe_create_new = true;
-      #   workspace_swipe_forever = true;
-      #   #workspace_swipe_use_r = true #uncomment if wanted a forever create a new workspace with swipe right
-      # }
+      gestures = {
+        workspace_swipe = true;
+        workspace_swipe_fingers = 3;
+        workspace_swipe_distance = 500;
+        workspace_swipe_invert = true;
+        workspace_swipe_min_speed_to_force = 30;
+        workspace_swipe_cancel_ratio = 0.5;
+        workspace_swipe_create_new = true;
+        workspace_swipe_forever = true;
+        #workspace_swipe_use_r = true #uncomment if wanted a forever create a new workspace with swipe right
+      };
 
       # #Could help when scaling and not pixelating
       # xwayland {
@@ -2323,10 +2388,9 @@ element-icon {
         #"$UserScripts/RainbowBorders.sh &" # Rainbow borders
       ];
 
-
-###################
-### KEYBINDINGS ###
-###################
+      ###################
+      ### KEYBINDINGS ###
+      ###################
 
       bind = [
         "$mainMod , Return, exec, $terminal"
@@ -2335,8 +2399,8 @@ element-icon {
         "$mainMod,       E, exec, $fileManager"
         "$mainMod,       F, togglefloating,"
         # "$mainMod,       A, exec, $menu -show drun"
-        "$mainMod,       A, exec, pkill rofi || rofi -show drun -replace -i"
-        "$mainMod,       P, pseudo,"
+        "$mainMod,       space, exec, pkill rofi || rofi -show drun -replace -i"
+        "$mainMod,       P, exec, gnome-text-editor"
         "$mainMod,       M, exec, missioncenter" # Open Mission Center
         "$mainMod,       W, exec, waypaper " # Open wallpaper selector
         "$mainMod SHIFT, W, exec,waypaper --random "
@@ -2347,13 +2411,24 @@ element-icon {
         "$mainMod,       C, exec, code"
         "$mainMod,       V, exec, cliphist list | $menu -dmenu | cliphist decode | wl-copy"
         "$mainMod,       B, exec, firefox"
+        "$mainMod,       Z, exec, zen"
         #"$mainMod SHIFT, B, exec, pkill -SIGUSR1 waybar"
         "$mainMod,       L, exec, loginctl lock-session"
         "$mainMod,       P, exec, hyprpicker -an"
         "$mainMod,       N, exec, swaync-client -t"
         ", Print, exec, grimblast --notify --freeze copysave area"
         "$mainMod CTRL,  Q, exec, wlogout -p layer-shell"
-        "$mainMod,       PRINT, exec, flameshot gui"
+        
+
+      # Region screenshot with Swappy
+      "$mainMod, S, exec, grim -g \"$(slurp)\" - | swappy -f -"
+
+      # Fullscreen screenshot with Swappy
+      "$mainMod SHIFT, S, exec, grim -o $(hyprctl monitors | jq -r '.[] | select(.focused).name') - | swappy -f -"
+
+      # Focused window screenshot with Swappy
+      "$mainMod CTRL, S, exec, grim -g \"$(hyprctl clients -j | jq '.[] | select(.focused==true).at' | sed 's/,/x/')+$(hyprctl clients -j | jq '.[] | select(.focused==true).size' | sed 's/,/x/')+0x0\" - | swappy -f -"
+        
         # Moving focus
         "$mainMod, left, movefocus, l"
         "$mainMod, right, movefocus, r"
@@ -2384,21 +2459,33 @@ element-icon {
         "$mainMod, 9, workspace, 9"
         "$mainMod, 0, workspace, 10"
 
-        # Moving windows to workspaces
-        "$mainMod SHIFT, 1, movetoworkspacesilent, 1"
-        "$mainMod SHIFT, 2, movetoworkspacesilent, 2"
-        "$mainMod SHIFT, 3, movetoworkspacesilent, 3"
-        "$mainMod SHIFT, 4, movetoworkspacesilent, 4"
-        "$mainMod SHIFT, 5, movetoworkspacesilent, 5"
-        "$mainMod SHIFT, 6, movetoworkspacesilent, 6"
-        "$mainMod SHIFT, 7, movetoworkspacesilent, 7"
-        "$mainMod SHIFT, 8, movetoworkspacesilent, 8"
-        "$mainMod SHIFT, 9, movetoworkspacesilent, 9"
-        "$mainMod SHIFT, 0, movetoworkspacesilent, 10"
+        # # Moving windows to workspaces
+        # "$mainMod SHIFT, 1, movetoworkspacesilent, 1"
+        # "$mainMod SHIFT, 2, movetoworkspacesilent, 2"
+        # "$mainMod SHIFT, 3, movetoworkspacesilent, 3"
+        # "$mainMod SHIFT, 4, movetoworkspacesilent, 4"
+        # "$mainMod SHIFT, 5, movetoworkspacesilent, 5"
+        # "$mainMod SHIFT, 6, movetoworkspacesilent, 6"
+        # "$mainMod SHIFT, 7, movetoworkspacesilent, 7"
+        # "$mainMod SHIFT, 8, movetoworkspacesilent, 8"
+        # "$mainMod SHIFT, 9, movetoworkspacesilent, 9"
+        # "$mainMod SHIFT, 0, movetoworkspacesilent, 10"
 
-        # Scratchpad
-        "$mainMod,       S, togglespecialworkspace,  magic"
-        "$mainMod SHIFT, S, movetoworkspace, special:magic"
+        # Moving windows to workspaces
+        "$mainMod SHIFT, 1, movetoworkspace, 1" # Move active window to workspace 1
+        "$mainMod SHIFT, 2, movetoworkspace, 2" # Move active window to workspace 2
+        "$mainMod SHIFT, 3, movetoworkspace, 3" # Move active window to workspace 3
+        "$mainMod SHIFT, 4, movetoworkspace, 4" # Move active window to workspace 4
+        "$mainMod SHIFT, 5, movetoworkspace, 5" # Move active window to workspace 5
+        "$mainMod SHIFT, 6, movetoworkspace, 6" # Move active window to workspace 6
+        "$mainMod SHIFT, 7, movetoworkspace, 7" # Move active window to workspace 7
+        "$mainMod SHIFT, 8, movetoworkspace, 8" # Move active window to workspace 8
+        "$mainMod SHIFT, 9, movetoworkspace, 9" # Move active window to workspace 9
+        "$mainMod SHIFT, 0, movetoworkspace, 10" # Move active window to workspace 10
+
+        # # Scratchpad
+        # "$mainMod,       S, togglespecialworkspace,  magic"
+        # "$mainMod SHIFT, S, movetoworkspace, special:magic"
 
         #Swayosd
         ", Caps_Lock, exec, swayosd-client --caps-lock"
@@ -2420,8 +2507,6 @@ element-icon {
         "$mainMod, bracketright, exec, brightnessctl s 10%+"
         "$mainMod, bracketleft,  exec, brightnessctl s 10%-"
       ];
-
-      
 
       # Audio playback
       bindl =
@@ -2449,13 +2534,13 @@ element-icon {
           ) 9
         ));
 
-#####################
-### LOOK AND FEEL ###
-#####################
+      #####################
+      ### LOOK AND FEEL ###
+      #####################
 
       general = {
-        gaps_in = 2;
-        gaps_out = 2;
+        gaps_in = 8;
+        gaps_out = 8;
         border_size = 0;
         "col.active_border" = "rgba(33ccffee)";
         "col.inactive_border" = "rgba(595959aa)";
@@ -2466,7 +2551,7 @@ element-icon {
       };
 
       decoration = {
-        rounding = 8;
+        rounding = 14;
         active_opacity = 1.0;
         inactive_opacity = 0.8;
         fullscreen_opacity = 1.0;
@@ -2488,10 +2573,15 @@ element-icon {
         shadow = {
           enabled = true;
           range = 30;
-          render_power = 3;
+          render_power = 1000;
           color = "rgba(1a1a1aee)";
+          #color = "rgba${custom.primary_accent}";
         };
       };
+
+      layerrule = [
+        "blur, waybar"
+      ];
 
       # animations = {
       #   enabled = true;
@@ -2513,85 +2603,82 @@ element-icon {
       #   ];
       # };
 
+      # general = {
+      #     gaps_in = 10;
+      #     gaps_out = 40;
+      #     border_size = 3;
+      #     "col.active_border" = "rgba(fab387ff) rgba(fab387ff) 45deg";
+      #     "col.inactive_border" = "rgba(00000000)";
+      #     resize_on_border = false;
+      #     allow_tearing = false;
+      #     # layout = dwindle;
+      # };
 
-# general = {
-#     gaps_in = 10;
-#     gaps_out = 40;
-#     border_size = 3;
-#     "col.active_border" = "rgba(fab387ff) rgba(fab387ff) 45deg";
-#     "col.inactive_border" = "rgba(00000000)";
-#     resize_on_border = false;
-#     allow_tearing = false;
-#     # layout = dwindle;
-# };
+      # decoration = {
+      #     rounding = 10;
+      #     active_opacity = 0.8;
+      #     inactive_opacity = 0.3;
+      #     shadow = {
+      #         enabled = true;
+      #         range = 25;
+      #         render_power = 1000;
+      #         color = "rgba(fab387ff)";
+      #         color_inactive = "rgba(00000000)";
+      #     };
+      #     blur = {
+      #         enabled = true;
+      #         size = 1;
+      #         passes = 5;
 
-# decoration = {
-#     rounding = 10;
-#     active_opacity = 0.8;
-#     inactive_opacity = 0.3;
-#     shadow = {
-#         enabled = true;
-#         range = 25;
-#         render_power = 1000;
-#         color = "rgba(fab387ff)";
-#         color_inactive = "rgba(00000000)";
-#     };
-#     blur = {
-#         enabled = true;
-#         size = 1;
-#         passes = 5;
-
-#         vibrancy = 0.1696;
-#     };
-# };
-animations = {
-    enabled = true;
+      #         vibrancy = 0.1696;
+      #     };
+      # };
+      animations = {
+        enabled = true;
         bezier = [
           "wind, 0.05, 0.9, 0.1, 1.05"
-         "winIn, 0.1, 1.1, 0.1, 1.1"
-         "winOut, 0.3, -0.3, 0, 1"
-         "liner, 1, 1, 1, 1"
-         "overshot, 0.05, 0.9, 0.1, 1.05"
-         "smoothOut, 0.5, 0, 0.99, 0.99"
-         "smoothIn, 0.5, -0.5, 0.68, 1.5"
-         "easeOutQuint,0.23,1,0.32,1"
-         "easeInOutCubic,0.65,0.05,0.36,1" 
-         "linear,0,0,1,1"
-         "almostLinear,0.5,0.5,0.75,1.0"
-         "quick,0.15,0,0.1,1"
+          "winIn, 0.1, 1.1, 0.1, 1.1"
+          "winOut, 0.3, -0.3, 0, 1"
+          "liner, 1, 1, 1, 1"
+          "overshot, 0.05, 0.9, 0.1, 1.05"
+          "smoothOut, 0.5, 0, 0.99, 0.99"
+          "smoothIn, 0.5, -0.5, 0.68, 1.5"
+          "easeOutQuint,0.23,1,0.32,1"
+          "easeInOutCubic,0.65,0.05,0.36,1"
+          "linear,0,0,1,1"
+          "almostLinear,0.5,0.5,0.75,1.0"
+          "quick,0.15,0,0.1,1"
         ];
-        animation = 
-        ["windows, 1, 6, wind, slide"
-         "windowsIn, 1, 5, winIn, slide"
-         "windowsOut, 1, 3, smoothOut, slide"
-         "windowsMove, 1, 5, wind, slide"
-         "border, 1, 1, liner"
-         "borderangle, 1, 180, liner, loop" 
-         "fade, 1, 3, smoothOut"
-         "workspaces, 1, 5, overshot"
-         "workspacesIn, 1, 5, winIn, slide"
-         "workspacesOut, 1, 5, winOut, slide"
-         "layers, 1, 3.81, easeOutQuint" 
-         "layersIn, 1, 4, easeOutQuint, popin 50%"
-         "layersOut, 1, 3, easeOutQuint, slide"
+        animation = [
+          "windows, 1, 6, wind, slide"
+          "windowsIn, 1, 5, winIn, slide"
+          "windowsOut, 1, 3, smoothOut, slide"
+          "windowsMove, 1, 5, wind, slide"
+          "border, 1, 1, liner"
+          "borderangle, 1, 180, liner, loop"
+          "fade, 1, 3, smoothOut"
+          "workspaces, 1, 5, overshot"
+          "workspacesIn, 1, 5, winIn, slide"
+          "workspacesOut, 1, 5, winOut, slide"
+          "layers, 1, 3.81, easeOutQuint"
+          "layersIn, 1, 4, easeOutQuint, popin 50%"
+          "layersOut, 1, 3, easeOutQuint, slide"
         ];
-};
+      };
 
-# dwindle = {
-#     pseudotile = true; 
-#     preserve_split = true; 
-# };
+      # dwindle = {
+      #     pseudotile = true;
+      #     preserve_split = true;
+      # };
 
-# master = {
-#     new_status = master;
-# };
+      # master = {
+      #     new_status = master;
+      # };
 
-misc = {
-    force_default_wallpaper = -1;
-    disable_hyprland_logo = false;
-};
-
-
+      misc = {
+        force_default_wallpaper = -1;
+        disable_hyprland_logo = false;
+      };
 
       #systemd.variables = [ "--all" ];
       #  extraConfig = ''
@@ -2612,23 +2699,25 @@ misc = {
       windowrule = [
         # Window rules
         "tile,title:^(kitty)$"
-        "float,title:^(fly_is_kitty)$"
+        # "float,title:^(fly_is_kitty)$"
+        "float,title:^(kitty)$"
         "tile,^(Spotify)$"
         "tile,^(wps)$"
         "float, ^(waypaper)$"
         "float, ^(missioncenter)$"
 
-        #   # Window rules
-        #   windowrulev2 = float,title:^(flameshot)
-        #   windowrulev2 = move 0 0,title:^(flameshot)
-        #   windowrulev2 = suppressevent fullscreen,title:^(flameshot)
-
-        #   windowrule = float, ^(pavucontrol)$
-        #   windowrule = float, ^(nm-connection-editor)$
-        #   windowrule = float, ^(rofi)$
-        #   windowrule = float, ^(waypaper)$
-        #   windowrule = float, ^(missioncenter)$
       ];
+
+      #   # Window rules
+      #   windowrulev2 = float,title:^(flameshot)
+      #   windowrulev2 = move 0 0,title:^(flameshot)
+      #   windowrulev2 = suppressevent fullscreen,title:^(flameshot)
+
+      #   windowrule = float, ^(pavucontrol)$
+      #   windowrule = float, ^(nm-connection-editor)$
+      #   windowrule = float, ^(rofi)$
+      #   windowrule = float, ^(waypaper)$
+      #   windowrule = float, ^(missioncenter)$
 
       windowrulev2 = [
         "float,title:^(flameshot)"
@@ -2655,490 +2744,485 @@ misc = {
     };
   };
 
-
-
-# #nwg-dock configuration
-   xdg.configFile."nwg-dock-hyprland/style.css".text = ''
-   /* importing waybar colors as i am using same colours here */
-   @import url("../../.cache/wal/colors-waybar.css");
-   window {
-	/*  background: rgba(99, 100, 127, 0.9);*/
-	background: rgba(54, 48, 70, 0.8);
-	border-radius: 30px;
-	border-style: solid;
-	border-width: 6px;
-	/*	border-width:0px; */
-	border-color: ${custom.primary_accent};
-}
-
-#box {
-/* Define attributes of the box surrounding icons here */
-/*    background : rgba(33, 26, 38, 0.2); */
-	padding: 8px;
-	margin-left: 20px;
-	margin-right: 20px;
-	margin-bottom: 2px;
-	margin-top: 3.5px;
-	border-radius: 70px;
-	border-bottom-right-radius: 0px;
-	border-bottom-left-radius: 0px;
-  animation: gradient_f 20s ease-in infinite;
-  transition: all 0.5s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.7s ease-in-out, background-color 0.7s ease-in-out;
-  
-  
-}
-
-#active {
-	/* This is to underline the button representing the currently active window */
-	/*	border: solid 2px;*/
-	border-radius: 10px;
-	/*	border-color: ${custom.tertiary_accent};*/
-	background: ${custom.secondary_accent};
-	}
-
-button, image {
-	background: none;
-	border-style: none;
-	box-shadow: none;
-	color: ${custom.primary_accent};
-}
-
-button {
-	/* border: 1px solid ${custom.secondary_accent}; */
-}
-
-button {
-	padding: 4px;
-	margin-left: 4px;
-	margin-right: 4px;
-	color:${custom.tertiary_accent};
-	font-size: 12px;
-}
-
-
-button:hover {
-	border-radius: 8px;
-  /* border-radius: 80px; */
-	background-color: rgba(204, 208, 218,1);
-	background-size: 20%;
-  margin: 10px;
-  box-shadow: 0 0 10px;
-  animation: gradient_f 20s ease-in infinite;
-  transition: all 0.5s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.7s ease-in-out, background-color 0.7s ease-in-out;
-}
-
-
-button:focus {
-	box-shadow: none
-}
-
-/*
- button:focus {
-        background-size: 50%;
-    	border: 0px;
+  # #nwg-dock configuration
+  xdg.configFile."nwg-dock-hyprland/style.css".text = ''
+       /* importing waybar colors as i am using same colours here */
+       @import url("../../.cache/wal/colors-waybar.css");
+       window {
+    	/*  background: rgba(99, 100, 127, 0.9);*/
+    	background: rgba(54, 48, 70, 0.8);
+    	border-radius: 30px;
+    	border-style: solid;
+    	border-width: 6px;
+    	/*	border-width:0px; */
+    	border-color: ${custom.primary_accent};
     }
-*/
+
+    #box {
+    /* Define attributes of the box surrounding icons here */
+    /*    background : rgba(33, 26, 38, 0.2); */
+    	padding: 8px;
+    	margin-left: 20px;
+    	margin-right: 20px;
+    	margin-bottom: 2px;
+    	margin-top: 3.5px;
+    	border-radius: 70px;
+    	border-bottom-right-radius: 0px;
+    	border-bottom-left-radius: 0px;
+      animation: gradient_f 20s ease-in infinite;
+      transition: all 0.5s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.7s ease-in-out, background-color 0.7s ease-in-out;
+      
+      
+    }
+
+    #active {
+    	/* This is to underline the button representing the currently active window */
+    	/*	border: solid 2px;*/
+    	border-radius: 10px;
+    	/*	border-color: ${custom.tertiary_accent};*/
+    	background: ${custom.secondary_accent};
+    	}
+
+    button, image {
+    	background: none;
+    	border-style: none;
+    	box-shadow: none;
+    	color: ${custom.primary_accent};
+    }
+
+    button {
+    	/* border: 1px solid ${custom.secondary_accent}; */
+    }
+
+    button {
+    	padding: 4px;
+    	margin-left: 4px;
+    	margin-right: 4px;
+    	color:${custom.tertiary_accent};
+    	font-size: 12px;
+    }
 
 
-       
- '';
+    button:hover {
+    	border-radius: 8px;
+      /* border-radius: 80px; */
+    	background-color: rgba(204, 208, 218,1);
+    	background-size: 20%;
+      margin: 10px;
+      box-shadow: 0 0 10px;
+      animation: gradient_f 20s ease-in infinite;
+      transition: all 0.5s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.7s ease-in-out, background-color 0.7s ease-in-out;
+    }
+
+
+    button:focus {
+    	box-shadow: none
+    }
+
+    /*
+     button:focus {
+            background-size: 50%;
+        	border: 0px;
+        }
+    */
+
+
+           
+  '';
 
   # Wlogout configuration
 
-#############
-### older ###
-#############
-#  xdg.configFile."wlogout/layout".text = ''
-# {
-#     "label" : "lock",
-#     "action" : "swaylock",
-#     "text" : "Lock",
-#     "keybind" : "l"
-# }
-# {
-#     "label" : "logout",
-#     "action" : "hyprctl dispatch exit 0",
-#     "text" : "Logout",
-#     "keybind" : "e"
-# }
-# {
-#     "label" : "suspend",
-#     "action" : "swaylock -f && systemctl suspend",
-#     "text" : "Suspend",
-#     "keybind" : "u"
-# }
-# {
-#     "label" : "shutdown",
-#     "action" : "systemctl poweroff",
-#     "text" : "Shutdown",
-#     "keybind" : "s"
-# }
-# {
-#     "label" : "hibernate",
-#     "action" : "systemctl hibernate",
-#     "text" : "Hibernate",
-#     "keybind" : "h"
-# }
-# {
-#     "label" : "reboot",
-#     "action" : "systemctl reboot",
-#     "text" : "Reboot",
-#     "keybind" : "r"
-# }
-# '';
+  #############
+  ### older ###
+  #############
+  #  xdg.configFile."wlogout/layout".text = ''
+  # {
+  #     "label" : "lock",
+  #     "action" : "swaylock",
+  #     "text" : "Lock",
+  #     "keybind" : "l"
+  # }
+  # {
+  #     "label" : "logout",
+  #     "action" : "hyprctl dispatch exit 0",
+  #     "text" : "Logout",
+  #     "keybind" : "e"
+  # }
+  # {
+  #     "label" : "suspend",
+  #     "action" : "swaylock -f && systemctl suspend",
+  #     "text" : "Suspend",
+  #     "keybind" : "u"
+  # }
+  # {
+  #     "label" : "shutdown",
+  #     "action" : "systemctl poweroff",
+  #     "text" : "Shutdown",
+  #     "keybind" : "s"
+  # }
+  # {
+  #     "label" : "hibernate",
+  #     "action" : "systemctl hibernate",
+  #     "text" : "Hibernate",
+  #     "keybind" : "h"
+  # }
+  # {
+  #     "label" : "reboot",
+  #     "action" : "systemctl reboot",
+  #     "text" : "Reboot",
+  #     "keybind" : "r"
+  # }
+  # '';
 
-# xdg.configFile."wlogout/style.css".text = ''
-# @import url("../../.cache/wal/colors-wlogout.css");
+  # xdg.configFile."wlogout/style.css".text = ''
+  # @import url("../../.cache/wal/colors-wlogout.css");
 
-# * {
-#     background-image: none;
-#     font-family: "JetBrainsMono Nerd Font";
-# }
+  # * {
+  #     background-image: none;
+  #     font-family: "JetBrainsMono Nerd Font";
+  # }
 
-# window {
-#     background-color: rgba(12, 12, 12, 0.9);
-# }
+  # window {
+  #     background-color: rgba(12, 12, 12, 0.9);
+  # }
 
-# button {
-#     color: @main-fg;
-#     background-color: rgba(12, 12, 12, 0.4);
-#     outline-style: none;
-#     border: 2px solid @wb-hvr-bg;
-#     border-radius: 20px;
-#     background-repeat: no-repeat;
-#     background-position: center;
-#     background-size: 25%;
-#     margin: 5px;
-#     transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682);
-#     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-# }
+  # button {
+  #     color: @main-fg;
+  #     background-color: rgba(12, 12, 12, 0.4);
+  #     outline-style: none;
+  #     border: 2px solid @wb-hvr-bg;
+  #     border-radius: 20px;
+  #     background-repeat: no-repeat;
+  #     background-position: center;
+  #     background-size: 25%;
+  #     margin: 5px;
+  #     transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682);
+  #     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  # }
 
-# button:focus {
-#     background-color: @wb-act-bg;
-#     border-color: @wb-hvr-bg;
-#     background-size: 30%;
-# }
+  # button:focus {
+  #     background-color: @wb-act-bg;
+  #     border-color: @wb-hvr-bg;
+  #     background-size: 30%;
+  # }
 
-# button:hover {
-#     background-color: @wb-hvr-bg;
-#     border-color: @main-bg;
-#     background-size: 35%;
-#     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-# }
+  # button:hover {
+  #     background-color: @wb-hvr-bg;
+  #     border-color: @main-bg;
+  #     background-size: 35%;
+  #     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  # }
 
-# #lock, #logout, #suspend, #shutdown, #hibernate, #reboot {
-#     margin: 10px;
-# }
+  # #lock, #logout, #suspend, #shutdown, #hibernate, #reboot {
+  #     margin: 10px;
+  # }
 
-# #lock {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/lock.png"));
-# }
+  # #lock {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/lock.png"));
+  # }
 
-# #logout {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/logout.png"));
-# }
+  # #logout {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/logout.png"));
+  # }
 
-# #suspend {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/suspend.png"));
-# }
+  # #suspend {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/suspend.png"));
+  # }
 
-# #shutdown {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/shutdown.png"));
-# }
+  # #shutdown {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/shutdown.png"));
+  # }
 
-# #hibernate {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/hibernate.png"));
-# }
+  # #hibernate {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/hibernate.png"));
+  # }
 
-# #reboot {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/reboot.png"));
-# }
-# '';
+  # #reboot {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/reboot.png"));
+  # }
+  # '';
 
+  #############
+  ### newer ###
+  #############
 
-#############
-### newer ###
-#############
+  xdg.configFile."wlogout/layout".text = ''
+    {
+        "label" : "lock",
+        "action" : "hyprlock",
+        "text" : "Lock",
+        "keybind" : "l"
+    }
+    {
+        "label" : "hibernate",
+        "action" : "systemctl hibernate",
+        "text" : "Hibernate",
+        "keybind" : "h"
+    }
+    {
+        "label" : "logout",
+        "action" : "loginctl terminate-user $USER",
+        "text" : "Logout",
+        "keybind" : "e"
+    }
+    {
+        "label" : "shutdown",
+        "action" : "systemctl poweroff",
+        "text" : "Shutdown",
+        "keybind" : "s"
+    }
+    {
+        "label" : "suspend",
+        "action" : "systemctl suspend",
+        "text" : "Suspend",
+        "keybind" : "u"
+    }
+    {
+        "label" : "reboot",
+        "action" : "systemctl reboot",
+        "text" : "Reboot",
+        "keybind" : "r"
+    }
+  '';
 
-xdg.configFile."wlogout/layout".text = ''
-{
-    "label" : "lock",
-    "action" : "hyprlock",
-    "text" : "Lock",
-    "keybind" : "l"
-}
-{
-    "label" : "hibernate",
-    "action" : "systemctl hibernate",
-    "text" : "Hibernate",
-    "keybind" : "h"
-}
-{
-    "label" : "logout",
-    "action" : "loginctl terminate-user $USER",
-    "text" : "Logout",
-    "keybind" : "e"
-}
-{
-    "label" : "shutdown",
-    "action" : "systemctl poweroff",
-    "text" : "Shutdown",
-    "keybind" : "s"
-}
-{
-    "label" : "suspend",
-    "action" : "systemctl suspend",
-    "text" : "Suspend",
-    "keybind" : "u"
-}
-{
-    "label" : "reboot",
-    "action" : "systemctl reboot",
-    "text" : "Reboot",
-    "keybind" : "r"
-}
-'';
+  xdg.configFile."wlogout/style.css".text = ''
+    /* Import pywal colors */
+    @import url("../../.cache/wal/colors-wlogout.css");
 
-xdg.configFile."wlogout/style.css".text = ''
-/* Import pywal colors */
-@import url("../../.cache/wal/colors-wlogout.css");
+    * {
+        background-image: none;
+        font-family: "JetBrainsMono Nerd Font";
+    }
 
-* {
-    background-image: none;
-    font-family: "JetBrainsMono Nerd Font";
-}
+    window {
+        background-color: rgba(0, 0, 0, 0.6);
+        background-size: cover;
+        font-size: 16pt;
+        color: @main-fg;
+    }
 
-window {
-    background-color: rgba(0, 0, 0, 0.6);
-    background-size: cover;
-    font-size: 16pt;
-    color: @main-fg;
-}
+    button {
+        color: @main-fg;
+        background-color: @main-bg;
+        border-style: solid;
+        border-width: 2px;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 25%;
+        border-radius: 80px;
+        margin: 5px;
+        transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682);
+        border: 2px solid @wb-act-bg;
+    }
 
-button {
-    color: @main-fg;
-    background-color: @main-bg;
-    border-style: solid;
-    border-width: 2px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 25%;
-    border-radius: 80px;
-    margin: 5px;
-    transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682);
-    border: 2px solid @wb-act-bg;
-}
+    button:active {
+        background-color: @wb-act-bg;
+        color: @wb-act-fg;
+        outline-style: none;
+    }
 
-button:active {
-    background-color: @wb-act-bg;
-    color: @wb-act-fg;
-    outline-style: none;
-}
+    button:focus {
+        background-size: 50%;
+        border-color: @wb-hvr-bg;
+    }
 
-button:focus {
-    background-size: 50%;
-    border-color: @wb-hvr-bg;
-}
+    button:hover {
+        background-color: @wb-hvr-bg;
+        color: @wb-hvr-fg;
+        background-size: 50%;
+        margin: 30px;
+        border-radius: 80px;
+        box-shadow: 0 0 30px @wb-hvr-bg;
+    }
 
-button:hover {
-    background-color: @wb-hvr-bg;
-    color: @wb-hvr-fg;
-    background-size: 50%;
-    margin: 30px;
-    border-radius: 80px;
-    box-shadow: 0 0 30px @wb-hvr-bg;
-}
+    button span {
+        font-size: 1.2em;
+    }
 
-button span {
-    font-size: 1.2em;
-}
+    #lock, #logout, #suspend, #hibernate, #shutdown, #reboot {
+        margin: 10px;
+        border-radius: 20px;
+        background-size: 25%;
+        transition: all 0.3s ease;
+    }
 
-#lock, #logout, #suspend, #hibernate, #shutdown, #reboot {
-    margin: 10px;
-    border-radius: 20px;
-    background-size: 25%;
-    transition: all 0.3s ease;
-}
+    #lock {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/lock.png"));
+    }
 
-#lock {
-    background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/lock.png"));
-}
+    #logout {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/logout.png"));
+    }
 
-#logout {
-    background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/logout.png"));
-}
+    #suspend {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/suspend.png"));
+    }
 
-#suspend {
-    background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/suspend.png"));
-}
+    #hibernate {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/hibernate.png"));
+    }
 
-#hibernate {
-    background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/hibernate.png"));
-}
+    #shutdown {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/shutdown.png"));
+    }
 
-#shutdown {
-    background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/shutdown.png"));
-}
+    #reboot {
+        background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/reboot.png"));
+    }
+  '';
 
-#reboot {
-    background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/reboot.png"));
-}
-'';
+  #############
+  ### newer V ###
+  #############
 
-#############
-### newer V ###
-#############
+  # xdg.configFile."wlogout/layout".text = ''
+  # {
+  #     "label" : "lock",
+  #     "action" : "swaylock",
+  #     "text" : "Lock",
+  #     "keybind" : "l"
+  # }
+  # {
+  #     "label" : "logout",
+  #     "action" : "hyprctl dispatch exit 0",
+  #     "text" : "Logout",
+  #     "keybind" : "e"
+  # }
+  # {
+  #     "label" : "suspend",
+  #     "action" : "swaylock -f && systemctl suspend",
+  #     "text" : "Suspend",
+  #     "keybind" : "u"
+  # }
+  # {
+  #     "label" : "shutdown",
+  #     "action" : "systemctl poweroff",
+  #     "text" : "Shutdown",
+  #     "keybind" : "s"
+  # }
+  # {
+  #     "label" : "hibernate",
+  #     "action" : "systemctl hibernate",
+  #     "text" : "Hibernate",
+  #     "keybind" : "h"
+  # }
+  # {
+  #     "label" : "reboot",
+  #     "action" : "systemctl reboot",
+  #     "text" : "Reboot",
+  #     "keybind" : "r"
+  # }
+  # '';
 
-# xdg.configFile."wlogout/layout".text = ''
-# {
-#     "label" : "lock",
-#     "action" : "swaylock",
-#     "text" : "Lock",
-#     "keybind" : "l"
-# }
-# {
-#     "label" : "logout",
-#     "action" : "hyprctl dispatch exit 0",
-#     "text" : "Logout",
-#     "keybind" : "e"
-# }
-# {
-#     "label" : "suspend",
-#     "action" : "swaylock -f && systemctl suspend",
-#     "text" : "Suspend",
-#     "keybind" : "u"
-# }
-# {
-#     "label" : "shutdown",
-#     "action" : "systemctl poweroff",
-#     "text" : "Shutdown",
-#     "keybind" : "s"
-# }
-# {
-#     "label" : "hibernate",
-#     "action" : "systemctl hibernate",
-#     "text" : "Hibernate",
-#     "keybind" : "h"
-# }
-# {
-#     "label" : "reboot",
-#     "action" : "systemctl reboot",
-#     "text" : "Reboot",
-#     "keybind" : "r"
-# }
-# '';
+  # xdg.configFile."wlogout/style.css".text = ''
+  # @import url("../../.cache/wal/colors-wlogout.css");
 
-# xdg.configFile."wlogout/style.css".text = ''
-# @import url("../../.cache/wal/colors-wlogout.css");
+  # * {
+  #     background-image: none;
+  #     font-family: "JetBrainsMono Nerd Font";
+  # }
 
-# * {
-#     background-image: none;
-#     font-family: "JetBrainsMono Nerd Font";
-# }
+  # window {
+  #     background-color: rgba(12, 12, 12, 0.9);
+  # }
 
-# window {
-#     background-color: rgba(12, 12, 12, 0.9);
-# }
+  # button {
+  #     color: @main-fg;
+  #     background-color: rgba(12, 12, 12, 0.4);
+  #     outline-style: none;
+  #     border: none;
+  #     border-width: 0px;
+  #     background-repeat: no-repeat;
+  #     background-position: center;
+  #     background-size: 20%;
+  #     border-radius: 0px;
+  #     box-shadow: none;
+  #     text-shadow: none;
+  #     animation: gradient_f 20s ease-in infinite;
+  # }
 
-# button {
-#     color: @main-fg;
-#     background-color: rgba(12, 12, 12, 0.4);
-#     outline-style: none;
-#     border: none;
-#     border-width: 0px;
-#     background-repeat: no-repeat;
-#     background-position: center;
-#     background-size: 20%;
-#     border-radius: 0px;
-#     box-shadow: none;
-#     text-shadow: none;
-#     animation: gradient_f 20s ease-in infinite;
-# }
+  # button:focus {
+  #     background-color: @wb-act-bg;
+  #     background-size: 30%;
+  # }
 
-# button:focus {
-#     background-color: @wb-act-bg;
-#     background-size: 30%;
-# }
+  # button:hover {
+  #     background-color: @wb-hvr-bg;
+  #     background-size: 40%;
+  #     border-radius: ${wlog.active_rad}px;
+  #     animation: gradient_f 20s ease-in infinite;
+  #     transition: all 0.3s cubic-bezier(.55,0.0,.28,1.682);
+  # }
 
-# button:hover {
-#     background-color: @wb-hvr-bg;
-#     background-size: 40%;
-#     border-radius: ${wlog.active_rad}px;
-#     animation: gradient_f 20s ease-in infinite;
-#     transition: all 0.3s cubic-bezier(.55,0.0,.28,1.682);
-# }
+  # button:hover#lock {
+  #     border-radius: ${wlog.active_rad}px;
+  #     margin : ${wlog.hvr}px 0px ${wlog.hvr}px ${wlog.mgn}px;
+  # }
 
-# button:hover#lock {
-#     border-radius: ${wlog.active_rad}px;
-#     margin : ${wlog.hvr}px 0px ${wlog.hvr}px ${wlog.mgn}px;
-# }
+  # button:hover#logout {
+  #     border-radius: ${wlog.active_rad}px;
+  #     margin : ${wlog.hvr}px 0px ${wlog.hvr}px 0px;
+  # }
 
-# button:hover#logout {
-#     border-radius: ${wlog.active_rad}px;
-#     margin : ${wlog.hvr}px 0px ${wlog.hvr}px 0px;
-# }
+  # button:hover#suspend {
+  #     border-radius: ${wlog.active_rad}px;
+  #     margin : ${wlog.hvr}px 0px ${wlog.hvr}px 0px;
+  # }
 
-# button:hover#suspend {
-#     border-radius: ${wlog.active_rad}px;
-#     margin : ${wlog.hvr}px 0px ${wlog.hvr}px 0px;
-# }
+  # button:hover#shutdown {
+  #     border-radius: ${wlog.active_rad}px;
+  #     margin : ${wlog.hvr}px 0px ${wlog.hvr}px 0px;
+  # }
 
-# button:hover#shutdown {
-#     border-radius: ${wlog.active_rad}px;
-#     margin : ${wlog.hvr}px 0px ${wlog.hvr}px 0px;
-# }
+  # button:hover#hibernate {
+  #     border-radius: ${wlog.active_rad}px;
+  #     margin : ${wlog.hvr}px 0px ${wlog.hvr}px 0px;
+  # }
 
-# button:hover#hibernate {
-#     border-radius: ${wlog.active_rad}px;
-#     margin : ${wlog.hvr}px 0px ${wlog.hvr}px 0px;
-# }
+  # button:hover#reboot {
+  #     border-radius: ${wlog.active_rad}px;
+  #     margin : ${wlog.hvr}px ${wlog.mgn}px ${wlog.hvr}px 0px;
+  # }
 
-# button:hover#reboot {
-#     border-radius: ${wlog.active_rad}px;
-#     margin : ${wlog.hvr}px ${wlog.mgn}px ${wlog.hvr}px 0px;
-# }
+  # #lock {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/lock.png"));
+  #       border-radius: ${wlog.button_rad}px 0px 0px ${wlog.button_rad}px;
+  #     margin : ${wlog.mgn}px 0px ${wlog.mgn}px ${wlog.mgn}px;
+  # }
 
+  # #logout {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/logout.png"));
+  #     border-radius: 0px 0px 0px 0px;
+  #     margin : ${wlog.mgn}px 0px ${wlog.mgn}px 0px;
+  # }
 
-# #lock {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/lock.png"));
-#       border-radius: ${wlog.button_rad}px 0px 0px ${wlog.button_rad}px;
-#     margin : ${wlog.mgn}px 0px ${wlog.mgn}px ${wlog.mgn}px;
-# }
+  # #suspend {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/suspend.png"));
+  #     border-radius: 0px 0px 0px 0px;
+  #     margin : ${wlog.mgn}px 0px ${wlog.mgn}px 0px;
+  # }
 
-# #logout {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/logout.png"));
-#     border-radius: 0px 0px 0px 0px;
-#     margin : ${wlog.mgn}px 0px ${wlog.mgn}px 0px;
-# }
+  # #shutdown {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/shutdown.png"));
+  #     border-radius: 0px 0px 0px 0px;
+  #     margin : ${wlog.mgn}px 0px ${wlog.mgn}px 0px;
 
-# #suspend {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/suspend.png"));
-#     border-radius: 0px 0px 0px 0px;
-#     margin : ${wlog.mgn}px 0px ${wlog.mgn}px 0px;
-# }
+  # }
 
-# #shutdown {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/shutdown.png"));
-#     border-radius: 0px 0px 0px 0px;
-#     margin : ${wlog.mgn}px 0px ${wlog.mgn}px 0px;
+  # #hibernate {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/hibernate.png"));
+  #     border-radius: 0px 0px 0px 0px;
+  #     margin : ${wlog.mgn}px 0px ${wlog.mgn}px 0px;
+  # }
 
-# }
+  # #reboot {
+  #     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/reboot.png"));
+  #     border-radius: 0px ${wlog.button_rad}px ${wlog.button_rad}px 0px;
+  #     margin : ${wlog.mgn}px ${wlog.mgn}px ${wlog.mgn}px 0px;
+  # }
+  # '';
 
-# #hibernate {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/hibernate.png"));
-#     border-radius: 0px 0px 0px 0px;
-#     margin : ${wlog.mgn}px 0px ${wlog.mgn}px 0px;
-# }
-
-# #reboot {
-#     background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/reboot.png"));
-#     border-radius: 0px ${wlog.button_rad}px ${wlog.button_rad}px 0px;
-#     margin : ${wlog.mgn}px ${wlog.mgn}px ${wlog.mgn}px 0px;
-# }
-# '';
-
-
-####__________________________________________________________#######
+  ####__________________________________________________________#######
 
   #Swayosd
   # Write the SwayOSD style configuration
@@ -3157,8 +3241,6 @@ button span {
   #     border-radius: 5px;
   #   }
   # '';
-
-  
 
   #Fastfetch
   programs.fastfetch = {
