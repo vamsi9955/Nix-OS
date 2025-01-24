@@ -13,11 +13,7 @@
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
      }; 
-   #Hyprland Plugins
-     hyprland-plugins = {
-    url = "github:hyprwm/hyprland-plugins";
-    inputs.hyprland.follows = "hyprland";
-  };
+   
      
    spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";

@@ -380,13 +380,17 @@ programs.steam = {
     #rofi-wayland
     #swww # wallpaper
     #dunst # notification daemon
-    #libnotify
-    #wl-clipboard
+    libnotify
+    wl-clipboard
     wlr-randr
     #wofi
+    pipewire
+    easyeffects # For advanced audio processing
     qt6.qtwayland
     macchanger #mac address changer
-    xdg-desktop-portal-hyprland  
+    xdg-desktop-portal-hyprland
+    hyprcursor
+    bibata-cursors  
     xdg-desktop-portal-gtk  # For Cinnamon
     sddm-astronaut
     ntfs3g
@@ -458,6 +462,8 @@ nix.gc = {
     # channel = "https://nixos.org/channels/nixos-unstable";
   };
 
+#SVG support for cursor
+services.xserver.gdk-pixbuf.modulePackages = [ pkgs.librsvg ];
 
 ##Some Scecurity Stuff #---------------------------
  # Some programs need SUID wrappers, can be configured further or are

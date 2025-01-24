@@ -76,6 +76,7 @@
 
                    echo "Detected wallpaper path: $WALLPAPER"
                    WALLPAPER="$(eval echo "$WALLPAPER")"
+
                     # Generate colors using pywal
                     wal -i "$WALLPAPER" --saturate 0.8
                     
@@ -99,6 +100,10 @@
                     wpg -s "$WALLPAPER"
 
         ## Reload Apps
+
+        #Hyprlock
+        "wallpaperHyprlock"
+        "song-script"
          
          #Waybar
           pid=$(ps -eaf | grep waybar | grep -v "grep waybar" | awk '{print $2}' | xargs)
@@ -117,14 +122,85 @@
           #${pkgs.swaynotificationcenter}/bin/swaync-client -rs
           swaync-client -rs
 
-          #nwg-dock
-          did=$(ps -eaf | grep nwg-dock-hyprland | grep -v "grep nwg-dock-hyprland" | awk '{print $2}' | xargs)
-           kill -9 $did
-           nwg-dock-hyprland &
+          # #nwg-dock
+          # did=$(ps -eaf | grep nwg-dock-hyprland | grep -v "grep nwg-dock-hyprland" | awk '{print $2}' | xargs)
+          #  kill -9 $did
+          #  nwg-dock-hyprland &
 
           #cava
           pkill -USR1 cava
 
+    '')
+
+
+(writeShellScriptBin "wallpaperHyprlock" ''
+  #!/bin/bash
+
+  # Define paths
+  WAYPAPER_CONFIG="$HOME/.config/waypaper/config.ini"
+  HYPRLOCK_PATH="$HOME/.config/hypr"
+  HYPRLOCK_WALLPAPER="$HYPRLOCK_PATH/hyprlock.png"
+
+  # Create hypr directory if it doesn't exist
+  mkdir -p "$HYPRLOCK_PATH"
+
+  # Check if ImageMagick is installed
+  if ! command -v convert >/dev/null 2>&1; then
+      echo "Error: ImageMagick is not installed. Please install it first."
+      exit 1
+  fi
+
+  # Get current wallpaper path from waypaper config.ini
+  if [ -f "$WAYPAPER_CONFIG" ]; then
+      # Get current wallpaper path from waypaper config
+      CURRENT_WALLPAPER="$(grep "^wallpaper" "$WAYPAPER_CONFIG" \
+          | cut -d '=' -f2- \
+          | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+
+      echo "Detected wallpaper path: $CURRENT_WALLPAPER"
+      CURRENT_WALLPAPER="$(eval echo "$CURRENT_WALLPAPER")"
+
+      # Check if we got a wallpaper path
+      if [ -n "$CURRENT_WALLPAPER" ] && [ -f "$CURRENT_WALLPAPER" ]; then
+          # Get file extension
+          FILE_EXT="''${CURRENT_WALLPAPER##*.}"
+          
+          if [ "''${FILE_EXT,,}" = "png" ]; then
+              # If it's already PNG, just copy
+              cp "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
+          else
+              # Convert to PNG using ImageMagick
+              convert "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
+          fi
+          
+          echo "Successfully copied/converted wallpaper to $HYPRLOCK_WALLPAPER"
+      else
+          echo "Error: Current wallpaper not found"
+          exit 1
+      fi
+  else
+      echo "Error: Waypaper config.ini not found"
+      exit 1
+  fi
+'')
+
+# Add wallpaper change script
+    (writeShellScriptBin "song-script" ''
+      #!/bin/bash
+
+# Create the required directory
+mkdir -p ~/.config/hypr/Scripts
+
+# Create and write content to the script file
+cat > ~/.config/hypr/Scripts/songdetail.sh << 'EOL'
+#!/bin/bash
+playerctl metadata --format '{{title}}      {{artist}}'
+EOL
+
+# Make the script executable
+chmod +x ~/.config/hypr/Scripts/songdetail.sh
+
+echo "Song detail script has been created and configured"
     '')
 
     # Add wallpaper change script

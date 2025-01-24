@@ -137,7 +137,6 @@ in
       eza
       fzf
       nix-output-monitor
-      wl-clipboard
       fish
       showmethekey
       nil # nix language server
@@ -156,6 +155,7 @@ in
       hyprpicker
       ninja
       imv
+      imagemagick #important using this for converting jpg to png for it display on hyprlock
       mpv
       obs-studio
       solaar
@@ -166,6 +166,12 @@ in
       # music
       #spotify
       spicetify-cli
+      lollypop
+      kdePackages.elisa
+      sayonara
+      amberol
+      deadbeef-with-plugins
+      mpd
 
       # Additional utilities
       brightnessctl
@@ -175,7 +181,14 @@ in
       qdirstat
       ncdu
       kdePackages.filelight
-      easyeffects
+      #easyeffects
+      #plugins for eassyeffects
+      zita-convolver
+      calf
+      zam-plugins
+      lsp-plugins
+      mda_lv2
+      
 
       #Productivity
       hugo
@@ -189,7 +202,7 @@ in
 
       #AI
       ollama
-      #ollama-cuda
+      #ollama-cuda #builds from source
 
       #User Apps
       celluloid
@@ -197,10 +210,8 @@ in
       vesktop # modded discord
       librewolf
       cool-retro-term
-      bibata-cursors
       vscode
       code-cursor
-      lollypop
       lutris
       #openrgb
       #betterdiscord-installer
@@ -1520,14 +1531,6 @@ in
       '';
     };
 
-    # waypaper = {
-    #     enable = true;
-    #     package = pkgs.waypaper;
-    #     settings = {
-    #       restore_last = true;
-    #       post_command = "theme-reload";
-    #     };
-    #   };
 
     # Git configuration
     git = {
@@ -1540,12 +1543,7 @@ in
       };
     };
 
-    # Shell configurations
-    #starship.enable = true;
-    # bash = {
-    #  enable = true;
-    #  enableCompletion = true;
-    # };
+
 
     # Terminal configuration
     alacritty = {
@@ -1936,46 +1934,619 @@ in
 
     };
 
-    #hyprlock
-    hyprlock = {
-      enable = true;
-      settings = {
-        general = {
-          disable_loading_bar = true;
-          grace = 0; # Disable unlocking on mouse movement
-          #grace = 10;
-          hide_cursor = true;
-          no_fade_in = false;
-        };
+  ############
+  ##hyprlock##
+  ############
 
-        background = [
-          {
-            path = "/etc/nixos/wallpaper.jpg";
-            blur_passes = 3;
-            blur_size = 8;
-            # monitor =
-            #path = $XDG_CONFIG_HOME/hypr/scripts/current_wal;   # only png supported for now
-            # color = $color0;
+##Version - 1 
+    # hyprlock = {
+    #   enable = true;
+    #   settings = {
+    #     general = {
+    #       disable_loading_bar = true;
+    #       grace = 0; # Disable unlocking on mouse movement
+    #       #grace = 10;
+    #       hide_cursor = true;
+    #       no_fade_in = false;
+    #     };
 
-          }
-        ];
+    #     background = [
+    #       {
+    #         path = "/etc/nixos/wallpaper.jpg";
+    #         blur_passes = 3;
+    #         blur_size = 8;
+    #         # monitor =
+    #         #path = $XDG_CONFIG_HOME/hypr/scripts/current_wal;   # only png supported for now
+    #         # color = $color0;
 
-        input-field = [
-          {
-            size = "200, 50";
-            position = "0, -80";
-            dots_center = true;
-            fade_on_empty = false;
-            font_color = "rgb(CFE6F4)";
-            inner_color = "rgb(657DC2)";
-            outer_color = "rgb(0D0E15)";
-            outline_thickness = 5;
-            placeholder_text = "Password...";
-            shadow_passes = 2;
-          }
-        ];
-      };
+    #       }
+    #     ];
+
+    #     input-field = [
+    #       {
+    #         size = "200, 50";
+    #         position = "0, -80";
+    #         dots_center = true;
+    #         fade_on_empty = false;
+    #         font_color = "rgb(CFE6F4)";
+    #         inner_color = "rgb(657DC2)";
+    #         outer_color = "rgb(0D0E15)";
+    #         outline_thickness = 5;
+    #         placeholder_text = "Password...";
+    #         shadow_passes = 2;
+    #       }
+    #     ];
+    #   };
+    # };
+
+
+##Version - 2  ##style - 3
+
+# hyprlock = {
+#   enable = true;
+#   settings = {
+#     background = [{
+#       monitor = "";
+#       path = "~/.config/hypr/hyprlock.png";
+#       blur_passes = 3;
+#       contrast = 0.8916;
+#       brightness = 0.8172;
+#       vibrancy = 0.1696;
+#       vibrancy_darkness = 0.0;
+#     }];
+
+#     general = {
+#       no_fade_in = false;
+#       grace = 0;
+#       disable_loading_bar = false;
+#     };
+
+#     image = [{
+#       monitor = "";
+#       path = "~/.config/hypr/vivek.png";
+#       border_size = 2;
+#       border_color = "rgba(255, 255, 255, 0)";
+#       size = 130;
+#       rounding = -1;
+#       rotate = 0;
+#       reload_time = -1;
+#       position = "0, 40";
+#       halign = "center";
+#       valign = "center";
+#     }];
+
+#     label = [
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo -e \"$(date +\"%A, %B %d\")\"";
+#         color = "rgba(216, 222, 233, 0.70)";
+#         font_size = 25;
+#         font_family = "SF Pro Display Bold";
+#         position = "0, 350";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo \"<span>$(date +\"%I:%M\")</span>\"";
+#         color = "rgba(216, 222, 233, 0.70)";
+#         font_size = 120;
+#         font_family = "SF Pro Display Bold";
+#         position = "0, 250";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "$USER";
+#         color = "rgba(216, 222, 233, 0.80)";
+#         outline_thickness = 2;
+#         dots_size = 0.2;
+#         dots_spacing = 0.2;
+#         dots_center = true;
+#         font_size = 18;
+#         font_family = "SF Pro Display Bold";
+#         position = "0, -130";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo \"$(~/.config/hypr/Scripts/songdetail.sh)\"";
+#         color = "rgba(255, 255, 255, 0.6)";
+#         font_size = 18;
+#         font_family = "JetBrains Mono Nerd, SF Pro Display Bold";
+#         position = "0, 50";
+#         halign = "center";
+#         valign = "bottom";
+#       }
+#     ];
+
+#     shape = [{
+#       monitor = "";
+#       size = "300, 60";
+#       color = "rgba(255, 255, 255, .1)";
+#       rounding = -1;
+#       border_size = 0;
+#       border_color = "rgba(253, 198, 135, 0)";
+#       rotate = 0;
+#       xray = false;
+#       position = "0, -130";
+#       halign = "center";
+#       valign = "center";
+#     }];
+
+#     input-field = [{
+#       monitor = "";
+#       size = "300, 60";
+#       outline_thickness = 2;
+#       dots_size = 0.2;
+#       dots_spacing = 0.2;
+#       dots_center = true;
+#       outer_color = "rgba(0, 0, 0, 0)";
+#       inner_color = "rgba(255, 255, 255, 0.1)";
+#       font_color = "rgb(200, 200, 200)";
+#       fade_on_empty = false;
+#       font_family = "SF Pro Display Bold";
+#       placeholder_text = "<i><span foreground=\"##ffffff99\">🔒 Enter Pass</span></i>";
+#       hide_input = false;
+#       position = "0, -210";
+#       halign = "center";
+#       valign = "center";
+#     }];
+#   };
+# };
+
+##Version - 3  ##Style-4
+
+# hyprlock = {
+#   enable = true;
+#   settings = {
+#     background = [{
+#       monitor = "";
+#       path = "~/.config/hypr/hyprlock.png";
+#       blur_passes = 0;
+#       contrast = 0.8916;
+#       brightness = 0.8916;
+#       vibrancy = 0.8916;
+#       vibrancy_darkness = 0.0;
+#     }];
+
+#     general = {
+#       no_fade_in = false;
+#       grace = 0;
+#       disable_loading_bar = false;
+#     };
+
+#     image = [{
+#       monitor = "";
+#       path = "~/.config/hypr/vivek.png";
+#       border_size = 2;
+#       border_color = "rgba(216, 222, 233, 0.80)";
+#       size = 100;
+#       rounding = -1;
+#       rotate = 0;
+#       reload_time = -1;
+#       position = "25, 200";
+#       halign = "center";
+#       valign = "center";
+#     }];
+
+#     label = [
+#       {
+#         monitor = "";
+#         text = "Vivek Rajan";
+#         color = "rgba(216, 222, 233, 0.80)";
+#         outline_thickness = 0;
+#         dots_size = 0.2;
+#         dots_spacing = 0.2;
+#         dots_center = true;
+#         font_size = 20;
+#         font_family = "SF Pro Display Bold";
+#         position = "25, 110";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo \"<span>$(date +\"%I:%M\")</span>\"";
+#         color = "rgba(216, 222, 233, 0.80)";
+#         font_size = 60;
+#         font_family = "SF Pro Display Bold";
+#         position = "30, -8";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo -e \"$(date +\"%A, %B %d\")\"";
+#         color = "rgba(216, 222, 233, .80)";
+#         font_size = 19;
+#         font_family = "SF Pro Display Bold";
+#         position = "35, -60";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "$USER";
+#         color = "rgba(216, 222, 233, 0.80)";
+#         outline_thickness = 0;
+#         dots_size = 0.2;
+#         dots_spacing = 0.2;
+#         dots_center = true;
+#         font_size = 16;
+#         font_family = "SF Pro Display Bold";
+#         position = "38, -190";
+#         halign = "center";
+#         valign = "center";
+#       }
+#     ];
+
+#     shape = [{
+#       monitor = "";
+#       size = "320, 55";
+#       color = "rgba(255, 255, 255, 0.1)";
+#       rounding = -1;
+#       border_size = 0;
+#       border_color = "rgba(255, 255, 255, 1)";
+#       rotate = 0;
+#       xray = false;
+#       position = "34, -190";
+#       halign = "center";
+#       valign = "center";
+#     }];
+
+#     input-field = [{
+#       monitor = "";
+#       size = "320, 55";
+#       outline_thickness = 0;
+#       dots_size = 0.2;
+#       dots_spacing = 0.2;
+#       dots_center = true;
+#       outer_color = "rgba(255, 255, 255, 0)";
+#       inner_color = "rgba(255, 255, 255, 0.1)";
+#       font_color = "rgb(200, 200, 200)";
+#       fade_on_empty = false;
+#       font_family = "SF Pro Display Bold";
+#       placeholder_text = "<i><span foreground=\"##ffffff99\">🔒  Enter Pass</span></i>";
+#       hide_input = false;
+#       position = "34, -268";
+#       halign = "center";
+#       valign = "center";
+#     }];
+#   };
+# };
+
+
+##Version - 4  #Style - 7
+
+# hyprlock = {
+#   enable = true;
+#   settings = {
+#     background = [{
+#       monitor = "";
+#       path = "~/.config/hypr/hyprlock.png";
+#       blur_passes = 0;
+#       contrast = 0.8916;
+#       brightness = 0.8172;
+#       vibrancy = 0.1696;
+#       vibrancy_darkness = 0.0;
+#     }];
+
+#     general = {
+#       no_fade_in = false;
+#       grace = 0;
+#       disable_loading_bar = false;
+#     };
+
+#     label = [
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo \"<span>$(date +\"%I\")</span>\"";
+#         color = "rgba(255, 255, 255, 1)";
+#         font_size = 125;
+#         font_family = "StretchPro";
+#         position = "-80, 190";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo \"<span>$(date +\"%M\")</span>\"";
+#         color = "rgba(147, 196, 255, 1)";
+#         font_size = 125;
+#         font_family = "StretchPro";
+#         position = "0, 70";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo -e \"$(date +\"%d %B, %a.\")\"";
+#         color = "rgba(255, 255, 255, 100)";
+#         font_size = 22;
+#         font_family = "Suisse Int'l Mono";
+#         position = "20, -8";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "$USER";
+#         color = "rgba(216, 222, 233, 0.80)";
+#         outline_thickness = 2;
+#         dots_size = 0.2;
+#         dots_spacing = 0.2;
+#         dots_center = true;
+#         font_size = 22;
+#         font_family = "SF Pro Display Bold";
+#         position = "0, -220";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo \"$(~/.config/hypr/Scripts/songdetail.sh)\"";
+#         color = "rgba(147, 196, 255, 1)";
+#         font_size = 18;
+#         font_family = "JetBrains Mono Nerd, SF Pro Display Bold";
+#         position = "0, 20";
+#         halign = "center";
+#         valign = "bottom";
+#       }
+#     ];
+
+#     input-field = [{
+#       monitor = "";
+#       size = "300, 60";
+#       outline_thickness = 2;
+#       dots_size = 0.2;
+#       dots_spacing = 0.2;
+#       dots_center = true;
+#       outer_color = "rgba(0, 0, 0, 0)";
+#       inner_color = "rgba(255, 255, 255, 0.1)";
+#       font_color = "rgb(200, 200, 200)";
+#       fade_on_empty = false;
+#       font_family = "SF Pro Display Bold";
+#       placeholder_text = "<i><span foreground=\"##ffffff99\">🔒 Enter Pass</span></i>";
+#       hide_input = false;
+#       position = "0, -290";
+#       halign = "center";
+#       valign = "center";
+#     }];
+#   };
+# };
+
+
+##Version - 5  #Style - 9
+
+hyprlock = {
+  enable = true;
+  settings = {
+    background = [{
+      monitor = "";
+      path = "~/.config/hypr/hyprlock.png";
+      blur_passes = 2;
+      contrast = 0.8916;
+      brightness = 0.8172;
+      vibrancy = 0.1696;
+      vibrancy_darkness = 0.0;
+    }];
+
+    general = {
+      no_fade_in = false;
+      grace = 0;
+      disable_loading_bar = false;
     };
+
+    input-field = [{
+      monitor = "";
+      size = "250, 60";
+      outline_thickness = 2;
+      dots_size = 0.2;
+      dots_spacing = 0.2;
+      dots_center = true;
+      outer_color = "rgba(0, 0, 0, 0)";
+      inner_color = "rgba(100, 114, 125, 0.4)";
+      font_color = "rgb(200, 200, 200)";
+      fade_on_empty = false;
+      font_family = "SF Pro Display Bold";
+      placeholder_text = "<i><span foreground=\"##ffffff99\">Enter Pass</span></i>";
+      hide_input = false;
+      position = "0, -225";
+      halign = "center";
+      valign = "center";
+    }];
+
+    label = [
+      {
+        monitor = "";
+        text = "cmd[update:1000] echo \"<span>$(date +\"%H:%M\")</span>\"";
+        color = "rgba(216, 222, 233, 0.70)";
+        font_size = 130;
+        font_family = "SF Pro Display Bold";
+        position = "0, 240";
+        halign = "center";
+        valign = "center";
+      }
+      {
+        monitor = "";
+        text = "cmd[update:1000] echo -e \"$(date +\"%A, %d %B\")\"";
+        color = "rgba(216, 222, 233, 0.70)";
+        font_size = 30;
+        font_family = "SF Pro Display Bold";
+        position = "0, 105";
+        halign = "center";
+        valign = "center";
+      }
+      {
+        monitor = "";
+        text = "Hi, $USER";
+        color = "rgba(216, 222, 233, 0.70)";
+        font_size = 25;
+        font_family = "SF Pro Display Bold";
+        position = "0, -130";
+        halign = "center";
+        valign = "center";
+      }
+      {
+        monitor = "";
+        # text = "cmd[update:1000] echo "$(~/.config/hypr/Scripts/songdetail.sh)"";
+        text = ''cmd[update:1000] echo "$(~/.config/hypr/Scripts/songdetail.sh)"'';
+        color = "rgba(255, 255, 255, 0.7)";
+        font_size = 18;
+        font_family = "JetBrains Mono Nerd, SF Pro Display Bold";
+        position = "0, 60";
+        halign = "center";
+        valign = "bottom";
+      }
+    ];
+
+    image = [{
+      monitor = "";
+      path = "~/.config/hypr/vivek.png";
+      border_color = "0xffdddddd";
+      border_size = 0;
+      size = 120;
+      rounding = -1;
+      rotate = 0;
+      reload_time = -1;
+      position = "0, -20";
+      halign = "center";
+      valign = "center";
+    }];
+  };
+};
+
+##Version - 6 #Style - 10
+
+# hyprlock = {
+#   enable = true;
+#   settings = {
+#     background = [{
+#       monitor = "";
+#       path = "~/.config/hypr/hyprlock.png";
+#       blur_passes = 2;
+#       contrast = 0.8916;
+#       brightness = 0.8172;
+#       vibrancy = 0.1696;
+#       vibrancy_darkness = 0.0;
+#     }];
+
+#     general = {
+#       no_fade_in = false;
+#       grace = 0;
+#       disable_loading_bar = false;
+#     };
+
+#     label = [
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo -e \"$(date +\"%A\")\"";
+#         color = "rgba(216, 222, 233, 0.70)";
+#         font_size = 90;
+#         font_family = "SF Pro Display Bold";
+#         position = "0, 350";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo -e \"$(date +\"%d %B\")\"";
+#         color = "rgba(216, 222, 233, 0.70)";
+#         font_size = 40;
+#         font_family = "SF Pro Display Bold";
+#         position = "0, 250";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "cmd[update:1000] echo \"<span>$(date +\"- %I:%M -\")</span>\"";
+#         color = "rgba(216, 222, 233, 0.70)";
+#         font_size = 20;
+#         font_family = "SF Pro Display Bold";
+#         position = "0, 190";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "$USER";
+#         color = "rgba(216, 222, 233, 0.80)";
+#         outline_thickness = 2;
+#         dots_size = 0.2;
+#         dots_spacing = 0.2;
+#         dots_center = true;
+#         font_size = 18;
+#         font_family = "SF Pro Display Bold";
+#         position = "0, -130";
+#         halign = "center";
+#         valign = "center";
+#       }
+#       {
+#         monitor = "";
+#         text = "󰐥  󰜉  󰤄";
+#         color = "rgba(255, 255, 255, 0.6)";
+#         font_size = 50;
+#         position = "0, 100";
+#         halign = "center";
+#         valign = "bottom";
+#       }
+#     ];
+
+#     image = [{
+#       monitor = "";
+#       path = "~/.config/hypr/vivek.png";
+#       border_size = 2;
+#       border_color = "rgba(255, 255, 255, .65)";
+#       size = 130;
+#       rounding = -1;
+#       rotate = 0;
+#       reload_time = -1;
+#       position = "0, 40";
+#       halign = "center";
+#       valign = "center";
+#     }];
+
+#     shape = [{
+#       monitor = "";
+#       size = "300, 60";
+#       color = "rgba(255, 255, 255, .1)";
+#       rounding = -1;
+#       border_size = 0;
+#       border_color = "rgba(255, 255, 255, 0)";
+#       rotate = 0;
+#       xray = false;
+#       position = "0, -130";
+#       halign = "center";
+#       valign = "center";
+#     }];
+
+#     input-field = [{
+#       monitor = "";
+#       size = "300, 60";
+#       outline_thickness = 2;
+#       dots_size = 0.2;
+#       dots_spacing = 0.2;
+#       dots_center = true;
+#       outer_color = "rgba(255, 255, 255, 0)";
+#       inner_color = "rgba(255, 255, 255, 0.1)";
+#       font_color = "rgb(200, 200, 200)";
+#       fade_on_empty = false;
+#       font_family = "SF Pro Display Bold";
+#       placeholder_text = "<i><span foreground=\"##ffffff99\">🔒 Enter Pass</span></i>";
+#       hide_input = false;
+#       position = "0, -210";
+#       halign = "center";
+#       valign = "center";
+#     }];
+#   };
+# };
+
+#########################################
+
 
     #Fish
     fish = {
@@ -2057,7 +2628,7 @@ in
       };
     };
 
-    # # Rofi configuration
+    # # Rofi configuration - 1
     # rofi = {
     #   enable = true;
     #   package = pkgs.rofi-wayland;
@@ -2191,7 +2762,7 @@ in
 
   };
 
-  # Rofi configuration
+  # Rofi configuration - 2
   xdg.configFile."rofi/config.rasi".text = ''
               @import "~/.config/rofi/pywal.rasi"
 
@@ -2265,24 +2836,83 @@ in
   wayland.windowManager.hyprland = {
     enable = true;
 
-    #  plugins = [
-    # Format these which are build from source
-    # inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
+     plugins = [
 
-    #To import prebuilt plugins
-    #pkgs.hyprlandPlugins.<plugin name>
-    #  pkgs.hyprlandPlugins.hyprtrails
-    #  pkgs.hyprlandPlugins.hyprbars
+  ##Recomended
+    #To import prebuilt plugins 
+    #The format is : pkgs.hyprlandPlugins.<plugin name>
+     pkgs.hyprlandPlugins.hyprtrails
+     pkgs.hyprlandPlugins.hyprexpo
+     #pkgs.hyprlandPlugins.hypr-dynamic-cursors #pixelated icon when magnified Hyprcursor is not working
+     #pkgs.hyprlandPlugins.hyprbars
 
-    #  ];
+
+  ##Not recomended
+    #Format these which are build from source you also need flake for this
+    #inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
+
+
+
+     ];
 
     settings = {
 
-      #      plugin = {
-      #               hyprtrails = {
-      #                       color = "rgba(ffaa00ff)";
-      #                            };
-      #                };
+           plugin = {
+                    hyprtrails = {
+                      color = "rgba(140, 0, 255, 0.77)";
+                      #color = "${custom.primary_background_rgba}";
+                     };
+
+                    hyprexpo = {
+                        columns = 3; # Number of columns in the overview
+                        gap_size = 5; # Gap size between windows
+                        bg_col = "rgb(111111)"; # Background color of the overview
+                        enable_gesture = true; # Enable touchpad gesture for toggling overview
+                        gesture_distance = 300; # Distance required for gesture activation
+                      };
+
+                    # hypr-dynamic-cursors = {
+                    #   enabled = true;
+
+                    #   # Disable all cursor behavior modes globally
+                    #   mode = "none";
+                      
+                    #   shaperule = [
+                    #     "clientside, none"
+                    #     "left_ptr, none"
+                    #     "default, none"
+                    #     "text, none"
+                    #     "crosshair, none"
+                    #   ];
+
+                    #   # High-resolution cursor support
+                    #   hyprcursor = {
+                    #     enabled = true;        # Enable high-resolution cursor support
+                    #     nearest = 0;       # 0 / false - never use pixelated scaling, 1 / true  - use pixelated when no highres image, 2 - always use pixleated scaling
+                    #     resolution = -1;       # Automatically adjust resolution based on magnification
+                    #     fallback = "clientside"; # Fallback shape for client-side cursors
+                    #   };
+
+                    #   # Shake to Find behavior
+                    #   shake = {
+                    #     enabled = true;
+                    #     nearest = false;        # Use bilinear scaling for smoother results
+                    #     threshold = 0.01;       # Sensitivity for detecting shake (lower is more sensitive)
+                    #     base = 4.0;            # Initial magnification level
+                    #     speed = 0.0;           # Magnification increase per second during shaking
+                    #     influence = 0.0;       # Influence of shake intensity on magnification speed
+                    #     limit = 0.0;           # 0.0-No limit on magnification
+                    #     timeout = 2000;        # Time (ms) cursor stays magnified after shaking stops
+                    #     effects = false;       # Disable additional effects like tilt/rotate during shaking
+                    #     ipc = false;           # Disable IPC events for shake (optional)
+                    #   };
+
+                    # };
+
+
+                  };
+
+
       "$mainMod" = "SUPER";
       # "$terminal" = "alacritty";
       "$terminal" = "kitty";
@@ -2337,7 +2967,7 @@ in
       gestures = {
         workspace_swipe = true;
         workspace_swipe_fingers = 3;
-        workspace_swipe_distance = 500;
+        workspace_swipe_distance = 300;
         workspace_swipe_invert = true;
         workspace_swipe_min_speed_to_force = 30;
         workspace_swipe_cancel_ratio = 0.5;
@@ -2357,25 +2987,43 @@ in
       #   explicit_sync_kms = 2
       #   direct_scanout = false
       # }
-      # cursor {
-      #   sync_gsettings_theme = true
-      #   no_hardware_cursors = 2
-      #   enable_hyprcursor = true
-      #   warp_on_change_workspace = 2
-      #   no_warps = true
-      # }
+      # cursor = {
+      #   sync_gsettings_theme = true;
+      #   no_hardware_cursors = 2;
+      #   enable_hyprcursor = true;
+      #   warp_on_change_workspace = 2;
+      #   no_warps = true;
+      # };
+      cursor = {
+        sync_gsettings_theme = true;
+        no_hardware_cursors = 2; # Ensures software cursors are used for better scaling
+        enable_hyprcursor = true; # Enables Hyprcursor support
+        warp_on_change_workspace = 2;
+        no_warps = true;
+      };
+
+    #Environment variables
+      env = [
+    "HYPRCURSOR_THEME, Bibata-Modern-Classic"
+    "HYPRCURSOR_SIZE, 32"
+      ];
 
       exec-once = [
         "waybar"
         "waypaper --restore"
         "wal -R" # Restore previous wallpaper and colorscheme
-        # "hyprctl plugin load ${pkgs.hyprland-plugins.hyprtrails}"
         "swaync"
         "nm-applet --indicator &"
         #bluetooth
         "blueman-applet &"
         #"overskride"
         "swayosd-server &"
+        "hyprctl setcursor Bibata-Modern-Classic 32"
+
+        ##plugins
+        "hyprctl plugin load ${pkgs.hyprlandPlugins.hyprtrails}"
+        "hyprctl plugin load ${pkgs.hyprlandPlugins.hyprexpo}"
+        "hyprctl plugin load ${pkgs.hyprlandPlugins.hypr-dynamic-cursors}"
 
         "swww init"
         "flameshot"
@@ -2419,6 +3067,9 @@ in
         ", Print, exec, grimblast --notify --freeze copysave area"
         "$mainMod CTRL,  Q, exec, wlogout -p layer-shell"
         
+        
+        "$mainMod,grave, hyprexpo:expo, toggle" #grave is the key "~" which is above tab
+        
 
       # Region screenshot with Swappy
       "$mainMod, S, exec, grim -g \"$(slurp)\" - | swappy -f -"
@@ -2459,17 +3110,6 @@ in
         "$mainMod, 9, workspace, 9"
         "$mainMod, 0, workspace, 10"
 
-        # # Moving windows to workspaces
-        # "$mainMod SHIFT, 1, movetoworkspacesilent, 1"
-        # "$mainMod SHIFT, 2, movetoworkspacesilent, 2"
-        # "$mainMod SHIFT, 3, movetoworkspacesilent, 3"
-        # "$mainMod SHIFT, 4, movetoworkspacesilent, 4"
-        # "$mainMod SHIFT, 5, movetoworkspacesilent, 5"
-        # "$mainMod SHIFT, 6, movetoworkspacesilent, 6"
-        # "$mainMod SHIFT, 7, movetoworkspacesilent, 7"
-        # "$mainMod SHIFT, 8, movetoworkspacesilent, 8"
-        # "$mainMod SHIFT, 9, movetoworkspacesilent, 9"
-        # "$mainMod SHIFT, 0, movetoworkspacesilent, 10"
 
         # Moving windows to workspaces
         "$mainMod SHIFT, 1, movetoworkspace, 1" # Move active window to workspace 1
@@ -2744,7 +3384,8 @@ in
     };
   };
 
-  # #nwg-dock configuration
+      ######################
+  ### nwg-dock configuration ###
   xdg.configFile."nwg-dock-hyprland/style.css".text = ''
        /* importing waybar colors as i am using same colours here */
        @import url("../../.cache/wal/colors-waybar.css");
@@ -3269,7 +3910,7 @@ in
         "break"
         {
           type = "custom";
-          format = "┌──────────────────────Hardware──────────────────────┐";
+          format = "┌──────────────────────Hardware────────────────────────┐";
         }
         {
           type = "cpu";
@@ -3285,12 +3926,12 @@ in
         }
         {
           type = "custom";
-          format = "└────────────────────────────────────────────────────┘";
+          format = "└──────────────────────────────────────────────────────┘";
         }
         "break"
         {
           type = "custom";
-          format = "┌──────────────────────Software──────────────────────┐";
+          format = "┌──────────────────────Software────────────────────────┐";
         }
         {
           type = "custom";
@@ -3323,7 +3964,7 @@ in
         }
         {
           type = "custom";
-          format = "└────────────────────────────────────────────────────┘";
+          format = "└──────────────────────────────────────────────────────┘";
         }
         "break"
         {
@@ -3360,7 +4001,7 @@ in
     gtk.enable = true;
     package = pkgs.bibata-cursors;
     name = "Bibata-Modern-Classic";
-    size = 24;
+    size = 32;
   };
 
   # GTK configuration

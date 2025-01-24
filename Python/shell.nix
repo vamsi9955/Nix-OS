@@ -22,7 +22,7 @@ pkgs.mkShell {
       echo "Installing latest NumPy and PyTorch via pip..."
       
       pip install --upgrade pip
-      pip install  numpy torch torchvision torchaudio stable-baselines3 tensorboard pandas jupyter notebook platformdirs ipykernel matplotlib gym scikit-learn ray[rllib] wandb
+      pip install  numpy torch torchvision torchaudio stable-baselines3 tensorboard pandas jupyter notebook platformdirs ipykernel matplotlib gym scikit-learn ray[rllib] wandb mujoco
 
     else
       echo "Activating existing virtual environment..."
