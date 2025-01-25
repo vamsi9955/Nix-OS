@@ -39,27 +39,43 @@
     (writeShellScriptBin "theme-reload" ''
                     #!/usr/bin/env bash
 
-                    # Copy pywal colors to waybar
-                    cp ~/.cache/wal/colors-waybar.css ~/.config/waybar/colors.css
+
+            #Issue with waypaper at first Nix-Os rebuild is fixed below 
+                      CONFIG="$HOME/.config/waypaper/config.ini"
+
+                      # Ensure config.ini exists and has a wallpaper line
+                      if [ ! -f "$CONFIG" ] || ! grep -q '^wallpaper' "$CONFIG"; then
+                        mkdir -p "$(dirname "$CONFIG")"
+                        waypaper --backend swww --wallpaper /etc/nixos/wallpaper.jpg
+                      fi
 
 
-                    # Copy colors to config locations
 
-                    cp ~/.cache/wal/colors-alacritty.toml ~/.config/alacritty/colors.toml
-                    cp ~/.cache/wal/colors-kitty.conf ~/.config/kitty/colors.conf
-                    cp ~/.cache/wal/colors-gtk3.css ~/.config/gtk-3.0/colors.css
+
+    ## Copy pywal colors to waybar
+      cp ~/.cache/wal/colors-waybar.css ~/.config/waybar/colors.css
+
+
+      # Copy colors to config locations
+
+      cp ~/.cache/wal/colors-alacritty.toml ~/.config/alacritty/colors.toml
+      cp ~/.cache/wal/colors-kitty.conf ~/.config/kitty/colors.conf
+      cp ~/.cache/wal/colors-gtk3.css ~/.config/gtk-3.0/colors.css
                     
-                    if [ -f ~/.cache/wal/colors-cava.conf ]; then
-                    cp ~/.cache/wal/colors-cava.conf ~/.config/cava/config
-                    fi
+      if [ -f ~/.cache/wal/colors-cava.conf ]; then
+      cp ~/.cache/wal/colors-cava.conf ~/.config/cava/config
+      fi
 
-                    cp ~/.cache/wal/colors-swaync.css ~/.config/swaync/style.css
+      cp ~/.cache/wal/colors-swaync.css ~/.config/swaync/style.css
 
-                    cp ~/.cache/wal/btop-colors.theme ~/.config/btop/themes/pywal.theme
+        p ~/.cache/wal/btop-colors.theme ~/.config/btop/themes/pywal.theme
 
 
-                    cp ~/.cache/wal/colors-wlogout.css ~/.config/wlogout/colors.css
+      cp ~/.cache/wal/colors-wlogout.css ~/.config/wlogout/colors.css
 
+
+
+                        
 
 
 
@@ -123,9 +139,9 @@
           swaync-client -rs
 
           # #nwg-dock
-          # did=$(ps -eaf | grep nwg-dock-hyprland | grep -v "grep nwg-dock-hyprland" | awk '{print $2}' | xargs)
-          #  kill -9 $did
-          #  nwg-dock-hyprland &
+          did=$(ps -eaf | grep nwg-dock-hyprland | grep -v "grep nwg-dock-hyprland" | awk '{print $2}' | xargs)
+           kill -9 $did
+           nwg-dock-hyprland &
 
           #cava
           pkill -USR1 cava
@@ -253,6 +269,13 @@ echo "Song detail script has been created and configured"
         $color15 = rgb({color15.strip})
       '';
     };
+
+
+
+ 
+
+
+
 
     # ".config/wal/templates/colors-waybar.css" = {
     #   text = ''
@@ -586,6 +609,8 @@ echo "Song detail script has been created and configured"
       '';
     };
 
+
+
 #Btop
 ".config/wal/templates/btop-colors.theme" = {
   text = ''
@@ -669,6 +694,10 @@ echo "Song detail script has been created and configured"
   home.activation.createPywalCache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     $DRY_RUN_CMD mkdir -p $HOME/.cache/wal
   '';
+
+
+
+
 
   home.activation.installPywalfox = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.pywalfox-native}/bin/pywalfox install

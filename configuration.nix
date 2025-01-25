@@ -27,6 +27,7 @@ boot.loader.grub.theme = pkgs.stdenv.mkDerivation {
     installPhase = "cp -r customize/nixos $out";
   };
 
+
 ########
 ##Ntfs##
 ########
@@ -247,22 +248,6 @@ services.xserver.videoDrivers = ["nvidia"];
  #  };
  # };
 ###########------------------#############
-  
-  
-   
- 
-#A trick for pywal walpaper for rebuidd switch but dosent seem to work
-# system.activationScripts.waypaperConfig = ''
-#   if [ -f ~/.config/waypaper/config.ini ]; then
-#     sed -i '/^post_command/d' ~/.config/waypaper/config.ini
-#     echo 'post_command = "theme-reload"' >> ~/.config/waypaper/config.ini
-#   else
-#     mkdir -p ~/.config/waypaper
-#     echo '[Settings]' > ~/.config/waypaper/config.ini
-#     echo 'post_command = "theme-reload"' >> ~/.config/waypaper/config.ini
-#   fi
-# '';
-
 
  
  
@@ -378,12 +363,14 @@ programs.steam = {
     overskride #bluetooth client
     #waybar
     #rofi-wayland
-    #swww # wallpaper
+    swww # wallpaper
     #dunst # notification daemon
     libnotify
     wl-clipboard
     wlr-randr
     #wofi
+    waypaper
+    hyprpaper
     pipewire
     easyeffects # For advanced audio processing
     qt6.qtwayland

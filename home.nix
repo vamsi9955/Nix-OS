@@ -127,9 +127,9 @@ in
       swappy
       jq
       wl-clipboard
-      swww # Wallpaper setter
+      #swww # in configuration.nix
       wlogout
-      waypaper
+      #waypaper
       # theme other apps
       nwg-look
       # volume, brightness modifier / display
@@ -175,7 +175,7 @@ in
       kdePackages.elisa
       sayonara #launch time very slow
       amberol
-      deadbeef-with-plugins
+     ##deadbeef-with-plugins #not worth it
       #mpd
 
       # Additional utilities
@@ -218,6 +218,8 @@ in
       vscode
       code-cursor
       lutris
+      #mullvad-vpn
+      protonvpn-gui
       #openrgb
       #betterdiscord-installer
 
@@ -285,6 +287,20 @@ in
       ))
 
       ##Scripts##
+
+      #Dock Toggle
+      (pkgs.writeShellScriptBin "toggle-dock" ''
+        #!/usr/bin/env bash
+
+        # If any nwg-dock-hyprland process is running, kill it; otherwise, start one with arguments.
+        if pgrep -f "nwg-dock-hyprland" >/dev/null; then
+            pkill -f "nwg-dock-hyprland"
+        else
+            nwg-dock-hyprland -i 32 -w 5 -mb 10 -ml 10 -mr 10 -x -c "rofi -show drun" &
+        fi
+
+
+      '')
 
       #Keybinds Hint
       (pkgs.writeShellScriptBin "keybindings-hint" ''
@@ -369,10 +385,13 @@ in
     ];
   };
 
+
+
+
   home.file = {
 
     ##############
-    ##Key Binds###
+    ##Key Binds Hint###
     ##############
     # Ensure the custom Rofi config is placed in the expected directory
     ".config/rofi/config-keybinds.rasi" = {
@@ -382,7 +401,7 @@ in
            /* ---- Entry ---- */
            entry {
              width: 85%;
-             placeholder: ' 🧮 Search Keybinds NOTE "ESC will close this app  " "=" "SUPER KEY is (Windows Key)" ';
+             placeholder: '  Search Keybinds NOTE "ESC will close this app  " "=" "SUPER KEY is (Windows Key)" ';
              
            }
 
@@ -400,15 +419,15 @@ in
   };
 
 
+  
+
+
   #For Flameshot
   home.sessionVariables = {
     XDG_CURRENT_DESKTOP = "Hyprland";
     WAYLAND_DISPLAY = "wayland-0";
   };
 
-  # Enable Mullvad VPN
-  # services.mullvad-vpn.enable = true;
-  # services.mullvad-vpn.package = pkgs.mullvad-vpn; # `pkgs.mullvad` only provides the CLI tool, use `pkgs.mullvad-vpn` instead if you want to use the CLI and the GUI.
 
   ##Yubi key
   #services.udev.packages = [ pkgs.yubikey-personalization ];
@@ -428,39 +447,40 @@ in
   #    hyprlock.u2fAuth = true;
   #  };
 
-  #Hypridle config
-  #  services.hypridle = {
-  #    enable = true;
-  #    settings = {
-  #      general = {
-  #        before_sleep_cmd = "loginctl lock-session";
-  #        after_sleep_cmd = "hyprctl dispatch dpms on";
-  #        ignore_dbus_inhibit = false;
-  #        lock_cmd = "pidof hyprlock || hyprlock";
-  #      };
+  ##Hypridle config
+   
+   services.hypridle = {
+     enable = true;
+     settings = {
+       general = {
+         before_sleep_cmd = "loginctl lock-session";
+         after_sleep_cmd = "hyprctl dispatch dpms on";
+         ignore_dbus_inhibit = false;
+         lock_cmd = "pidof hyprlock || hyprlock";
+       };
 
-  #      listener = [
-  #        {
-  #          timeout = 180;
-  #          on-timeout = "brightnessctl -s set 30";
-  #          on-resume = "brightnessctl -r";
-  #        }
-  #        {
-  #          timeout = 300;
-  #          on-timeout = "loginctl lock-session";
-  #        }
-  #        {
-  #          timeout = 600;
-  #          on-timeout = "hyprctl dispatch dpms off";
-  #          on-resume = "hyprctl dispatch dpms on";
-  #        }
-  #        {
-  #          timeout = 1200;
-  #          on-timeout = "sysemctl suspend";
-  #        }
-  #      ];
-  #    };
-  #  };
+       listener = [
+         {
+           timeout = 180;
+           on-timeout = "brightnessctl -s set 30";
+           on-resume = "brightnessctl -r";
+         }
+         {
+           timeout = 300;
+           on-timeout = "loginctl lock-session";
+         }
+         {
+           timeout = 600;
+           on-timeout = "hyprctl dispatch dpms off";
+           on-resume = "hyprctl dispatch dpms on";
+         }
+         {
+           timeout = 1200;
+           on-timeout = "sysemctl suspend";
+         }
+       ];
+     };
+   };
 
   #Ollama not required for ollama.cuda pacakge
   #  services.ollama = {
@@ -1725,7 +1745,8 @@ in
     btop = {
       enable = true;
       settings = {
-        color_theme = "pywal";
+        #color_theme = "pywal";  #default one is better
+        color_theme = "";
         theme_background = false;
         vim_keys = true;
         rounded_corners = true;
@@ -2856,6 +2877,152 @@ hyprlock = {
     }
   '';
 
+##Vesktop
+
+  xdg.configFile."vesktop/themes/theme.css".text = ''
+    
+      /**
+       * @name midnight-pywal
+       * @description A dark, rounded discord theme with pywal colors.
+       * @version 1.0.0
+      */
+
+      @import url('https://refact0r.github.io/midnight-discord/midnight.css');
+      
+      @import "~/.cache/wal/colors-vesktop.css"
+
+      :root {
+        --font: 'JetBrainsMono Nerd Font';
+        --corner-text: 'Midnight';
+
+        --online-indicator: var(--accent-2);
+        --dnd-indicator: var(--accent-3);
+        --idle-indicator: var(--accent-4);
+        --streaming-indicator: var(--accent-5);
+
+        --spacing: 12px;
+        --list-item-transition: 0.2s ease;
+        --unread-bar-transition: 0.2s ease;
+        --moon-spin-transition: 0.4s ease;
+        --icon-spin-transition: 1s ease;
+
+        --roundness-xl: 22px;
+        --roundness-l: 20px;
+        --roundness-m: 16px;
+        --roundness-s: 12px;
+        --roundness-xs: 10px;
+        --roundness-xxs: 8px;
+
+        --discord-icon: none;
+        --moon-icon: block;
+        --moon-icon-url: url('https://upload.wikimedia.org/wikipedia/commons/c/c4/Font_Awesome_5_solid_moon.svg');
+        --moon-icon-size: auto;
+      }
+    '';
+xdg.configFile."vesktop/themes/Material-theme.css".text = ''
+    /**
+ * @name Material Discord
+ * @version 3.0.5
+ * @description A theme based on Google's Material Design
+ * @author CapnKitten
+ *
+ * @website http://github.com/CapnKitten
+ * @source https://github.com/CapnKitten/BetterDiscord/blob/master/Themes/Material-Discord/css/source.css
+ * @donate https://paypal.me/capnkitten
+ * @invite jzJkA6Z
+ */
+
+@import url(https://capnkitten.github.io/BetterDiscord/Themes/Material-Discord/css/source.css);
+
+/* Material You addon */
+@import url(https://capnkitten.github.io/BetterDiscord/Themes/Material-Discord/css/addons/material-you/source.css);
+
+/* MATERIAL YOU DARK THEME SETTINGS */
+.theme-dark {
+	--saturation-modifier: 0.31;
+	--lightness-modifier: 0.225;
+	--text-lightness-modifier: 1.0;
+	--ui-darkness-modifier: 1.0;
+}
+
+/* MATERIAL YOU LIGHT THEME SETTINGS */
+.theme-light {
+	--saturation-modifier: 0.74;
+	--lightness-modifier: 2.125;
+	--text-lightness-modifier: 1.0;
+}
+
+:root {
+	/* ACCENT HSL AND TEXT COLOR SETTINGS */
+	--accent-hue: 227;
+	--accent-saturation: 71%;
+	--accent-lightness: 61%;
+	--accent-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
+	--accent-button-action: hsl(0,0%,100%);
+
+	/* ALERT HSL AND TEXT COLOR SETTINGS */
+	--alert-hue: 0;
+	--alert-saturation: 85%;
+	--alert-lightness: 61%;
+	--alert-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
+
+	/* WARNING HSL AND TEXT COLOR SETTINGS*/
+	--warning-hue: 40;
+	--warning-saturation: 86.4%;
+	--warning-lightness: 56.9%;
+	--warning-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
+
+	/* MESSAGE SETTINGS */
+	--message-radius: 18px;
+	--message-padding-top: 8px;
+	--message-padding-side: 12px;
+
+	/* MESSAGE MEDIA SETTINGS */
+	--media-radius: 10px;
+
+	/* CARD SETTINGS */
+	--card-radius: 8px;
+	--card-radius-big: 18px;
+
+	/* BUTTON SETTINGS */
+	--button-height: 36px;
+	--button-padding: 0 24px;
+	--button-action-color: hsl(0,0%,100%);
+
+	/* INPUT SETTINGS */
+	--input-height: 36px;
+	--input-padding: 0 12px;
+
+	/* POPOUT AND MODAL SETTINGS */
+	--popout-radius: 8px;
+	--popout-radius-big: 18px;
+
+	/* TOOLTIP SETTINGS */
+	--tooltip-color: hsl(0,0%,38%,0.9);
+	--tooltip-text-color: hsl(0,0%,87%);
+	--tooltip-font-size: 12px;
+	--tooltip-padding: 8px;
+	--tooltip-radius: 8px;
+
+	/* SCROLLBAR SETTINGS */
+	--scrollbar-width: 10px;
+	--scrollbar-thin-width: 6px;
+}
+
+     
+    '';
+
+
+
+
+#  _   _                  _                 _  
+# | | | |_   _ _ __  _ __| | __ _ _ __   __| | 
+# | |_| | | | | '_ \| '__| |/ _` | '_ \ / _` | 
+# |  _  | |_| | |_) | |  | | (_| | | | | (_| | 
+# |_| |_|\__, | .__/|_|  |_|\__,_|_| |_|\__,_| 
+#        |___/|_|                              
+#  
+# ----------------------------------------------------- 
   # Hyprland configuration
   wayland.windowManager.hyprland = {
     enable = true;
@@ -3077,7 +3244,7 @@ hyprlock = {
         "$mainMod,       W, exec, waypaper " # Open wallpaper selector
         "$mainMod SHIFT, W, exec,waypaper --random "
         "$mainMod SHIFT, B, exec,pkill waybar || waybar" # Waybar toggle
-        "$mainMod,       D, exec, bash -c 'pkill -f nwg-dock-hyprland || nwg-dock-hyprland'" # Dock Toggle
+        "$mainMod,       D, exec, 'toggle-dock' " # Dock Toggle
         "$mainMod,       J, togglesplit,"
         "$mainMod,       R, exec, bemoji -cn"
         "$mainMod,       C, exec, code"
@@ -3422,92 +3589,91 @@ hyprlock = {
     };
   };
 
-      ######################
-  ### nwg-dock configuration ###
+   ##############################
+   ### nwg-dock configuration ###
+   ##############################
+
+
   xdg.configFile."nwg-dock-hyprland/style.css".text = ''
-       /* importing waybar colors as i am using same colours here */
-       @import url("../../.cache/wal/colors-waybar.css");
-       window {
-    	/*  background: rgba(99, 100, 127, 0.9);*/
-    	background: rgba(54, 48, 70, 0.8);
-    	border-radius: 30px;
-    	border-style: solid;
-    	border-width: 6px;
-    	/*	border-width:0px; */
-    	border-color: ${custom.primary_accent};
-    }
-
-    #box {
-    /* Define attributes of the box surrounding icons here */
-    /*    background : rgba(33, 26, 38, 0.2); */
-    	padding: 8px;
-    	margin-left: 20px;
-    	margin-right: 20px;
-    	margin-bottom: 2px;
-    	margin-top: 3.5px;
-    	border-radius: 70px;
-    	border-bottom-right-radius: 0px;
-    	border-bottom-left-radius: 0px;
-      animation: gradient_f 20s ease-in infinite;
-      transition: all 0.5s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.7s ease-in-out, background-color 0.7s ease-in-out;
-      
-      
-    }
-
-    #active {
-    	/* This is to underline the button representing the currently active window */
-    	/*	border: solid 2px;*/
-    	border-radius: 10px;
-    	/*	border-color: ${custom.tertiary_accent};*/
-    	background: ${custom.secondary_accent};
-    	}
-
-    button, image {
-    	background: none;
-    	border-style: none;
-    	box-shadow: none;
-    	color: ${custom.primary_accent};
-    }
-
-    button {
-    	/* border: 1px solid ${custom.secondary_accent}; */
-    }
-
-    button {
-    	padding: 4px;
-    	margin-left: 4px;
-    	margin-right: 4px;
-    	color:${custom.tertiary_accent};
-    	font-size: 12px;
-    }
-
-
-    button:hover {
-    	border-radius: 8px;
-      /* border-radius: 80px; */
-    	background-color: rgba(204, 208, 218,1);
-    	background-size: 20%;
-      margin: 10px;
-      box-shadow: 0 0 10px;
-      animation: gradient_f 20s ease-in infinite;
-      transition: all 0.5s cubic-bezier(.55, 0.0, .28, 1.682), box-shadow 0.7s ease-in-out, background-color 0.7s ease-in-out;
-    }
-
-
-    button:focus {
-    	box-shadow: none
-    }
-
-    /*
-     button:focus {
-            background-size: 50%;
-        	border: 0px;
-        }
-    */
-
+       	 /* importing waybar colors as i am using same colours here */
+	 @import url("../../.cache/wal/colors-waybar.css");
+	 window {
+		background: ${custom.primary_background_rgba};
+		border-radius: 30px;
+		border-style: solid;
+		border-width: 6px;
+		border-color: ${custom.primary_accent};
+	  }
+	  
+	  #box {
+		padding: 8px;
+		margin-left: 20px;
+		margin-right: 20px;
+		margin-top: 6px;
+		margin-bottom: 6px;
+		border-radius: 80px;
+		border-bottom-right-radius: 80px;
+		border-bottom-left-radius: 80px;
+		background:  ${custom.primary_background_rgba};
+	  }
+	  
+	  #active {
+		border-radius: 10px;
+		background:${custom.secondary_accent};
+	  }
+	  
+	  button, image {
+		background: none;
+		border-style: none;
+		box-shadow: none;
+		color: ${custom.primary_accent};
+	  }
+	  
+	  /* Baseline appearance for icons using background images. */
+	  button {
+		padding: 6px;
+		margin: 4px;
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: contain;
+		font-size: 12px;
+		color: ${custom.tertiary_accent};
+		transition:
+		  background-size 0.15s ease-in-out,
+		  margin 0.15s ease-in-out,
+		  background-color 0.15s ease-in-out,
+		  box-shadow 0.15s ease-in-out;
+	  }
+	  
+	  /* On hover, dramatically increase the background-size to mimic a stronger zoom. */
+	  button:hover {
+		background-size: 400% auto; /* <-- Increase or decrease this value for a bigger or smaller zoom */
+		margin-top: 2px;
+		margin-bottom: 2px;
+		border-radius: 10px;
+		background-color: rgba(204, 208, 218, 1);
+		box-shadow: 0 0 8px;
+	  }
+	  
+	  button:focus {
+		box-shadow: none;
+	  }
 
            
   '';
+
+##nwg-dock-pinned apps
+  home.file = {
+    ".cache/nwg-dock-pinned" = {
+      text = ''
+    zen
+    firefox
+    kitty
+    vesktop
+
+    '';
+      };
+  };
 
   # Wlogout configuration
 
@@ -3682,7 +3848,8 @@ hyprlock = {
 
     button {
         color: @main-fg;
-        background-color: @main-bg;
+        /* background-color: @main-bg; */
+        background-color: rgba(12, 12, 12, 0.3);
         border-style: solid;
         border-width: 2px;
         background-repeat: no-repeat;
@@ -3691,7 +3858,8 @@ hyprlock = {
         border-radius: 80px;
         margin: 5px;
         transition: all 0.3s cubic-bezier(.55, 0.0, .28, 1.682);
-        border: 2px solid @wb-act-bg;
+        border: 3px solid @wb-act-bg;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     }
 
     button:active {
