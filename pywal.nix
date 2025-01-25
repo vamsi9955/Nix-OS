@@ -170,7 +170,7 @@
               cp "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
           else
               # Convert to PNG using ImageMagick
-              convert "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
+              magick "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
           fi
           
           echo "Successfully copied/converted wallpaper to $HYPRLOCK_WALLPAPER"

@@ -110,7 +110,12 @@ in
       # ntfs support
       ntfs3g
 
+
+      #My Script
       themechanger
+
+      #clamav #antivirus
+      gnupg
 
       # Wayland essentials
       hyprland
@@ -168,10 +173,10 @@ in
       spicetify-cli
       lollypop
       kdePackages.elisa
-      sayonara
+      sayonara #launch time very slow
       amberol
       deadbeef-with-plugins
-      mpd
+      #mpd
 
       # Additional utilities
       brightnessctl
@@ -392,6 +397,13 @@ in
            }
       '';
     };
+  };
+
+
+  #For Flameshot
+  home.sessionVariables = {
+    XDG_CURRENT_DESKTOP = "Hyprland";
+    WAYLAND_DISPLAY = "wayland-0";
   };
 
   # Enable Mullvad VPN
@@ -786,6 +798,7 @@ in
   };
 
   programs = {
+
 
     # vscode = {
     #   enable = true;
@@ -2003,7 +2016,7 @@ in
 
 #     image = [{
 #       monitor = "";
-#       path = "~/.config/hypr/vivek.png";
+#       path = "~/.config/hypr/face.png";
 #       border_size = 2;
 #       border_color = "rgba(255, 255, 255, 0)";
 #       size = 130;
@@ -2120,7 +2133,7 @@ in
 
 #     image = [{
 #       monitor = "";
-#       path = "~/.config/hypr/vivek.png";
+#       path = "~/.config/hypr/face.png";
 #       border_size = 2;
 #       border_color = "rgba(216, 222, 233, 0.80)";
 #       size = 100;
@@ -2135,7 +2148,7 @@ in
 #     label = [
 #       {
 #         monitor = "";
-#         text = "Vivek Rajan";
+#         text = "Vamsi";
 #         color = "rgba(216, 222, 233, 0.80)";
 #         outline_thickness = 0;
 #         dots_size = 0.2;
@@ -2362,7 +2375,7 @@ hyprlock = {
     label = [
       {
         monitor = "";
-        text = "cmd[update:1000] echo \"<span>$(date +\"%H:%M\")</span>\"";
+        text = "cmd[update:1000] echo \"<span>$(date +\"%I:%M\")</span>\"";
         color = "rgba(216, 222, 233, 0.70)";
         font_size = 130;
         font_family = "SF Pro Display Bold";
@@ -2405,7 +2418,7 @@ hyprlock = {
 
     image = [{
       monitor = "";
-      path = "~/.config/hypr/vivek.png";
+      path = "~/.config/hypr/face.png";
       border_color = "0xffdddddd";
       border_size = 0;
       size = 120;
@@ -2498,7 +2511,7 @@ hyprlock = {
 
 #     image = [{
 #       monitor = "";
-#       path = "~/.config/hypr/vivek.png";
+#       path = "~/.config/hypr/face.png";
 #       border_size = 2;
 #       border_color = "rgba(255, 255, 255, .65)";
 #       size = 130;
@@ -2762,34 +2775,45 @@ hyprlock = {
 
   };
 
+
+
+
   # Rofi configuration - 2
   xdg.configFile."rofi/config.rasi".text = ''
               @import "~/.config/rofi/pywal.rasi"
 
+    
+
     configuration {
-      modi: "window,drun,ssh,combi,filebrowser,recursivebrowser";
-      display-drun: "  ";
-      icon-theme: "Papirus";
-      show-icons: true;
-      drun-display-format: "{icon} {name}";
-      font: "Roboto Mono Nerd 12";
-      combi-modi: "window,drun,ssh";
-      terminal: "kitty";
-      run-shell-command: "{terminal} -e {cmd}";
-      sidebar-mode: true;
+    modi: "window,drun,run,ssh,combi,filebrowser";
+    display-drun: " Apps";
+    display-run: " Run";
+    display-filebrowser: " Files";
+    display-window: " Windows";
+    icon-theme: "Papirus";
+    show-icons: true;
+    drun-display-format: "{icon} {name}";
+    font: "Roboto Mono Nerd 12";
+    combi-modi: "window,drun,ssh";
+    terminal: "kitty";
+    run-shell-command: "{terminal} -e {cmd}";
+    sidebar-mode: true;
     }
   '';
+
+
 
   xdg.configFile."rofi/pywal.rasi".text = ''
            @import "~/.cache/wal/colors-rofi"
     *{
-      background-color: rgba(0, 0, 0, 0.41);
+      
+      background-color: rgba(0, 0, 0, 0.16);
     }
 
     window{
     	width: env(WIDTH, 35%);
     	height: env(HEIGHT, 65%);
-      	border: 2px;
+      	border: 4px;
     	border-color: @active-background;
     	border-radius: 15px;
     }
@@ -3026,7 +3050,7 @@ hyprlock = {
         "hyprctl plugin load ${pkgs.hyprlandPlugins.hypr-dynamic-cursors}"
 
         "swww init"
-        "flameshot"
+        #"flameshot"
         "/usr/lib/polkit-kde-authentication-agent-1"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
@@ -3071,15 +3095,22 @@ hyprlock = {
         "$mainMod,grave, hyprexpo:expo, toggle" #grave is the key "~" which is above tab
         
 
-      # Region screenshot with Swappy
-      "$mainMod, S, exec, grim -g \"$(slurp)\" - | swappy -f -"
+      # # Region screenshot with Swappy
+      # "$mainMod, S, exec, grim -g \"$(slurp)\" - | swappy -f -"
 
-      # Fullscreen screenshot with Swappy
-      "$mainMod SHIFT, S, exec, grim -o $(hyprctl monitors | jq -r '.[] | select(.focused).name') - | swappy -f -"
+      # # Fullscreen screenshot with Swappy
+      # "$mainMod SHIFT, S, exec, grim -o $(hyprctl monitors | jq -r '.[] | select(.focused).name') - | swappy -f -"
 
-      # Focused window screenshot with Swappy
-      "$mainMod CTRL, S, exec, grim -g \"$(hyprctl clients -j | jq '.[] | select(.focused==true).at' | sed 's/,/x/')+$(hyprctl clients -j | jq '.[] | select(.focused==true).size' | sed 's/,/x/')+0x0\" - | swappy -f -"
+      # # Focused window screenshot with Swappy
+      # "$mainMod CTRL, S, exec, grim -g \"$(hyprctl clients -j | jq '.[] | select(.focused==true).at' | sed 's/,/x/')+$(hyprctl clients -j | jq '.[] | select(.focused==true).size' | sed 's/,/x/')+0x0\" - | swappy -f -"
         
+        # Launch Flameshot GUI with Print Screen key
+        "$mainMod , S, exec, flameshot gui"
+
+        # Take a fullscreen screenshot with Flameshot
+        "$mainMod SHIFT , S, exec, flameshot full -p ~/Pictures"
+
+
         # Moving focus
         "$mainMod, left, movefocus, l"
         "$mainMod, right, movefocus, r"
@@ -3360,9 +3391,16 @@ hyprlock = {
       #   windowrule = float, ^(missioncenter)$
 
       windowrulev2 = [
-        "float,title:^(flameshot)"
-        "move 0 0,title:^(flameshot)"
-        "suppressevent fullscreen,title:^(flameshot)"
+        # "float,title:^(flameshot)"
+        # "move 0 0,title:^(flameshot)"
+        # "suppressevent fullscreen,title:^(flameshot)"
+        "float, class:^(flameshot)$"
+        "noanim, class:^(flameshot)$"
+        "pin, class:^(flameshot)$"
+        "monitor 1, class:^(flameshot)$" # Adjust monitor ID as needed
+
+
+
         "opacity ${opacity} ${opacity},class:^(com.mitchellh.ghostty)$"
         "opacity ${opacity} ${opacity},class:^(zen-alpha)$"
         "float,class:^(pavucontrol)$"
