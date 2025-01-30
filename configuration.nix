@@ -27,6 +27,16 @@ boot.loader.grub.theme = pkgs.stdenv.mkDerivation {
     installPhase = "cp -r customize/nixos $out";
   };
 
+#boot.plymouth = {
+#  enable = true;
+#  themePackages = [ pkgs.adi1090x-plymouth-themes ];
+#  theme = "deus_ex";
+#  #theme ="cybernetic";
+  # pack_1 cubes,cross_hud,circuit,circle_hud,abstract_ring_alt;
+  # pack_2 hexagon_hud,hexagon_dots_alt,glitch,deus_ex,cybernetic
+  # pack_3 metal_ball,loader,ironman,hud_2,
+  # pack_4 spinner_alt,target_2
+#};
 
 ########
 ##Ntfs##
@@ -48,6 +58,23 @@ boot.loader.grub.theme = pkgs.stdenv.mkDerivation {
 #Add the following line to blacklist the ntfs3 module:
 boot.blacklistedKernelModules = [ "ntfs3" ];
 
+
+
+systemd = {
+  user.services.polkit-gnome-authentication-agent-1 = {
+    description = "polkit-gnome-authentication-agent-1";
+    wantedBy = [ "graphical-session.target" ];
+    wants = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+      Restart = "on-failure";
+      RestartSec = 1;
+      TimeoutStopSec = 10;
+    };
+  };
+};
 
 
 
@@ -97,24 +124,6 @@ boot.blacklistedKernelModules = [ "ntfs3" ];
 #SwayOSD
 services.udev.packages = [ pkgs.swayosd ];
  
-   # Configure the systemd service
-  # systemd.services.swayosd-libinput-backend = {
-  #   description = "SwayOSD LibInput backend for listening to keys";
-  #   documentation = [ "https://github.com/ErikReider/SwayOSD" ];
-  #   wantedBy = [ "graphical.target" ];
-  #   partOf = [ "graphical.target" ];
-  #   after = [ "graphical.target" ];
-  #   serviceConfig = {
-  #     Type = "dbus";
-  #     BusName = "org.erikreider.swayosd";
-  #     ExecStart = "${pkgs.swayosd}/bin/swayosd-libinput-backend";
-  #     Restart = "on-failure";
-  #     RestartSec = "1";
-  #   };
-  # };
-
-
-
 
 #Bluetooth
 hardware.bluetooth.enable = true;
@@ -185,16 +194,6 @@ services.xserver.videoDrivers = ["nvidia"];
     modesetting.enable = true;
     open = false;
 
-# Fine-grained power management. Turns off GPU when not in use.
-    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
-    #Fine-grained power management requires offload to be enabled.
-      # powerManagement.finegrained = true;
-
-# Dynamic Boost. It is a technology found in NVIDIA Max-Q design laptops with RTX GPUs.
-    # It intelligently and automatically shifts power between
-    # the CPU and GPU in real-time based on the workload of your game or application.
-   # dynamicBoost.enable = lib.mkForce true;
-
 # Enable the Nvidia settings menu,
   	# accessible via `nvidia-settings`.
     nvidiaSettings = true;
@@ -202,52 +201,10 @@ services.xserver.videoDrivers = ["nvidia"];
 # Optionally, you may need to select the appropriate driver version for your specific GPU.
     package = config.boot.kernelPackages.nvidiaPackages.latest;
 
-# Nvidia Optimus PRIME. It is a technology developed by Nvidia to optimize
-    # the power consumption and performance of laptops equipped with their GPUs.
-    # It seamlessly switches between the integrated graphics,
-    # usually from Intel, for lightweight tasks to save power,
-    # and the discrete Nvidia GPU for performance-intensive tasks.
-#    prime = {
- # 		offload = {
-  #			enable = true;
-  #			enableOffloadCmd = true;
-   #               };
 
-                 # FIXME: Change the following values to the correct Bus ID values for your system!
-      # More on "https://wiki.nixos.org/wiki/Nvidia#Configuring_Optimus_PRIME:_Bus_ID_Values_(Mandatory)"
-  #		nvidiaBusId = "PCI:1:0:0";
-  #		intelBusId = "PCI:0:2:0";
-                #amdgpuBusId = "PCI:54:0:0"; # If you have an AMD iGPU
-
-
-
-  #		};
      };           
 
-# NixOS specialization named 'nvidia-sync'. Provides the ability
-  # to switch the Nvidia Optimus Prime profile
-  # to sync mode during the boot process, enhancing performance.
 
-######
-#When you create a specialisation, NixOS generates two separate boot options:
-
- #   A default configuration that boots into TTY
- #   A "nvidia-sync" configuration that boots into SDDM
-#######
- # specialisation = {
- #   nvidia-sync.configuration = {
- #     system.nixos.tags = [ "nvidia-sync" ];
- #     hardware.nvidia = {
- #       powerManagement.finegrained = lib.mkForce false;
-
- #       prime.offload.enable = lib.mkForce false;
- #       prime.offload.enableOffloadCmd = lib.mkForce false;
-
- #       prime.sync.enable = lib.mkForce true;
- #     };
- #  };
- # };
-###########------------------#############
 
  
  
@@ -262,22 +219,52 @@ services.xserver.videoDrivers = ["nvidia"];
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
-  # Enable the Cinnamon Desktop Environment.
-  services.xserver.displayManager.lightdm.enable = false;
-  
- # services.xserver.displayManager.sddm.enable = true;
- 
-    services.xserver.displayManager.sddm = {
-    enable = true;
-    theme = "sddm-astronaut-theme";
-    package = pkgs.kdePackages.sddm;
-    #wayland.enable = true;
-  };
+  # Enable the Light Desktop Manager.
+  #services.xserver.displayManager.lightdm.enable = false;
 
-     services.xserver.displayManager.sddm.extraPackages = with pkgs.kdePackages; [
-        qt5compat
-        qtsvg
-     ];
+
+######## 
+##Sddm##
+
+#  Check for SDDM Theme and face in folowing file/directory/
+#  [Theme]
+# Current=sddm-astronaut-theme
+# FacesDir=/run/current-system/sw/share/sddm/faces
+# ThemeDir=/run/current-system/sw/share/sddm/themes
+# can also use : "ls /run/current-system/sw/share/sddm/themes/" 
+ 
+  #_____________________________________________________________________
+  services.displayManager.defaultSession = "hyprland";
+  services.displayManager.sddm = {
+    enable = true; # Enable SDDM
+    package = pkgs.kdePackages.sddm;
+    extraPackages = with pkgs; [
+      kdePackages.qtsvg
+      kdePackages.qt5compat
+      kdePackages.qtmultimedia
+      kdePackages.qtvirtualkeyboard
+    ];
+    #wayland.enable = true;
+    theme = "sddm-astronaut-theme"; # Specify your theme
+    settings = {
+      Theme = {
+        CursorTheme = "Bibata-Modern-Ice"; # Set custom cursor theme
+      };
+    };
+  };
+#_______________________________________________________________________-
+#  services.xserver.displayManager.sddm = {
+#     enable = true;
+#     theme = "sddm-astronaut-theme";
+#     package = pkgs.kdePackages.sddm;
+#     #wayland.enable = true;
+#   };
+
+#      services.xserver.displayManager.sddm.extraPackages = with pkgs.kdePackages; [
+#         qt5compat
+#         qtsvg
+#      ];
+  
 
 
  services.xserver.desktopManager.cinnamon.enable = true;
@@ -355,7 +342,21 @@ programs.steam = {
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
+
+
+environment.systemPackages = with pkgs;  
+[
+ 
+    kdePackages.qtsvg
+    kdePackages.qtmultimedia
+    kdePackages.qtvirtualkeyboard
+    kdePackages.qt5compat
+    (pkgs.callPackage ./sddm.nix {
+      theme = "cyberpunk"; # Set custom SDDM theme
+    })
+
+
+
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     libevdev
@@ -373,17 +374,24 @@ programs.steam = {
     hyprpaper
     pipewire
     easyeffects # For advanced audio processing
+    linux-wifi-hotspot
     qt6.qtwayland
     macchanger #mac address changer
     xdg-desktop-portal-hyprland
+    #hyprpolkitagent
+    polkit
+    polkit_gnome
     hyprcursor
     bibata-cursors  
     xdg-desktop-portal-gtk  # For Cinnamon
     sddm-astronaut
+    #adi1090x-plymouth-themes
+    #sleek-grub-theme
     ntfs3g
     swayosd
     google-chrome
-    cudaPackages.cudatoolkit  # Automatically resolves to the latest version
+    wf-recorder
+   # cudaPackages.cudatoolkit  # Automatically resolves to the latest version
   ];
   
   # Enable XDG Portal
@@ -409,6 +417,11 @@ programs.steam = {
 
 fonts = {
   packages = with pkgs; [
+    
+    noto-fonts
+    font-awesome
+      
+
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
     fira-code
@@ -416,12 +429,20 @@ fonts = {
   ];
   fontconfig = {
     defaultFonts = {
-      monospace = [ "JetBrainsMono Nerd Font" "FiraCode Nerd Font" ];
-      sansSerif = [ "JetBrainsMono Nerd Font" ];
+      monospace = ["Noto Mono"  "JetBrainsMono Nerd Font" "FiraCode Nerd Font" ];
+      sansSerif = ["Astronaut" "Noto Sans" "JetBrainsMono Nerd Font" ];
       serif = [ "JetBrainsMono Nerd Font" ];
     };
   };
 };
+
+# Qt theming (IMPORTANT for proper styling)
+  # qt = {
+  #   enable = true;
+  #   platformTheme = "kde";
+  #   style = "breeze";
+  # };
+
 
 ##Optimization
 nix.settings.auto-optimise-store = true;
@@ -477,7 +498,7 @@ services.xserver.gdk-pixbuf.modulePackages = [ pkgs.librsvg ];
   # };
   # services.fail2ban.enable = true;
    security.pam.services.hyprlock = {};
-  # # security.polkit.enable = true;
+   security.polkit.enable = true;
   # programs.browserpass.enable = true;
   # services.clamav = {
   #   daemon.enable = true;

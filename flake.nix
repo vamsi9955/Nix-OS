@@ -14,11 +14,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
      }; 
    
-     
+
    spicetify-nix = {
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+     hyprpanel = {
+      url = "github:Jas-SinghFSU/HyprPanel";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
 
   # #Zen-Browser
      zen-browser.url = "github:0xc000022070/zen-browser-flake";
@@ -43,7 +49,15 @@ outputs = { self, nixpkgs, home-manager, hyprland,spicetify-nix,zen-browser, ...
             backupFileExtension = "backup";  # Add this line
           };
         }
+     
+            {
+            nixpkgs.overlays = [
+              inputs.hyprpanel.overlay
+            ];
+          }
+
       ];
+      
     };
   };
 }

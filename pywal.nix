@@ -141,7 +141,14 @@
           # #nwg-dock
           did=$(ps -eaf | grep nwg-dock-hyprland | grep -v "grep nwg-dock-hyprland" | awk '{print $2}' | xargs)
            kill -9 $did
-           nwg-dock-hyprland &
+           #nwg-dock-hyprland &
+           'toggle-dock'
+
+           # #Hyprpanel
+          did=$(ps -eaf | grep hyprpanel | grep -v "grep hyprpanel" | awk '{print $2}' | xargs)
+           kill -9 $did
+           #nwg-dock-hyprland &
+           'toggle-hyprpanel'
 
           #cava
           pkill -USR1 cava
