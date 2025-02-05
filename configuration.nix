@@ -123,6 +123,32 @@ systemd = {
 
 #SwayOSD
 services.udev.packages = [ pkgs.swayosd ];
+
+#Virtualization
+virtualisation = {
+    libvirtd = {
+      enable = true;
+      qemu = {
+        package = pkgs.qemu_kvm;
+        runAsRoot = true; #Only needed if you explicitly want QEMU to run as root. Otherwise, you can omit this.
+        swtpm.enable = true; #Enables TPM emulation (useful for Windows 11).
+        ovmf = {
+          enable = true; #Enables UEFI support for VMs.
+          packages = [
+            (pkgs.OVMF.override {
+              secureBoot = false;  # Set to true only if needed
+              tpmSupport = true;
+            }).fd
+          ];
+        };
+      };
+    };
+
+    spiceUSBRedirection.enable = true; #Enables USB redirection in Spice for better device passthrough.
+    podman.enable = true; #Enables Podman for container management. Fine if you need it, but unrelated to QEMU.
+    # waydroid.enable = true;  # If you want Waydroid (Android in Linux Containers), make sure GPU passthrough works properly.
+  };
+
  
 
 #Bluetooth
@@ -391,7 +417,11 @@ environment.systemPackages = with pkgs;
     swayosd
     google-chrome
     wf-recorder
-   # cudaPackages.cudatoolkit  # Automatically resolves to the latest version
+    libreoffice-fresh
+    ollama
+    cudaPackages.cudatoolkit  # Automatically resolves to the latest version
+    virt-manager   # Virt-Manager GUI
+    #gnome-boxes 
   ];
   
   # Enable XDG Portal
@@ -405,6 +435,15 @@ environment.systemPackages = with pkgs;
     enable = true;
   };
 };
+
+
+ #Ollama not required for ollama.cuda pacakge
+  services.ollama = {
+    enable = true;
+    acceleration = "cuda"; # Use "rocm" if you have AMD GPU, or remove if using CPU
+  };
+
+
 
 # Environment variables for Wayland support
   environment.variables = {

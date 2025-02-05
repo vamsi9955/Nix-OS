@@ -75,10 +75,10 @@ home.activation.copyRofiConfig = ''
 
     configuration {
     modi: "window,drun,run,ssh,combi,filebrowser";
-    display-drun: " Apps";
-    display-run: " Run";
-    display-filebrowser: " Files";
-    display-window: " Windows";
+    display-drun: "  Apps";
+    display-run: "  Run";
+    display-filebrowser: "  Files";
+    display-window: "  Windows";
     icon-theme: "Papirus";
     show-icons: true;
     drun-display-format: "{icon} {name}";
@@ -95,7 +95,7 @@ home.activation.copyRofiConfig = ''
            @import "~/.cache/wal/colors-rofi"
     *{
       
-      background-color: rgba(0, 0, 0, 0.16);
+      background-color: rgba(0, 0, 0, 0);
     }
 
     window{

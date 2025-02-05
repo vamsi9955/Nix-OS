@@ -208,24 +208,8 @@
 '')
 
 # Add wallpaper change script
-    (writeShellScriptBin "song-script" ''
-      #!/bin/bash
-
-# Create the required directory
-mkdir -p ~/.config/hypr/Scripts
-
-# Create and write content to the script file
-cat > ~/.config/hypr/Scripts/songdetail.sh << 'EOL'
-#!/bin/bash
-playerctl metadata --format '{{title}}      {{artist}}'
-EOL
-
-# Make the script executable
-chmod +x ~/.config/hypr/Scripts/songdetail.sh
-
-echo "Song detail script has been created and configured"
-    '')
-
+ 
+ 
     # Add wallpaper change script
     (writeShellScriptBin "wallpaper-change" ''
       #!/usr/bin/env bash
