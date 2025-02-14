@@ -87,6 +87,7 @@ in
     # inputs.hyprpanel.homeManagerModules.hyprpanel
     ./pywal.nix
     ./rofi.nix
+    ./flameshot-overlay.nix
     #./guifetch.nix 
 
   ];
@@ -130,6 +131,7 @@ in
       swappy
       jq
       wl-clipboard
+      openssl
       fuzzel
       #swww # in configuration.nix
       wlogout
@@ -247,9 +249,9 @@ in
       zathura #pdf reader
 
       swaynotificationcenter # notification service
-      flameshot
-      #warp-terminal dosent open
+      #warp-terminal #dosent open
       ulauncher
+      ventoy
 
       gcc
       rustup
@@ -257,6 +259,7 @@ in
       catimg
       curl
       appimage-run
+      varia
 
       sqlite
 
@@ -628,6 +631,27 @@ echo "Song detail script has been created and configured"
     '')
 
 
+
+
+    (writeShellScriptBin "rainbow-borders" ''
+    
+    #!/bin/bash
+# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# for rainbow borders animation
+
+function random_hex() {
+    random_hex=("0xff$(openssl rand -hex 3)")
+    echo $random_hex
+}
+
+# rainbow colors only for active window
+hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex)  270deg
+
+# rainbow colors for inactive window (uncomment to take effect)
+#hyprctl keyword general:col.inactive_border $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) 270deg
+    '')
+
+
     ];
   };
 
@@ -669,10 +693,10 @@ echo "Song detail script has been created and configured"
 
 
   #For Flameshot
-  home.sessionVariables = {
-    XDG_CURRENT_DESKTOP = "Hyprland";
-    WAYLAND_DISPLAY = "wayland-0";
-  };
+  # home.sessionVariables = {
+  #   XDG_CURRENT_DESKTOP = "Hyprland";
+  #   WAYLAND_DISPLAY = "wayland-0";
+  # };
 
 
   ##Yubi key
@@ -828,8 +852,8 @@ echo "Song detail script has been created and configured"
             }
             {
               label = "📸";
-              command = "gimp";
-              tooltip = "Launch GIMP";
+              command = "flameshot gui";
+              tooltip = "Launch Screneshot tool";
             }
             # {
             #   label = "📣";
@@ -2789,6 +2813,7 @@ hyprlock = {
       monitor = "";
       path = "~/.config/hypr/hyprlock.png";
       blur_passes = 2;
+      blur_size = 2;
       contrast = 0.8916;
       brightness = 0.8172;
       vibrancy = 0.1696;
@@ -3471,6 +3496,11 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
   wayland.windowManager.hyprland = {
     enable = true;
 
+
+# extraConfig = ''
+#       source = $HOME/.cache/wal/colors-hyprland.conf
+#     '';
+
      plugins = [
 
   ##Recomended
@@ -3675,7 +3705,7 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "systemctl --user import-environment XDG_SESSION_TYPE XDG_CURRENT_DESKTOP"
         "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland"
         #"systemctl --user start hyprpolkitagent"
-        #"$UserScripts/RainbowBorders.sh &" # Rainbow borders
+        "rainbow-borders" # Rainbow borders
       ];
 
       ###################
@@ -3700,10 +3730,13 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "$mainMod,       J, togglesplit,"
         "$mainMod,       R, exec, bemoji -cn"
         "$mainMod,       C, exec, code"
-        #"$mainMod,       V, exec, cliphist list | $menu -dmenu | cliphist decode | wl-copy"
-        "$mainMod,       V, exec, pkill fuzzel || cliphist list | fuzzel  --match-mode fzf --dmenu | cliphist decode | wl-copy # Clipboard history >> clipboard"
+        "$mainMod,       V, exec, cliphist list | $menu -dmenu | cliphist decode | wl-copy"
+        # "$mainMod,       V, exec, pkill fuzzel || cliphist list | fuzzel  --match-mode fzf --dmenu | cliphist decode | wl-copy # Clipboard history >> clipboard"
         "$mainMod,       B, exec, firefox"
+        "$mainMod,       G, exec, google-chrome-stable"
+        "$mainMod,       O, exec, obsidian"
         "$mainMod,       Z, exec, zen"
+        "$mainMod CTRL,  space, exec, ulauncher"
         "$mainMod,       L, exec, loginctl lock-session"
         "$mainMod,       P, exec, hyprpicker -an"
         "$mainMod,       N, exec, swaync-client -t"
@@ -3731,6 +3764,7 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         
         # Launch Flameshot GUI with Print Screen key
         "$mainMod , S, exec, flameshot gui"
+        
 
         # Take a fullscreen screenshot with Flameshot
         "$mainMod SHIFT , S, exec, flameshot full -p ~/Pictures"
@@ -3835,13 +3869,15 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
       #####################
 
       general = {
-        gaps_in = 8;
-        gaps_out = 8;
-        border_size = 0;
+        gaps_in = 4;
+        gaps_out = 6;
+        border_size = 2;
         "col.active_border" = "rgba(33ccffee)";
         "col.inactive_border" = "rgba(595959aa)";
         # "col.active_border" = "rgba(b4befeee)";
-        # "col.inactive_border" = "rgba(7aa2f7ee) rgba(87aaf8ee) 45deg";
+         #"col.inactive_border" = "rgba(7aa2f7ee) rgba(87aaf8ee) 45deg";
+         #"col.active_border" = "$color12" ;
+         #"col.inactive_border" = "$color10";
         allow_tearing = false;
         # layout = "master";
       };
@@ -3849,7 +3885,7 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
       decoration = {
         rounding = 14;
         active_opacity = 1.0;
-        inactive_opacity = 0.8;
+        inactive_opacity = 0.9;
         fullscreen_opacity = 1.0;
 
         dim_inactive = true;
@@ -3867,20 +3903,21 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         #   vibrancy = 0.1696;
         # };
          blur = {
-     enabled = true;
-     xray = true;
-     size = 2;
-     passes = 4;
-     new_optimizations = true;
-     ignore_opacity = true;
-     brightness = 1.1;
-    };
+          enabled = true;
+          xray = true;
+          size = 4;
+          passes = 2;
+          new_optimizations = true;
+          ignore_opacity = true;
+          brightness = 1.1;
+          };
         shadow = {
           enabled = true;
-          range = 30;
-          render_power = 1000;
+          range = 3;
+          render_power = 1;
           color = "rgba(1a1a1aee)";
-          #color = "rgba${custom.primary_accent}";
+          #color =  "$color12";
+          #color_inactive = "$color10";
         };
       };
 
@@ -3891,8 +3928,9 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "blur, swaync-notification-window"
         "ignorezero, swaync-control-center"
         "ignorezero, swaync-notification-window"
-        "ignorealpha 0.5, swaync-control-center"
-        "ignorealpha 0.5, swaync-notification-window" 
+        #"ignorealpha 0.5, swaync-control-center"
+        #"ignorealpha 0.5, swaync-notification-window" 
+        
         
         "blur, rofi"
         "ignorezero, rofi"
@@ -4028,7 +4066,7 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "float, ^(waypaper)$"
         "float, ^(missioncenter)$"
         "size 840 680,^(missioncenter)$"
-       "opacity,0.99,0.99,title:^(obsidian)$" # Use 'Electron' for older Obsidian versions
+       
 
       ];
 
@@ -4044,18 +4082,32 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
       #   windowrule = float, ^(missioncenter)$
 
       windowrulev2 = [
-        # "float,title:^(flameshot)"
-        # "move 0 0,title:^(flameshot)"
-        # "suppressevent fullscreen,title:^(flameshot)"
+        #Flameshot
+        "float,title:^(flameshot)"
+        "move 0 0,title:^(flameshot)"
+        "suppressevent fullscreen,title:^(flameshot)"
         "float, class:^(flameshot)$"
         "noanim, class:^(flameshot)$"
         "pin, class:^(flameshot)$"
-        "monitor 1, class:^(flameshot)$" # Adjust monitor ID as needed
+        "monitor 1, class:^(flameshot)$" # Adjust monitor ID as needed 
+
+
+        #Ulauncher
+        # ULauncher window rules
+       "float, class:^Ulauncher$"
+       "size 800 600, class:^Ulauncher$"
+       "center, class:^Ulauncher$"
+       "noanim, class:^Ulauncher$"
+
 
 
 
         "opacity ${opacity} ${opacity},class:^(com.mitchellh.ghostty)$"
-        "opacity ${opacity} ${opacity},class:^(zen)$"
+        #"opacity ${opacity} ${opacity},class:^(zen)$"
+        "opacity,0.99,0.99,title:^(obsidian)$" # Use 'Electron' for older Obsidian versions
+        #"opacity 1.0 1.0,class:^(wofi)$"
+        "opacity ${opacity} ${opacity},class:^(nwg-dock-hyprland)$"
+
         "float,class:^(pavucontrol)$"
         "float,class:^(file_progress)$"
         "float,class:^(confirm)$"
@@ -4069,7 +4121,7 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "float,title:^(Confirm to replace files)$"
         "float,title:^(File Operation Progress)$"
         "float,title:^(mpv)$"
-        "opacity 1.0 1.0,class:^(wofi)$"
+        
       ];
 
     };
@@ -4154,7 +4206,9 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
       text = ''
     zen
     obsidian
+    varia
     firefox
+    chrome
     kitty
     vesktop
     nwg-displays
@@ -4168,31 +4222,31 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
   ##Fuzzel
    home.file = {
     ".config/fuzzel/fuzzel.ini" = {
-      text = ''
-    font=Gabarito
-terminal=foot -e
-prompt=">>  "
-layer=overlay
+     text = ''
+        font=Gabarito
+        terminal=foot -e
+        prompt=">>  "
+        layer=overlay
 
-[colors]
-background=1D1011ff
-text=F7DCDEff
-selection=574144ff
-selection-text=DEBFC2ff
-border=574144dd
-match=FFB2BCff
-selection-match=FFB2BCff
+        [colors]
+        background=1D1011ff
+        text=F7DCDEff
+        selection=574144ff
+        selection-text=DEBFC2ff
+        border=574144dd
+        match=FFB2BCff
+        selection-match=FFB2BCff
 
 
-[border]
-radius=17
-width=1
+        [border]
+        radius=17
+        width=1
 
-[dmenu]
-exit-immediately-if-empty=yes
-    '';
-      };
-  };
+        [dmenu]
+        exit-immediately-if-empty=yes
+            '';
+              };
+          };
 
 
   # Wlogout configuration
