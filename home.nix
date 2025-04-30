@@ -4,7 +4,7 @@
   pkgs,
   inputs,
   lib,
-  spicetify-nix,
+  #spicetify-nix,
   ...
 }:
 
@@ -15,7 +15,7 @@ let
   ###############################
 
   # #for Spicitify
-  spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
+  #spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
 
   #For hyprland
   opacity = "0.95";
@@ -83,12 +83,13 @@ in
     # For NixOS
     # inputs.spicetify-nix.nixosModules.default
     # For home-manager
-    inputs.spicetify-nix.homeManagerModules.default
+    #inputs.spicetify-nix.homeManagerModules.default
     # inputs.hyprpanel.homeManagerModules.hyprpanel
     ./pywal.nix
     ./rofi.nix
     ./flameshot-overlay.nix
-    #./guifetch.nix 
+    ./scripts.nix
+    ./hyprlock.nix
 
   ];
 
@@ -103,21 +104,18 @@ in
       #inputs.zen-browser.packages."${system}".beta
       #inputs.zen-browser.packages."${system}".twilight
 
+      home-manager
       # Add your user-specific packages here
       fastfetch
       nautilus
       xfce.thunar
       mission-center
       gnome-disk-utility
-      
+
       # bluetooth manager
       blueman
       # ntfs support
       ntfs3g
-
-
-      #My Script
-      themechanger
 
       #clamav #antivirus
       gnupg
@@ -136,14 +134,9 @@ in
       #swww # in configuration.nix
       wlogout
       #waypaper
-      
-      nwg-look # theme other apps
 
-      nwg-displays #Provide an intuitive GUI to manage multiple displays
-
-      nwg-dock-hyprland #Dock for Hyprland
+      nwg-dock-hyprland # Dock for Hyprland
       cliphist
-      
 
       # System utilities
       eza
@@ -152,7 +145,7 @@ in
       fish
       showmethekey
       nil # nix language server
-      any-nix-shell #fish, xonsh and zsh support for nix-shell
+      any-nix-shell # fish, xonsh and zsh support for nix-shell
 
       # Applications
       alacritty
@@ -161,7 +154,8 @@ in
       neovim
       # vimPlugins.nvchad
       #firefox
-      qbittorrent
+      #qbittorrent
+      qbittorrent-enhanced
       starship
       cmatrix
       bat
@@ -169,7 +163,7 @@ in
       hyprpicker
       ninja
       imv
-      imagemagick #important using this for converting jpg to png for it display on hyprlock
+      imagemagick # important using this for converting jpg to png for it display on hyprlock
       mpv
       obs-studio
       solaar
@@ -180,10 +174,7 @@ in
 
       # music
       #spotify
-      spicetify-cli
-      #lollypop #not good enough
-      #kdePackages.elisa  #not good enough, music folder
-      #sayonara #launch time very slow
+      #spicetify-cli
       amberol
       gapless
       #mpd
@@ -203,7 +194,6 @@ in
       #zam-plugins
       #lsp-plugins
       #mda_lv2
-      
 
       #Productivity
       hugo
@@ -215,29 +205,28 @@ in
       nixfmt-rfc-style
       #mongodb-compass
 
-      #AI
-      #ollama
-      #ollama-cuda #builds from source
-
       #User Apps
       celluloid
       discord
       vesktop # modded discord
       librewolf
-      cool-retro-term
+      #cool-retro-term
       vscode
       #vscodium #both cannot be used as conflicts occur
       code-cursor
       lutris
       #mullvad-vpn
-      protonvpn-gui
+      #protonvpn-gui
       stacer
       #openrgb
-      #betterdiscord-installer
       obsidian
+      calibre
+      haruna
+      kdePackages.ark
 
       #utils
       ranger
+      tmux
       wlr-randr
       superfile
       yazi
@@ -246,10 +235,14 @@ in
       zellij
       pipes-rs
       rsclock
-      zathura #pdf reader
+      zathura # pdf reader
+      caffeine-ng
+
+      linux-wallpaperengine
+      telegram-desktop
+      microsoft-edge
 
       swaynotificationcenter # notification service
-      #warp-terminal #dosent open
       ulauncher
       ventoy
 
@@ -283,11 +276,9 @@ in
       catppuccin-gtk
       catppuccin-kvantum
       wpgtk # gtk auto theme to wallpaper
-      gradience #Change the look of Adwaita, with ease 
       # catppuccin-cursors.macchiatoTeal
 
       #hyprpanel
-      
 
       pamixer
       mpc-cli
@@ -298,6 +289,14 @@ in
       # whitesur-gtk-theme
       # whitesur-icon-theme
 
+      #Not working apps on nixos
+      #betterdiscord-installer
+      #themechanger
+      #gradience #Change the look,  not in nixos
+      #warp-terminal #dosent open
+      #nwg-displays #Provide an intuitive GUI to manage multiple displays not helpful in nixos
+      nwg-look # theme other apps
+
       #Python##
       (python3.withPackages (
         ps: with ps; [
@@ -306,357 +305,10 @@ in
         ]
       ))
 
-      ##Scripts##
-
-      #Dock Toggle
-      (pkgs.writeShellScriptBin "toggle-dock" ''
-        #!/usr/bin/env bash
-
-        # If any nwg-dock-hyprland process is running, kill it; otherwise, start one with arguments.
-        if pgrep -f "nwg-dock-hyprland" >/dev/null; then
-            pkill -f "nwg-dock-hyprland"
-        else
-            nwg-dock-hyprland -i 32 -w 5 -mb 10 -ml 10 -mr 10 -x -c "rofi -show drun" &
-        fi
-
-
-      '')
-
-#  (pkgs.writeShellScriptBin "toggle-hyprpanel" ''
-#         #!/usr/bin/env bash
-
-#         # If any hyprpanel process is running, kill it; otherwise, start one with arguments.
-#         if pgrep  "hyprpanel" >/dev/null; then
-#             pkill  "hyprpanel"
-#             pkill "swaync"
-#         else
-#             hyprpanel &
-#         fi
-
-
-#       '')
-
-
-      #Keybinds Hint
-      (pkgs.writeShellScriptBin "keybindings-hint" ''
-        #!/bin/bash
-
-        # Kill yad if present to not interfere with this binds
-        pkill yad || true
-
-        # Check if rofi is already running
-        if pidof rofi > /dev/null; then
-          pkill rofi
-        fi
-
-        # Define the config files
-        KEYBINDS_CONF="$HOME/.config/hypr/hyprland.conf"
-
-        # Combine the contents of the keybinds files and filter for only 'bind ='
-        KEYBINDS=$(cat "$KEYBINDS_CONF" "$USER_KEYBINDS_CONF" | grep -E '^bind[[:space:]]*=')
-
-        # Check for any keybinds to display
-        if [[ -z "$KEYBINDS" ]]; then
-            echo "No keybinds found."
-            exit 1
-        fi
-
-        # Process keybindings:
-        # 1. Remove 'bind' prefix and '=' sign
-        # 2. Replace '$mainMod' with ''
-        # 3. Remove 'exec' text
-        MODIFIED_KEYBINDS=$(echo "$KEYBINDS" \
-            | sed -E 's/^bind[[:space:]]*=[[:space:]]*//g' \
-            | sed 's/\$mainMod//g' \
-            | sed 's/, exec//g')
-
-        # Use rofi to display the modified keybindings
-        echo "$MODIFIED_KEYBINDS" | rofi -dmenu -i -p "Keybinds" -config ~/.config/rofi/config-keybinds.rasi
-
-      '')
-
-      #Rofi-wifi menu
-
-      (pkgs.writeShellScriptBin "rofi-wifi" ''
-        #!/bin/env bash
-
-                notify-send "Getting list of available Wi-Fi networks..."
-                # Get a list of available wifi connections and morph it into a nice-looking list
-                wifi_list=$(nmcli --fields "SECURITY,SSID" device wifi list | sed 1d | sed 's/  */ /g' | sed -E "s/WPA*.?\S/ /g" | sed "s/^--/ /g" | sed "s/  //g" | sed "/--/d")
-
-                connected=$(nmcli -fields WIFI g)
-                if [[ "$connected" =~ "enabled" ]]; then
-                  toggle="󰖪  Disable Wi-Fi"
-                elif [[ "$connected" =~ "disabled" ]]; then
-                  toggle="󰖩  Enable Wi-Fi"
-                fi
-
-                # Use rofi to select wifi network
-                chosen_network=$(echo -e "$toggle\n$wifi_list" | uniq -u | rofi -dmenu -i -selected-row 1 -p "Wi-Fi SSID: " )
-                # Get name of connection
-                read -r chosen_id <<< "$chosen_network: 3"
-
-                if [ "$chosen_network" = "" ]; then
-                  exit
-                elif [ "$chosen_network" = "󰖩  Enable Wi-Fi" ]; then
-                  nmcli radio wifi on
-                elif [ "$chosen_network" = "󰖪  Disable Wi-Fi" ]; then
-                  nmcli radio wifi off
-                else
-                  # Message to show when connection is activated successfully
-                    success_message="You are now connected to the Wi-Fi network \"$chosen_id\"."
-                  # Get saved connections
-                  saved_connections=$(nmcli -g NAME connection)
-                  if [[ $(echo "$saved_connections" | grep -w "$chosen_id") = "$chosen_id" ]]; then
-                    nmcli connection up id "$chosen_id" | grep "successfully" && notify-send "Connection Established" "$success_message"
-                  else
-                    if [[ "$chosen_network" =~ "" ]]; then
-                      wifi_password=$(rofi -dmenu -p "Password: " )
-                    fi
-                    nmcli device wifi connect "$chosen_id" password "$wifi_password" | grep "successfully" && notify-send "Connection Established" "$success_message"
-                    fi
-                fi'')
-
-
-#Custom Rofi
-   (pkgs.writeShellScriptBin "rofi-run" ''
-               
-       #!/usr/bin/env bash
-
-   # Default values
-   dir="$HOME/.config/rofi/launchers/"
-
-  #  type="/type-7" # Default folder
-  #  theme='style-2' # Default rasi/config file
-
-  #  #Some Good ones
-  #  type="/type-1" 
-  #  theme='style-5'
-
-  #  type="/type-1" 
-  #  theme='style-12' 
-
-  #  type="/type-1" 
-  #  theme='style-15'  
-
-   type="/type-6" 
-   theme='style-10'  
-
-  #  type="/type-7" 
-  #  theme='style-1' 
-
-  #  type="/type-7" 
-  #  theme='style-1' 
-
-  #  type="/type-7" 
-  #  theme='style-1' 
-
-
-
-
-   
-
-##_____________________________Dont touch this_____________________________________
-            # Detect the active Wayland socket (e.g., wayland-1)
-            ACTIVE_SOCKET=$(ls /run/user/$(id -u)/wayland-* | head -n 1)
-
-            # Check if WAYLAND_DISPLAY is set and matches the active socket
-            if [ "$WAYLAND_DISPLAY" != "$(basename "$ACTIVE_SOCKET")" ]; then
-              # If not, export the active socket as WAYLAND_DISPLAY
-              export WAYLAND_DISPLAY="$(basename "$ACTIVE_SOCKET")"
-              echo "WAYLAND_DISPLAY updated to: $WAYLAND_DISPLAY"
-            else
-              echo "WAYLAND_DISPLAY already set to: $WAYLAND_DISPLAY"
-            fi
-
-            # Output the current WAYLAND_DISPLAY to verify
-            echo "Using WAYLAND_DISPLAY: $WAYLAND_DISPLAY"
-##__________________________________________________________________
-# Run rofi with the selected theme and display
-rofi \
-    -show drun \
-    -theme "$dir""$type"/"$theme".rasi
-
-
-
-      '')
-
-(pkgs.writeShellScriptBin "rofi-powermenu" ''
-#!/usr/bin/env bash
-## Rofi   : Power Menu
-
-          # Default values
-          dir=$HOME/.config/rofi/powermenu/   # No quotes for dir
-          type="/type-4"                      # Default folder
-          theme='style-1'                     # Default rasi/config file
-
-          # Current Theme
-          uptime="`uptime -p | sed -e 's/up //g'`"
-          host=`hostname`
-
-          # Options
-          shutdown=' Shutdown'
-          reboot=' Reboot'
-          lock=' Lock'
-          suspend=' Suspend'
-          logout=' Logout'
-          yes=' Yes'
-          no=' No'
-
-###____________________________________________________________________
-# Detect the active Wayland socket
-ACTIVE_SOCKET=$(ls /run/user/$(id -u)/wayland-* | head -n 1)
-
-# Check if WAYLAND_DISPLAY is set and matches the active socket
-if [ "$WAYLAND_DISPLAY" != "$(basename "$ACTIVE_SOCKET")" ]; then
-  # If not, export the active socket as WAYLAND_DISPLAY
-  export WAYLAND_DISPLAY="$(basename "$ACTIVE_SOCKET")"
-  echo "WAYLAND_DISPLAY updated to: $WAYLAND_DISPLAY"
-else
-  echo "WAYLAND_DISPLAY already set to: $WAYLAND_DISPLAY"
-fi
-
-# Output the current WAYLAND_DISPLAY to verify
-echo "Using WAYLAND_DISPLAY: $WAYLAND_DISPLAY"
-########_______________________________________________________________
-# Rofi CMD (Power Menu)
-rofi_cmd() {
-        rofi -dmenu \
-                -p "Uptime: $uptime" \
-                -mesg "Uptime: $uptime" \
-                -theme "$dir"/"$type"/"$theme".rasi   # Updated line with the correct path format
-}
-
-# Confirmation CMD
-confirm_cmd() {
-        rofi -theme-str 'window {location: center; anchor: center; fullscreen: false; width: 350px;}' \
-                -theme-str 'mainbox {children: [ "message", "listview" ];}' \
-                -theme-str 'listview {columns: 2; lines: 1;}' \
-                -theme-str 'element-text {horizontal-align: 0.5;}' \
-                -theme-str 'textbox {horizontal-align: 0.5;}' \
-                -dmenu \
-                -p 'Confirmation' \
-                -mesg 'Are you Sure?' \
-                -theme "$dir"/"$type"/"$theme".rasi
-}
-
-
-
-
-
-
-
-# Ask for confirmation
-confirm_exit() {
-	echo -e "$yes\n$no" | confirm_cmd
-}
-
-# Pass variables to rofi dmenu
-run_rofi() {
-	echo -e "$lock\n$suspend\n$logout\n$reboot\n$shutdown" | rofi_cmd
-}
-
-# Execute Command
-run_cmd() {
-	selected="$(confirm_exit)"
-	if [[ "$selected" == "$yes" ]]; then
-		if [[ $1 == '--shutdown' ]]; then
-			systemctl poweroff
-		elif [[ $1 == '--reboot' ]]; then
-			systemctl reboot
-		elif [[ $1 == '--suspend' ]]; then
-			mpc -q pause
-			amixer set Master mute
-			systemctl suspend
-		elif [[ $1 == '--logout' ]]; then
-			if [[ "$DESKTOP_SESSION" == 'openbox' ]]; then
-				openbox --exit
-			elif [[ "$DESKTOP_SESSION" == 'bspwm' ]]; then
-				bspc quit
-			elif [[ "$DESKTOP_SESSION" == 'i3' ]]; then
-				i3-msg exit
-			elif [[ "$DESKTOP_SESSION" == 'plasma' ]]; then
-				qdbus org.kde.ksmserver /KSMServer logout 0 0 0
-			fi
-		fi
-	else
-		exit 0
-	fi
-}
-
-# Actions
-chosen="$(run_rofi)"
-case "$chosen" in
-    $shutdown)
-		run_cmd --shutdown
-        ;;
-    $reboot)
-		run_cmd --reboot
-        ;;
-    $lock)
-		if [[ -x '/usr/bin/betterlockscreen' ]]; then
-			betterlockscreen -l
-		elif [[ -x '/usr/bin/i3lock' ]]; then
-			i3lock
-		fi
-        ;;
-    $suspend)
-		run_cmd --suspend
-        ;;
-    $logout)
-		run_cmd --logout
-        ;;
-esac
-
-      '')
-
-
-      #Song info
-         (writeShellScriptBin "song-script" ''
-      #!/bin/bash
-
-# Create the required directory
-mkdir -p ~/.config/hypr/Scripts
-
-# Create and write content to the script file
-cat > ~/.config/hypr/Scripts/songdetail.sh << 'EOL'
-#!/bin/bash
-playerctl metadata --format '{{title}}      {{artist}}'
-EOL
-
-# Make the script executable
-chmod +x ~/.config/hypr/Scripts/songdetail.sh
-
-echo "Song detail script has been created and configured"
-    '')
-
-
-
-
-    (writeShellScriptBin "rainbow-borders" ''
-    
-    #!/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# for rainbow borders animation
-
-function random_hex() {
-    random_hex=("0xff$(openssl rand -hex 3)")
-    echo $random_hex
-}
-
-# rainbow colors only for active window
-hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex)  270deg
-
-# rainbow colors for inactive window (uncomment to take effect)
-#hyprctl keyword general:col.inactive_border $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) $(random_hex) 270deg
-    '')
-
+      
 
     ];
   };
-
-
-
 
   home.file = {
 
@@ -688,16 +340,11 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
     };
   };
 
-
-  
-
-
   #For Flameshot
   # home.sessionVariables = {
   #   XDG_CURRENT_DESKTOP = "Hyprland";
   #   WAYLAND_DISPLAY = "wayland-0";
   # };
-
 
   ##Yubi key
   #services.udev.packages = [ pkgs.yubikey-personalization ];
@@ -718,27 +365,27 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
   #  };
 
   ##Hypridle config
-   
-   services.hypridle = {
-     enable = true;
-     settings = {
-       general = {
-         before_sleep_cmd = "loginctl lock-session";
-         after_sleep_cmd = "hyprctl dispatch dpms on";
-         ignore_dbus_inhibit = false;
-         lock_cmd = "pidof hyprlock || hyprlock";
-       };
 
-       listener = [
-         {
-           timeout = 180;
-           on-timeout = "brightnessctl -s set 30";
-           on-resume = "brightnessctl -r";
-         }
-         {
-           timeout = 300;
-           on-timeout = "loginctl lock-session";
-         }
+  services.hypridle = {
+    enable = true;
+    settings = {
+      general = {
+        before_sleep_cmd = "loginctl lock-session";
+        after_sleep_cmd = "hyprctl dispatch dpms on";
+        ignore_dbus_inhibit = false;
+        lock_cmd = "pidof hyprlock || hyprlock";
+      };
+
+      listener = [
+        {
+          timeout = 180;
+          on-timeout = "brightnessctl -s set 30";
+          on-resume = "brightnessctl -r";
+        }
+        {
+          timeout = 300;
+          on-timeout = "loginctl lock-session";
+        }
         #  {
         #    timeout = 600;
         #    on-timeout = "hyprctl dispatch dpms off";
@@ -748,11 +395,10 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
         #    timeout = 1200;
         #    on-timeout = "sysemctl suspend";
         #  }
-       ];
-     };
-   };
+      ];
+    };
+  };
 
- 
   #Sway Notification center configruration
   services.swaync = {
     enable = true;
@@ -792,7 +438,7 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
         "dnd"
         "backlight"
         "volume"
-        
+
         "mpris"
         "notifications"
         "buttons-grid"
@@ -832,13 +478,15 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
               label = "⏻";
               command = "systemctl poweroff";
               tooltip = "Power Off";
-              extra-args = { "data-tooltip" = "Power Off"; }; # Add this
+              extra-args = {
+                "data-tooltip" = "Power Off";
+              }; # Add this
             }
             {
               label = "🔄";
               command = "systemctl reboot";
               tooltip = "Reboot";
-              
+
             }
             # {
             #   label = "🚪";
@@ -886,7 +534,6 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
       };
 
     };
-
 
     style = ''
            @import url("../../.cache/wal/colors-swaync.css");
@@ -1052,139 +699,138 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
 
   programs = {
 
-#Hypanel
+    #Hypanel
 
-# hyprpanel = {
-#     enable = true;
-#     #systemd.enable = true; #absolute
-#     hyprland.enable = true;
-#     overwrite.enable = true;
-#     overlay.enable = true;
-#     theme = "catppuccin_mocha";
-#     layout = {
-#       "bar.layouts" = {
-#         "0" = {
-#           left = ["dashboard" "windowtitle" "systray" "cava"];
-#           middle = ["workspaces"];
-#           right = ["media" "clock" "hypridle" "power"];
-#         };
-#       };
-#     };
-#     override = {
-#       "theme.bar.buttons.workspaces.hover" = "#7f849c";
-#       "theme.bar.buttons.workspaces.active" = "#f5c2e7";
-#       "theme.bar.buttons.workspaces.occupied" = "#89dceb";
-#       "theme.bar.buttons.workspaces.available" = "#585b70";
-#       "theme.bar.buttons.workspaces.border" = "#f9e2af";
-#       "theme.bar.buttons.modules.power.spacing" = "0em";
-#       "theme.bar.border.color" = "#f9e2af";
-#       "theme.osd.orientation" = "vertical";
-#       "theme.osd.location" = "right";
-#       "bar.windowtitle.leftClick" = "pkill rofi || /home/antonio/.local/bin/agsv1 -t overview";
-#       "bar.workspaces.spacing" = "1.5";
-#       "bar.customModules.cava.showIcon"= false;
-#       "theme.font.name" = "JetBrainsMono Nerd Font";
-#     };
-#     settings = {
-#       bar.autoHide = "fullscreen";
-#       notifications.position = "top";
-#       #bar.windowtitle.leftClick = "'pkill rofi||/nix/store/rsb5ihbh4m3q4x046vc0y1r301i8j3is-ags-1.8.2/bin/ags -t overview'";
-#       theme.bar.buttons.workspaces.spacing = "0.5";
-#       theme.bar.buttons.background_hover_opacity = 80;
-#       theme.bar.buttons.innerRadiusMultiplier = "0.4";
-#       theme.bar.buttons.radius = "0.5em";
-#       theme.bar.buttons.y_margins = "0.8em";
-#       theme.bar.buttons.padding_y = "0.1rem";
-#       theme.bar.buttons.padding_x = "0.7rem";
-#       theme.bar.buttons.spacing = "0.25em";
-#       theme.bar.border.location = "full";
-#       theme.bar.buttons.workspaces.enableBorder = true;
-#       theme.bar.buttons.modules.power.enableBorder = true;
-#       theme.bar.buttons.dashboard.enableBorder = true;
-#       theme.bar.border.width = "0.1em";
-#       theme.bar.outer_spacing = "1.0em";
-#       theme.bar.label_spacing = "0.5em";
-#       theme.bar.border_radius = "0.6em";
-#       theme.bar.margin_sides = "14.5em";
-#       theme.bar.margin_bottom = "0em";
-#       theme.bar.margin_top = "-0.5em";
-#       theme.bar.layer = "overlay";
-#       theme.bar.opacity = 90;
-#       theme.bar.scaling = 85;
-#       theme.osd.scaling = 80;
-#       theme.tooltip.scaling = 80;
-#       theme.notification.scaling = 80;
-#       theme.bar.menus.menu.battery.scaling = 80;
-#       theme.bar.menus.menu.bluetooth.scaling = 80;
-#       theme.bar.menus.menu.clock.scaling = 80;
-#       #theme.bar.menus.menu.dashboard.confirmation_scaling = 80;
-#       theme.bar.menus.menu.dashboard.scaling = 70;
-#       theme.bar.menus.menu.dashboard.confirmation_scaling = 80;
-#       theme.bar.menus.menu.media.scaling = 80;
-#       theme.bar.menus.menu.notifications.scaling = 80;
-#       theme.bar.menus.menu.volume.scaling = 80;
-#       theme.bar.menus.popover.scaling = 80;
-#       theme.bar.location = "top";
-#       theme.bar.buttons.workspaces.pill.radius = "0.3rem * 0.2";
-#       theme.bar.buttons.workspaces.pill.height = "4em";
-#       theme.bar.buttons.workspaces.pill.width = "5em";
-#       theme.bar.buttons.workspaces.pill.active_width = "12em";
-#       menus.dashboard.directories.left.directory1.command = "bash -c \"xdg-open $HOME/Downloads/\"";
-#       menus.dashboard.directories.left.directory1.label = "󰉍 Downloads";
-#       menus.dashboard.directories.left.directory2.command = "bash -c \"xdg-open $HOME/Videos/\"";
-#       menus.dashboard.directories.left.directory2.label = "󰉏 Videos";
-#       menus.dashboard.directories.left.directory3.command = "bash -c \"xdg-open $HOME/Projects/\"";
-#       menus.dashboard.directories.left.directory3.label = "󰚝 Projects";
-#       menus.dashboard.directories.right.directory1.command = "bash -c \"xdg-open $HOME/Documents/\"";
-#       menus.dashboard.directories.right.directory1.label = "󱧶 Documents";
-#       menus.dashboard.directories.right.directory2.command = "bash -c \"xdg-open $HOME/Pictures/\"";
-#       menus.dashboard.directories.right.directory2.label = "󰉏 Pictures";
-#       menus.dashboard.directories.right.directory3.command = "bash -c \"xdg-open $HOME/\"";
-#       menus.dashboard.directories.right.directory3.label = "󱂵 Home";
-#       bar.customModules.updates.pollingInterval = 1440000;
-#       bar.launcher.icon = "❄️";
-#       theme.bar.floating = true;
-#       theme.bar.buttons.enableBorders = false;
-#       bar.clock.format = "%y/%m/%d  %H:%M";
-#       bar.media.show_active_only = false;
-#       bar.notifications.show_total = true;
-#       bar.windowtitle.leftClick = " pkill rofi || /home/$USER/.local/bin/agsv1 -t overview";
-#       theme.bar.buttons.modules.ram.enableBorder = false;
-#       bar.battery.hideLabelWhenFull = true;
-#       menus.dashboard.controls.enabled = true;
-#       menus.dashboard.shortcuts.enabled = true;
-#       menus.dashboard.shortcuts.right.shortcut1.command = "gcolor3";
-#       menus.media.displayTime = true;
-#       menus.power.lowBatteryNotification = true;
-#       bar.customModules.updates.updateCommand = "jq '[.[].cvssv3_basescore | to_entries | add | select(.value > 5)] | length' <<< $(vulnix -S --json)";
-#       bar.customModules.updates.icon.updated = "󰋼";
-#       bar.customModules.updates.icon.pending = "󰋼";
-#       bar.volume.rightClick = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
-#       bar.volume.middleClick = "pavucontrol";
-#       bar.media.format = "{title}";
-#       bar.launcher.autoDetectIcon = true;
-#       bar.workspaces.show_icons = false;
-#       bar.workspaces.ignored = "[-99]";
-#       theme.font.name = "JetBrainsMono Nerd Font";
-#       theme.font.size = "1.1rem";
-#       bar.workspaces.monitorSpecific = false;
-#       bar.workspaces.workspaces = 5;
-#       tear = true;
-#       menus.clock = {
-#         time = {
-#           military = true;
-#           hideSeconds = true;
-#         };
-#         weather.unit = "metric";
-#       };
-#       menus.dashboard.directories.enabled = true;
-#       menus.dashboard.stats.enable_gpu = false;
-#       theme.bar.transparent = false;
-#     };
-#   };
+    # hyprpanel = {
+    #     enable = true;
+    #     #systemd.enable = true; #absolute
+    #     hyprland.enable = true;
+    #     overwrite.enable = true;
+    #     overlay.enable = true;
+    #     theme = "catppuccin_mocha";
+    #     layout = {
+    #       "bar.layouts" = {
+    #         "0" = {
+    #           left = ["dashboard" "windowtitle" "systray" "cava"];
+    #           middle = ["workspaces"];
+    #           right = ["media" "clock" "hypridle" "power"];
+    #         };
+    #       };
+    #     };
+    #     override = {
+    #       "theme.bar.buttons.workspaces.hover" = "#7f849c";
+    #       "theme.bar.buttons.workspaces.active" = "#f5c2e7";
+    #       "theme.bar.buttons.workspaces.occupied" = "#89dceb";
+    #       "theme.bar.buttons.workspaces.available" = "#585b70";
+    #       "theme.bar.buttons.workspaces.border" = "#f9e2af";
+    #       "theme.bar.buttons.modules.power.spacing" = "0em";
+    #       "theme.bar.border.color" = "#f9e2af";
+    #       "theme.osd.orientation" = "vertical";
+    #       "theme.osd.location" = "right";
+    #       "bar.windowtitle.leftClick" = "pkill rofi || /home/antonio/.local/bin/agsv1 -t overview";
+    #       "bar.workspaces.spacing" = "1.5";
+    #       "bar.customModules.cava.showIcon"= false;
+    #       "theme.font.name" = "JetBrainsMono Nerd Font";
+    #     };
+    #     settings = {
+    #       bar.autoHide = "fullscreen";
+    #       notifications.position = "top";
+    #       #bar.windowtitle.leftClick = "'pkill rofi||/nix/store/rsb5ihbh4m3q4x046vc0y1r301i8j3is-ags-1.8.2/bin/ags -t overview'";
+    #       theme.bar.buttons.workspaces.spacing = "0.5";
+    #       theme.bar.buttons.background_hover_opacity = 80;
+    #       theme.bar.buttons.innerRadiusMultiplier = "0.4";
+    #       theme.bar.buttons.radius = "0.5em";
+    #       theme.bar.buttons.y_margins = "0.8em";
+    #       theme.bar.buttons.padding_y = "0.1rem";
+    #       theme.bar.buttons.padding_x = "0.7rem";
+    #       theme.bar.buttons.spacing = "0.25em";
+    #       theme.bar.border.location = "full";
+    #       theme.bar.buttons.workspaces.enableBorder = true;
+    #       theme.bar.buttons.modules.power.enableBorder = true;
+    #       theme.bar.buttons.dashboard.enableBorder = true;
+    #       theme.bar.border.width = "0.1em";
+    #       theme.bar.outer_spacing = "1.0em";
+    #       theme.bar.label_spacing = "0.5em";
+    #       theme.bar.border_radius = "0.6em";
+    #       theme.bar.margin_sides = "14.5em";
+    #       theme.bar.margin_bottom = "0em";
+    #       theme.bar.margin_top = "-0.5em";
+    #       theme.bar.layer = "overlay";
+    #       theme.bar.opacity = 90;
+    #       theme.bar.scaling = 85;
+    #       theme.osd.scaling = 80;
+    #       theme.tooltip.scaling = 80;
+    #       theme.notification.scaling = 80;
+    #       theme.bar.menus.menu.battery.scaling = 80;
+    #       theme.bar.menus.menu.bluetooth.scaling = 80;
+    #       theme.bar.menus.menu.clock.scaling = 80;
+    #       #theme.bar.menus.menu.dashboard.confirmation_scaling = 80;
+    #       theme.bar.menus.menu.dashboard.scaling = 70;
+    #       theme.bar.menus.menu.dashboard.confirmation_scaling = 80;
+    #       theme.bar.menus.menu.media.scaling = 80;
+    #       theme.bar.menus.menu.notifications.scaling = 80;
+    #       theme.bar.menus.menu.volume.scaling = 80;
+    #       theme.bar.menus.popover.scaling = 80;
+    #       theme.bar.location = "top";
+    #       theme.bar.buttons.workspaces.pill.radius = "0.3rem * 0.2";
+    #       theme.bar.buttons.workspaces.pill.height = "4em";
+    #       theme.bar.buttons.workspaces.pill.width = "5em";
+    #       theme.bar.buttons.workspaces.pill.active_width = "12em";
+    #       menus.dashboard.directories.left.directory1.command = "bash -c \"xdg-open $HOME/Downloads/\"";
+    #       menus.dashboard.directories.left.directory1.label = "󰉍 Downloads";
+    #       menus.dashboard.directories.left.directory2.command = "bash -c \"xdg-open $HOME/Videos/\"";
+    #       menus.dashboard.directories.left.directory2.label = "󰉏 Videos";
+    #       menus.dashboard.directories.left.directory3.command = "bash -c \"xdg-open $HOME/Projects/\"";
+    #       menus.dashboard.directories.left.directory3.label = "󰚝 Projects";
+    #       menus.dashboard.directories.right.directory1.command = "bash -c \"xdg-open $HOME/Documents/\"";
+    #       menus.dashboard.directories.right.directory1.label = "󱧶 Documents";
+    #       menus.dashboard.directories.right.directory2.command = "bash -c \"xdg-open $HOME/Pictures/\"";
+    #       menus.dashboard.directories.right.directory2.label = "󰉏 Pictures";
+    #       menus.dashboard.directories.right.directory3.command = "bash -c \"xdg-open $HOME/\"";
+    #       menus.dashboard.directories.right.directory3.label = "󱂵 Home";
+    #       bar.customModules.updates.pollingInterval = 1440000;
+    #       bar.launcher.icon = "❄️";
+    #       theme.bar.floating = true;
+    #       theme.bar.buttons.enableBorders = false;
+    #       bar.clock.format = "%y/%m/%d  %H:%M";
+    #       bar.media.show_active_only = false;
+    #       bar.notifications.show_total = true;
+    #       bar.windowtitle.leftClick = " pkill rofi || /home/$USER/.local/bin/agsv1 -t overview";
+    #       theme.bar.buttons.modules.ram.enableBorder = false;
+    #       bar.battery.hideLabelWhenFull = true;
+    #       menus.dashboard.controls.enabled = true;
+    #       menus.dashboard.shortcuts.enabled = true;
+    #       menus.dashboard.shortcuts.right.shortcut1.command = "gcolor3";
+    #       menus.media.displayTime = true;
+    #       menus.power.lowBatteryNotification = true;
+    #       bar.customModules.updates.updateCommand = "jq '[.[].cvssv3_basescore | to_entries | add | select(.value > 5)] | length' <<< $(vulnix -S --json)";
+    #       bar.customModules.updates.icon.updated = "󰋼";
+    #       bar.customModules.updates.icon.pending = "󰋼";
+    #       bar.volume.rightClick = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
+    #       bar.volume.middleClick = "pavucontrol";
+    #       bar.media.format = "{title}";
+    #       bar.launcher.autoDetectIcon = true;
+    #       bar.workspaces.show_icons = false;
+    #       bar.workspaces.ignored = "[-99]";
+    #       theme.font.name = "JetBrainsMono Nerd Font";
+    #       theme.font.size = "1.1rem";
+    #       bar.workspaces.monitorSpecific = false;
+    #       bar.workspaces.workspaces = 5;
+    #       tear = true;
+    #       menus.clock = {
+    #         time = {
+    #           military = true;
+    #           hideSeconds = true;
+    #         };
+    #         weather.unit = "metric";
+    #       };
+    #       menus.dashboard.directories.enabled = true;
+    #       menus.dashboard.stats.enable_gpu = false;
+    #       theme.bar.transparent = false;
+    #     };
+    #   };
 
-#
-
+    #
 
     # vscode = {
     #   enable = true;
@@ -1225,7 +871,6 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
           "custom/playerctl#play"
           "custom/playerctl#foward"
           "custom/playerlabel"
-          "hyprland/window"
           "wlr/taskbar"
 
         ];
@@ -1931,91 +1576,90 @@ hyprctl keyword general:col.active_border $(random_hex)  $(random_hex) $(random_
       '';
     };
 
+    #Zathura
+    zathura = {
+      enable = true;
 
-#Zathura
-zathura = {
-    enable = true;
-    
-    extraConfig = ''
-      # Open document in fit-width mode by default
-      set adjust-open "best-fit"
+      extraConfig = ''
+        # Open document in fit-width mode by default
+        set adjust-open "best-fit"
 
-      # One page per row by default
-      set pages-per-row 1
+        # One page per row by default
+        set pages-per-row 1
 
-      # Stop at page boundaries
-      set scroll-page-aware "true"
-      set smooth-scroll "true"
-      set scroll-full-overlap 0.01
-      set scroll-step 100
+        # Stop at page boundaries
+        set scroll-page-aware "true"
+        set smooth-scroll "true"
+        set scroll-full-overlap 0.01
+        set scroll-step 100
 
-      # Zoom settings
-      set zoom-min 10
-      set guioptions ""
+        # Zoom settings
+        set zoom-min 10
+        set guioptions ""
 
-      # Disable render loading
-      set render-loading "false"
-      
-      # Font setting
-      set font "JetBrainsMono Nerd Font"
+        # Disable render loading
+        set render-loading "false"
 
-      # Key mappings
-      unmap f
-      map f toggle_fullscreen
-      unmap a
-      map a toggle_statusbar
-      map [fullscreen] f toggle_fullscreen
+        # Font setting
+        set font "JetBrainsMono Nerd Font"
 
-      # Clipboard and title settings
-      set selection-clipboard clipboard
-      set window-title-page true
+        # Key mappings
+        unmap f
+        map f toggle_fullscreen
+        unmap a
+        map a toggle_statusbar
+        map [fullscreen] f toggle_fullscreen
 
-      # Colors
-      set default-fg                rgba(202,211,245,1)
-      set default-bg                rgba(30,30,46,1)
+        # Clipboard and title settings
+        set selection-clipboard clipboard
+        set window-title-page true
 
-      set completion-bg             rgba(30,30,46,1)
-      set completion-fg             rgba(202,211,245,1)
-      set completion-highlight-bg   rgba(87,82,104,1)
-      set completion-highlight-fg   rgba(202,211,245,1)
-      set completion-group-bg       rgba(54,58,79,1)
-      set completion-group-fg       rgba(138,173,244,1)
+        # Colors
+        set default-fg                rgba(202,211,245,1)
+        set default-bg                rgba(30,30,46,1)
 
-      set statusbar-fg              rgba(202,211,245,1)
-      set statusbar-bg              rgba(54,58,79,1)
+        set completion-bg             rgba(30,30,46,1)
+        set completion-fg             rgba(202,211,245,1)
+        set completion-highlight-bg   rgba(87,82,104,1)
+        set completion-highlight-fg   rgba(202,211,245,1)
+        set completion-group-bg       rgba(54,58,79,1)
+        set completion-group-fg       rgba(138,173,244,1)
 
-      set notification-bg           rgba(54,58,79,1)
-      set notification-fg           rgba(202,211,245,1)
-      set notification-error-bg     rgba(54,58,79,1)
-      set notification-error-fg     rgba(237,135,150,1)
-      set notification-warning-bg   rgba(54,58,79,1)
-      set notification-warning-fg   rgba(250,227,176,1)
+        set statusbar-fg              rgba(202,211,245,1)
+        set statusbar-bg              rgba(54,58,79,1)
 
-      set inputbar-fg               rgba(202,211,245,1)
-      set inputbar-bg               rgba(54,58,79,1)
+        set notification-bg           rgba(54,58,79,1)
+        set notification-fg           rgba(202,211,245,1)
+        set notification-error-bg     rgba(54,58,79,1)
+        set notification-error-fg     rgba(237,135,150,1)
+        set notification-warning-bg   rgba(54,58,79,1)
+        set notification-warning-fg   rgba(250,227,176,1)
 
-      # Recolor settings
-      set recolor                   "true"
-      set recolor-lightcolor        rgba(30,30,47,1)
-      set recolor-darkcolor         rgba(202,211,245,1)
+        set inputbar-fg               rgba(202,211,245,1)
+        set inputbar-bg               rgba(54,58,79,1)
 
-      set index-fg                  rgba(202,211,245,1)
-      set index-bg                  rgba(30,30,46,1)
-      set index-active-fg           rgba(202,211,245,1)
-      set index-active-bg           rgba(54,58,79,1)
+        # Recolor settings
+        set recolor                   "true"
+        set recolor-lightcolor        rgba(30,30,47,1)
+        set recolor-darkcolor         rgba(202,211,245,1)
 
-      set render-loading-bg         rgba(30,30,46,1)
-      set render-loading-fg         rgba(202,211,245,1)
+        set index-fg                  rgba(202,211,245,1)
+        set index-bg                  rgba(30,30,46,1)
+        set index-active-fg           rgba(202,211,245,1)
+        set index-active-bg           rgba(54,58,79,1)
 
-      set highlight-color           rgba(87,82,104,0.5)
-      set highlight-fg              rgba(245,189,230,0.5)
-      set highlight-active-color    rgba(245,189,230,0.5)
+        set render-loading-bg         rgba(30,30,46,1)
+        set render-loading-fg         rgba(202,211,245,1)
 
-      # Additional recolor settings
-      set recolor-reverse-video     "true"
-      set recolor-keephue           "true"
-    '';
-  };
+        set highlight-color           rgba(87,82,104,0.5)
+        set highlight-fg              rgba(245,189,230,0.5)
+        set highlight-active-color    rgba(245,189,230,0.5)
+
+        # Additional recolor settings
+        set recolor-reverse-video     "true"
+        set recolor-keephue           "true"
+      '';
+    };
 
     # Git configuration
     git = {
@@ -2027,8 +1671,6 @@ zathura = {
         pull.rebase = true;
       };
     };
-
-
 
     # Terminal configuration
     alacritty = {
@@ -2390,667 +2032,59 @@ zathura = {
     };
 
     ##Spicitify
-    spicetify = {
-      enable = true;
-      enabledExtensions = with spicePkgs.extensions; [
-        playlistIcons
-        historyShortcut
-        adblock
-        hidePodcasts
-        shuffle
-        fullAppDisplay
-        volumePercentage
-        history
-        #oneko #cat follow mouse
-        beautifulLyrics
-        autoSkipVideo
-        powerBar # Spotlight-like search bar for spotify
-      ];
-      theme = spicePkgs.themes.comfy;
-      #theme = spicePkgs.themes.lucid;
-      #theme = spicePkgs.themes.hazy;
-
-      enabledCustomApps = with spicePkgs.apps; [
-        newReleases
-        lyricsPlus
-        ncsVisualizer
-        marketplace
-        betterLibrary
-      ];
-
-    };
-
-  ############
-  ##hyprlock##
-  ############
-##Version - 1 
-    # hyprlock = {
+    # spicetify = {
     #   enable = true;
-    #   settings = {
-    #     general = {
-    #       disable_loading_bar = true;
-    #       grace = 0; # Disable unlocking on mouse movement
-    #       #grace = 10;
-    #       hide_cursor = true;
-    #       no_fade_in = false;
-    #     };
+    #   enabledExtensions = with spicePkgs.extensions; [
+    #     playlistIcons
+    #     historyShortcut
+    #     adblock
+    #     hidePodcasts
+    #     shuffle
+    #     fullAppDisplay
+    #     volumePercentage
+    #     history
+    #     #oneko #cat follow mouse
+    #     beautifulLyrics
+    #     autoSkipVideo
+    #     powerBar # Spotlight-like search bar for spotify
+    #   ];
+    #   theme = spicePkgs.themes.comfy;
+    #   #theme = spicePkgs.themes.lucid;
+    #   #theme = spicePkgs.themes.hazy;
 
-    #     background = [
-    #       {
-    #         path = "/etc/nixos/wallpaper.jpg";
-    #         blur_passes = 3;
-    #         blur_size = 8;
-    #         # monitor =
-    #         #path = $XDG_CONFIG_HOME/hypr/scripts/current_wal;   # only png supported for now
-    #         # color = $color0;
+    #   enabledCustomApps = with spicePkgs.apps; [
+    #     newReleases
+    #     lyricsPlus
+    #     ncsVisualizer
+    #     marketplace
+    #     betterLibrary
+    #   ];
 
-    #       }
-    #     ];
-
-    #     input-field = [
-    #       {
-    #         size = "200, 50";
-    #         position = "0, -80";
-    #         dots_center = true;
-    #         fade_on_empty = false;
-    #         font_color = "rgb(CFE6F4)";
-    #         inner_color = "rgb(657DC2)";
-    #         outer_color = "rgb(0D0E15)";
-    #         outline_thickness = 5;
-    #         placeholder_text = "Password...";
-    #         shadow_passes = 2;
-    #       }
-    #     ];
-    #   };
     # };
 
+    
 
-##Version - 2  ##style - 3
-
-# hyprlock = {
-#   enable = true;
-#   settings = {
-#     background = [{
-#       monitor = "";
-#       path = "~/.config/hypr/hyprlock.png";
-#       blur_passes = 3;
-#       contrast = 0.8916;
-#       brightness = 0.8172;
-#       vibrancy = 0.1696;
-#       vibrancy_darkness = 0.0;
-#     }];
-
-#     general = {
-#       no_fade_in = false;
-#       grace = 0;
-#       disable_loading_bar = false;
-#     };
-
-#     image = [{
-#       monitor = "";
-#       path = "~/.config/hypr/face.png";
-#       border_size = 2;
-#       border_color = "rgba(255, 255, 255, 0)";
-#       size = 130;
-#       rounding = -1;
-#       rotate = 0;
-#       reload_time = -1;
-#       position = "0, 40";
-#       halign = "center";
-#       valign = "center";
-#     }];
-
-#     label = [
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo -e \"$(date +\"%A, %B %d\")\"";
-#         color = "rgba(216, 222, 233, 0.70)";
-#         font_size = 25;
-#         font_family = "SF Pro Display Bold";
-#         position = "0, 350";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo \"<span>$(date +\"%I:%M\")</span>\"";
-#         color = "rgba(216, 222, 233, 0.70)";
-#         font_size = 120;
-#         font_family = "SF Pro Display Bold";
-#         position = "0, 250";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "$USER";
-#         color = "rgba(216, 222, 233, 0.80)";
-#         outline_thickness = 2;
-#         dots_size = 0.2;
-#         dots_spacing = 0.2;
-#         dots_center = true;
-#         font_size = 18;
-#         font_family = "SF Pro Display Bold";
-#         position = "0, -130";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo \"$(~/.config/hypr/Scripts/songdetail.sh)\"";
-#         color = "rgba(255, 255, 255, 0.6)";
-#         font_size = 18;
-#         font_family = "JetBrains Mono Nerd, SF Pro Display Bold";
-#         position = "0, 50";
-#         halign = "center";
-#         valign = "bottom";
-#       }
-#     ];
-
-#     shape = [{
-#       monitor = "";
-#       size = "300, 60";
-#       color = "rgba(255, 255, 255, .1)";
-#       rounding = -1;
-#       border_size = 0;
-#       border_color = "rgba(253, 198, 135, 0)";
-#       rotate = 0;
-#       xray = false;
-#       position = "0, -130";
-#       halign = "center";
-#       valign = "center";
-#     }];
-
-#     input-field = [{
-#       monitor = "";
-#       size = "300, 60";
-#       outline_thickness = 2;
-#       dots_size = 0.2;
-#       dots_spacing = 0.2;
-#       dots_center = true;
-#       outer_color = "rgba(0, 0, 0, 0)";
-#       inner_color = "rgba(255, 255, 255, 0.1)";
-#       font_color = "rgb(200, 200, 200)";
-#       fade_on_empty = false;
-#       font_family = "SF Pro Display Bold";
-#       placeholder_text = "<i><span foreground=\"##ffffff99\">🔒 Enter Pass</span></i>";
-#       hide_input = false;
-#       position = "0, -210";
-#       halign = "center";
-#       valign = "center";
-#     }];
-#   };
-# };
-
-##Version - 3  ##Style-4
-
-# hyprlock = {
-#   enable = true;
-#   settings = {
-#     background = [{
-#       monitor = "";
-#       path = "~/.config/hypr/hyprlock.png";
-#       blur_passes = 0;
-#       contrast = 0.8916;
-#       brightness = 0.8916;
-#       vibrancy = 0.8916;
-#       vibrancy_darkness = 0.0;
-#     }];
-
-#     general = {
-#       no_fade_in = false;
-#       grace = 0;
-#       disable_loading_bar = false;
-#     };
-
-#     image = [{
-#       monitor = "";
-#       path = "~/.config/hypr/face.png";
-#       border_size = 2;
-#       border_color = "rgba(216, 222, 233, 0.80)";
-#       size = 100;
-#       rounding = -1;
-#       rotate = 0;
-#       reload_time = -1;
-#       position = "25, 200";
-#       halign = "center";
-#       valign = "center";
-#     }];
-
-#     label = [
-#       {
-#         monitor = "";
-#         text = "Vamsi";
-#         color = "rgba(216, 222, 233, 0.80)";
-#         outline_thickness = 0;
-#         dots_size = 0.2;
-#         dots_spacing = 0.2;
-#         dots_center = true;
-#         font_size = 20;
-#         font_family = "SF Pro Display Bold";
-#         position = "25, 110";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo \"<span>$(date +\"%I:%M\")</span>\"";
-#         color = "rgba(216, 222, 233, 0.80)";
-#         font_size = 60;
-#         font_family = "SF Pro Display Bold";
-#         position = "30, -8";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo -e \"$(date +\"%A, %B %d\")\"";
-#         color = "rgba(216, 222, 233, .80)";
-#         font_size = 19;
-#         font_family = "SF Pro Display Bold";
-#         position = "35, -60";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "$USER";
-#         color = "rgba(216, 222, 233, 0.80)";
-#         outline_thickness = 0;
-#         dots_size = 0.2;
-#         dots_spacing = 0.2;
-#         dots_center = true;
-#         font_size = 16;
-#         font_family = "SF Pro Display Bold";
-#         position = "38, -190";
-#         halign = "center";
-#         valign = "center";
-#       }
-#     ];
-
-#     shape = [{
-#       monitor = "";
-#       size = "320, 55";
-#       color = "rgba(255, 255, 255, 0.1)";
-#       rounding = -1;
-#       border_size = 0;
-#       border_color = "rgba(255, 255, 255, 1)";
-#       rotate = 0;
-#       xray = false;
-#       position = "34, -190";
-#       halign = "center";
-#       valign = "center";
-#     }];
-
-#     input-field = [{
-#       monitor = "";
-#       size = "320, 55";
-#       outline_thickness = 0;
-#       dots_size = 0.2;
-#       dots_spacing = 0.2;
-#       dots_center = true;
-#       outer_color = "rgba(255, 255, 255, 0)";
-#       inner_color = "rgba(255, 255, 255, 0.1)";
-#       font_color = "rgb(200, 200, 200)";
-#       fade_on_empty = false;
-#       font_family = "SF Pro Display Bold";
-#       placeholder_text = "<i><span foreground=\"##ffffff99\">🔒  Enter Pass</span></i>";
-#       hide_input = false;
-#       position = "34, -268";
-#       halign = "center";
-#       valign = "center";
-#     }];
-#   };
-# };
-
-
-##Version - 4  #Style - 7
-
-# hyprlock = {
-#   enable = true;
-#   settings = {
-#     background = [{
-#       monitor = "";
-#       path = "~/.config/hypr/hyprlock.png";
-#       blur_passes = 0;
-#       contrast = 0.8916;
-#       brightness = 0.8172;
-#       vibrancy = 0.1696;
-#       vibrancy_darkness = 0.0;
-#     }];
-
-#     general = {
-#       no_fade_in = false;
-#       grace = 0;
-#       disable_loading_bar = false;
-#     };
-
-#     label = [
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo \"<span>$(date +\"%I\")</span>\"";
-#         color = "rgba(255, 255, 255, 1)";
-#         font_size = 125;
-#         font_family = "StretchPro";
-#         position = "-80, 190";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo \"<span>$(date +\"%M\")</span>\"";
-#         color = "rgba(147, 196, 255, 1)";
-#         font_size = 125;
-#         font_family = "StretchPro";
-#         position = "0, 70";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo -e \"$(date +\"%d %B, %a.\")\"";
-#         color = "rgba(255, 255, 255, 100)";
-#         font_size = 22;
-#         font_family = "Suisse Int'l Mono";
-#         position = "20, -8";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "$USER";
-#         color = "rgba(216, 222, 233, 0.80)";
-#         outline_thickness = 2;
-#         dots_size = 0.2;
-#         dots_spacing = 0.2;
-#         dots_center = true;
-#         font_size = 22;
-#         font_family = "SF Pro Display Bold";
-#         position = "0, -220";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo \"$(~/.config/hypr/Scripts/songdetail.sh)\"";
-#         color = "rgba(147, 196, 255, 1)";
-#         font_size = 18;
-#         font_family = "JetBrains Mono Nerd, SF Pro Display Bold";
-#         position = "0, 20";
-#         halign = "center";
-#         valign = "bottom";
-#       }
-#     ];
-
-#     input-field = [{
-#       monitor = "";
-#       size = "300, 60";
-#       outline_thickness = 2;
-#       dots_size = 0.2;
-#       dots_spacing = 0.2;
-#       dots_center = true;
-#       outer_color = "rgba(0, 0, 0, 0)";
-#       inner_color = "rgba(255, 255, 255, 0.1)";
-#       font_color = "rgb(200, 200, 200)";
-#       fade_on_empty = false;
-#       font_family = "SF Pro Display Bold";
-#       placeholder_text = "<i><span foreground=\"##ffffff99\">🔒 Enter Pass</span></i>";
-#       hide_input = false;
-#       position = "0, -290";
-#       halign = "center";
-#       valign = "center";
-#     }];
-#   };
-# };
-
-
-##Version - 5  #Style - 9
-
-hyprlock = {
-  enable = true;
-  settings = {
-    background = [{
-      monitor = "";
-      path = "~/.config/hypr/hyprlock.png";
-      blur_passes = 2;
-      blur_size = 2;
-      contrast = 0.8916;
-      brightness = 0.8172;
-      vibrancy = 0.1696;
-      vibrancy_darkness = 0.0;
-    }];
-
-    general = {
-      no_fade_in = false;
-      grace = 0;
-      disable_loading_bar = false;
-    };
-
-    input-field = [{
-      monitor = "";
-      size = "250, 60";
-      outline_thickness = 2;
-      dots_size = 0.2;
-      dots_spacing = 0.2;
-      dots_center = true;
-      outer_color = "rgba(0, 0, 0, 0)";
-      inner_color = "rgba(100, 114, 125, 0.4)";
-      font_color = "rgb(200, 200, 200)";
-      fade_on_empty = false;
-      font_family = "SF Pro Display Bold";
-      placeholder_text = "<i><span foreground=\"##ffffff99\">Enter Pass</span></i>";
-      hide_input = false;
-      position = "0, -225";
-      halign = "center";
-      valign = "center";
-    }];
-
-    label = [
-      {
-        monitor = "";
-        text = "cmd[update:1000] echo \"<span>$(date +\"%I:%M\")</span>\"";
-        color = "rgba(216, 222, 233, 0.70)";
-        font_size = 130;
-        font_family = "SF Pro Display Bold";
-        position = "0, 240";
-        halign = "center";
-        valign = "center";
-      }
-      {
-        monitor = "";
-        text = "cmd[update:1000] echo -e \"$(date +\"%A, %d %B\")\"";
-        color = "rgba(216, 222, 233, 0.70)";
-        font_size = 30;
-        font_family = "SF Pro Display Bold";
-        position = "0, 105";
-        halign = "center";
-        valign = "center";
-      }
-      {
-        monitor = "";
-        text = "Hi, $USER";
-        color = "rgba(216, 222, 233, 0.70)";
-        font_size = 25;
-        font_family = "SF Pro Display Bold";
-        position = "0, -130";
-        halign = "center";
-        valign = "center";
-      }
-      {
-        monitor = "";
-        # text = "cmd[update:1000] echo "$(~/.config/hypr/Scripts/songdetail.sh)"";
-        text = ''cmd[update:1000] echo "$(~/.config/hypr/Scripts/songdetail.sh)"'';
-        color = "rgba(255, 255, 255, 0.7)";
-        font_size = 18;
-        font_family = "JetBrains Mono Nerd, SF Pro Display Bold";
-        position = "0, 60";
-        halign = "center";
-        valign = "bottom";
-      }
-    ];
-
-    image = [{
-      monitor = "";
-      path = "~/.config/hypr/face.png";
-      border_color = "0xffdddddd";
-      border_size = 0;
-      size = 120;
-      rounding = -1;
-      rotate = 0;
-      reload_time = -1;
-      position = "0, -20";
-      halign = "center";
-      valign = "center";
-    }];
-  };
-};
-
-##Version - 6 #Style - 10
-
-# hyprlock = {
-#   enable = true;
-#   settings = {
-#     background = [{
-#       monitor = "";
-#       path = "~/.config/hypr/hyprlock.png";
-#       blur_passes = 2;
-#       contrast = 0.8916;
-#       brightness = 0.8172;
-#       vibrancy = 0.1696;
-#       vibrancy_darkness = 0.0;
-#     }];
-
-#     general = {
-#       no_fade_in = false;
-#       grace = 0;
-#       disable_loading_bar = false;
-#     };
-
-#     label = [
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo -e \"$(date +\"%A\")\"";
-#         color = "rgba(216, 222, 233, 0.70)";
-#         font_size = 90;
-#         font_family = "SF Pro Display Bold";
-#         position = "0, 350";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo -e \"$(date +\"%d %B\")\"";
-#         color = "rgba(216, 222, 233, 0.70)";
-#         font_size = 40;
-#         font_family = "SF Pro Display Bold";
-#         position = "0, 250";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "cmd[update:1000] echo \"<span>$(date +\"- %I:%M -\")</span>\"";
-#         color = "rgba(216, 222, 233, 0.70)";
-#         font_size = 20;
-#         font_family = "SF Pro Display Bold";
-#         position = "0, 190";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "$USER";
-#         color = "rgba(216, 222, 233, 0.80)";
-#         outline_thickness = 2;
-#         dots_size = 0.2;
-#         dots_spacing = 0.2;
-#         dots_center = true;
-#         font_size = 18;
-#         font_family = "SF Pro Display Bold";
-#         position = "0, -130";
-#         halign = "center";
-#         valign = "center";
-#       }
-#       {
-#         monitor = "";
-#         text = "󰐥  󰜉  󰤄";
-#         color = "rgba(255, 255, 255, 0.6)";
-#         font_size = 50;
-#         position = "0, 100";
-#         halign = "center";
-#         valign = "bottom";
-#       }
-#     ];
-
-#     image = [{
-#       monitor = "";
-#       path = "~/.config/hypr/face.png";
-#       border_size = 2;
-#       border_color = "rgba(255, 255, 255, .65)";
-#       size = 130;
-#       rounding = -1;
-#       rotate = 0;
-#       reload_time = -1;
-#       position = "0, 40";
-#       halign = "center";
-#       valign = "center";
-#     }];
-
-#     shape = [{
-#       monitor = "";
-#       size = "300, 60";
-#       color = "rgba(255, 255, 255, .1)";
-#       rounding = -1;
-#       border_size = 0;
-#       border_color = "rgba(255, 255, 255, 0)";
-#       rotate = 0;
-#       xray = false;
-#       position = "0, -130";
-#       halign = "center";
-#       valign = "center";
-#     }];
-
-#     input-field = [{
-#       monitor = "";
-#       size = "300, 60";
-#       outline_thickness = 2;
-#       dots_size = 0.2;
-#       dots_spacing = 0.2;
-#       dots_center = true;
-#       outer_color = "rgba(255, 255, 255, 0)";
-#       inner_color = "rgba(255, 255, 255, 0.1)";
-#       font_color = "rgb(200, 200, 200)";
-#       fade_on_empty = false;
-#       font_family = "SF Pro Display Bold";
-#       placeholder_text = "<i><span foreground=\"##ffffff99\">🔒 Enter Pass</span></i>";
-#       hide_input = false;
-#       position = "0, -210";
-#       halign = "center";
-#       valign = "center";
-#     }];
-#   };
-# };
-
-#########################################
-
+    #########################################
 
     #Fish
     fish = {
       enable = true;
 
       interactiveShellInit = ''
-        set -g fish_greeting # Disable greeting
+            set -g fish_greeting # Disable greeting
 
-        # Add any custom initialization commands here
-          nitch
+            # Add any custom initialization commands here
+              nitch
 
-       #enable fish inside nix-shell
-        ${pkgs.any-nix-shell}/bin/any-nix-shell fish --info-right | source
+           #enable fish inside nix-shell
+            ${pkgs.any-nix-shell}/bin/any-nix-shell fish --info-right | source
+
+        ##risky    #python-env #this recursing into nix-shell >> nix-shell.. , so comented it ,later see how to initialize only once 
       '';
 
       shellAliases = {
         # Add your aliases here
-        ncg = "nix-collect-garbage --delete-old && sudo nix-collect-garbage -d && sudo /run/current-system/bin/switch-to-configuration boot";
+        cleanup = "nix-collect-garbage --delete-old && sudo nix-collect-garbage -d && sudo /run/current-system/bin/switch-to-configuration boot";
         v = "nvim";
         sv = "sudo nvim";
         cat = "bat";
@@ -3060,6 +2094,11 @@ hyprlock = {
         ".." = "cd ..";
         btop = "btop --utf-force";
         pipes = "pipes-rs";
+        py-env = "cd ~/Documents/Python-Environment && nix-shell shell.nix";
+        #comfy-ui = "cd ~/Documents/Python-Environment && nix-shell shell.nix && cd Tools/ComfyUI && python main.py";
+        comfy-ui = "cd Tools/ComfyUI && python main.py";
+        #update = "cd /etc/nixos; nix flake update";
+        update = "cd /etc/nixos && nix flake update && sudo nixos-rebuild switch";
       };
 
       shellInit = ''
@@ -3079,6 +2118,97 @@ hyprlock = {
           };
         }
       ];
+    };
+
+
+
+#______________________________
+    #Tmux
+    tmux = {
+      enable = true;
+      plugins = with pkgs.tmuxPlugins; [
+        vim-tmux-navigator
+        sensible
+        yank
+        prefix-highlight
+        {
+          plugin = power-theme;
+          extraConfig = ''
+            set -g @tmux_power_theme 'gold'
+          '';
+        }
+        {
+          plugin = resurrect; # Used by tmux-continuum
+
+          # Use XDG data directory
+          # https://github.com/tmux-plugins/tmux-resurrect/issues/348
+          extraConfig = ''
+            set -g @resurrect-dir '/Users/dustin/.cache/tmux/resurrect'
+            set -g @resurrect-capture-pane-contents 'on'
+            set -g @resurrect-pane-contents-area 'visible'
+          '';
+        }
+        {
+          plugin = continuum;
+          extraConfig = ''
+            set -g @continuum-restore 'on'
+            set -g @continuum-save-interval '5' # minutes
+          '';
+        }
+      ];
+      terminal = "screen-256color";
+      prefix = "C-x";
+      escapeTime = 10;
+      historyLimit = 50000;
+      extraConfig = ''
+        # Default shell
+        set-option -g default-shell /run/current-system/sw/bin/fish
+
+        # Remove Vim mode delays
+        set -g focus-events on
+
+        # Enable full mouse support
+        set -g mouse on
+
+        # -----------------------------------------------------------------------------
+        # Key bindings
+        # -----------------------------------------------------------------------------
+
+        # Unbind default keys
+        unbind C-b
+        unbind '"'
+        unbind %
+
+        # Split panes, vertical or horizontal
+        bind-key x split-window -v
+        bind-key v split-window -h
+
+        # Move around panes with vim-like bindings (h,j,k,l)
+        bind-key -n M-k select-pane -U
+        bind-key -n M-h select-pane -L
+        bind-key -n M-j select-pane -D
+        bind-key -n M-l select-pane -R
+
+        # Smart pane switching with awareness of Vim splits.
+        # This is copy paste from https://github.com/christoomey/vim-tmux-navigator
+        is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+          | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'"
+        bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
+        bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
+        bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
+        bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'
+        tmux_version='$(tmux -V | sed -En "s/^tmux ([0-9]+(.[0-9]+)?).*/\1/p")'
+        if-shell -b '[ "$(echo "$tmux_version < 3.0" | bc)" = 1 ]' \
+          "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\'  'select-pane -l'"
+        if-shell -b '[ "$(echo "$tmux_version >= 3.0" | bc)" = 1 ]' \
+          "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\\\'  'select-pane -l'"
+
+        bind-key -T copy-mode-vi 'C-h' select-pane -L
+        bind-key -T copy-mode-vi 'C-j' select-pane -D
+        bind-key -T copy-mode-vi 'C-k' select-pane -U
+        bind-key -T copy-mode-vi 'C-l' select-pane -R
+        bind-key -T copy-mode-vi 'C-\' select-pane -l
+      '';
     };
 
     #Cava
@@ -3248,339 +2378,324 @@ hyprlock = {
 
   };
 
-
-
-
-  
   #Rofi v-2
-#   configuration {
-#   display-drun: "Apps:";
-#   display-run: "Run";
-#   display-window: "Window:";
-#   drun-display-format : "{icon} {name}";
-#   font: "JetBrainsMono Nerd Font 10";
-#   modi: "window,run,drun";
-#   show-icons: true;
-#   icon-theme: "Papirus";
-# }
+  #   configuration {
+  #   display-drun: "Apps:";
+  #   display-run: "Run";
+  #   display-window: "Window:";
+  #   drun-display-format : "{icon} {name}";
+  #   font: "JetBrainsMono Nerd Font 10";
+  #   modi: "window,run,drun";
+  #   show-icons: true;
+  #   icon-theme: "Papirus";
+  # }
 
-# @theme "/dev/null"
+  # @theme "/dev/null"
 
-# *{
-#  bg: #181825dd;
-#  bg-alt: #fcbdf9;
+  # *{
+  #  bg: #181825dd;
+  #  bg-alt: #fcbdf9;
 
-#  fg: #cdd6f4;
+  #  fg: #cdd6f4;
 
-#  background-color: @bg;
+  #  background-color: @bg;
 
-#  border: 0; 
-#  margin: 0;
-#  padding: 0;
-#  spacing: 2;
-# }
+  #  border: 0;
+  #  margin: 0;
+  #  padding: 0;
+  #  spacing: 2;
+  # }
 
-# window {
+  # window {
 
-#   width: 25%;
-#   border: 2;
-#   border-color: @bg-alt;
-#   border-radius: 7; 
-# }
+  #   width: 25%;
+  #   border: 2;
+  #   border-color: @bg-alt;
+  #   border-radius: 7;
+  # }
 
-# element {
-#   padding: 6;
-#   background-color: @bg;
-#   text-color: @fg;
-# }
+  # element {
+  #   padding: 6;
+  #   background-color: @bg;
+  #   text-color: @fg;
+  # }
 
-# element selected {
-#   background-color: @bg-alt;
-#   text-color: @bg;
-#   border-radius: 2%;
-# }
+  # element selected {
+  #   background-color: @bg-alt;
+  #   text-color: @bg;
+  #   border-radius: 2%;
+  # }
 
-# element-text {
-#   background-color: inherit;
-#   text-color: inherit;
-#   vertical-align: 0.5;
-# }
+  # element-text {
+  #   background-color: inherit;
+  #   text-color: inherit;
+  #   vertical-align: 0.5;
+  # }
 
-# element-icon {
-#   background-color: inherit;
-#   text-color: inherit;
-#   size: 30;
-# }
+  # element-icon {
+  #   background-color: inherit;
+  #   text-color: inherit;
+  #   size: 30;
+  # }
 
-# entry {
-#   background-color: @bg;
-#   padding: 10;
-#   text-color: @fg;
-# }
+  # entry {
+  #   background-color: @bg;
+  #   padding: 10;
+  #   text-color: @fg;
+  # }
 
-# inputbar {  
-#   children: [prompt, entry];
-# }
+  # inputbar {
+  #   children: [prompt, entry];
+  # }
 
-# inputbar {
-#   background-color: @bg;
-# }
+  # inputbar {
+  #   background-color: @bg;
+  # }
 
-# listview {
-#   background-color: @bg;
-#   margin: 0 10 10 10;
-#   columns: 1;
-#   lines: 6;
-# }
+  # listview {
+  #   background-color: @bg;
+  #   margin: 0 10 10 10;
+  #   columns: 1;
+  #   lines: 6;
+  # }
 
-# mainbox {
-#   background-color: @bg;
-#   children: [inputbar, listview];
-# }
+  # mainbox {
+  #   background-color: @bg;
+  #   children: [inputbar, listview];
+  # }
 
-# prompt {
-#   background-color: @bg;
-#   enabled: true;
-#   padding: 10;
-#   text-color: @fg;
+  # prompt {
+  #   background-color: @bg;
+  #   enabled: true;
+  #   padding: 10;
+  #   text-color: @fg;
 
-
-
-
-##Vesktop
+  ##Vesktop
 
   xdg.configFile."vesktop/themes/theme.css".text = ''
-    
-      /**
-       * @name midnight-pywal
-       * @description A dark, rounded discord theme with pywal colors.
-       * @version 1.0.0
-      */
 
-      @import url('https://refact0r.github.io/midnight-discord/midnight.css');
-      
-      @import "~/.cache/wal/colors-vesktop.css"
-
-      :root {
-        --font: 'JetBrainsMono Nerd Font';
-        --corner-text: 'Midnight';
-
-        --online-indicator: var(--accent-2);
-        --dnd-indicator: var(--accent-3);
-        --idle-indicator: var(--accent-4);
-        --streaming-indicator: var(--accent-5);
-
-        --spacing: 12px;
-        --list-item-transition: 0.2s ease;
-        --unread-bar-transition: 0.2s ease;
-        --moon-spin-transition: 0.4s ease;
-        --icon-spin-transition: 1s ease;
-
-        --roundness-xl: 22px;
-        --roundness-l: 20px;
-        --roundness-m: 16px;
-        --roundness-s: 12px;
-        --roundness-xs: 10px;
-        --roundness-xxs: 8px;
-
-        --discord-icon: none;
-        --moon-icon: block;
-        --moon-icon-url: url('https://upload.wikimedia.org/wikipedia/commons/c/c4/Font_Awesome_5_solid_moon.svg');
-        --moon-icon-size: auto;
-      }
-    '';
-xdg.configFile."vesktop/themes/Material-theme.css".text = ''
     /**
- * @name Material Discord
- * @version 3.0.5
- * @description A theme based on Google's Material Design
- * @author CapnKitten
- *
- * @website http://github.com/CapnKitten
- * @source https://github.com/CapnKitten/BetterDiscord/blob/master/Themes/Material-Discord/css/source.css
- * @donate https://paypal.me/capnkitten
- * @invite jzJkA6Z
- */
+     * @name midnight-pywal
+     * @description A dark, rounded discord theme with pywal colors.
+     * @version 1.0.0
+    */
 
-@import url(https://capnkitten.github.io/BetterDiscord/Themes/Material-Discord/css/source.css);
+    @import url('https://refact0r.github.io/midnight-discord/midnight.css');
 
-/* Material You addon */
-@import url(https://capnkitten.github.io/BetterDiscord/Themes/Material-Discord/css/addons/material-you/source.css);
+    @import "~/.cache/wal/colors-vesktop.css"
 
-/* MATERIAL YOU DARK THEME SETTINGS */
-.theme-dark {
-	--saturation-modifier: 0.31;
-	--lightness-modifier: 0.225;
-	--text-lightness-modifier: 1.0;
-	--ui-darkness-modifier: 1.0;
-}
+    :root {
+      --font: 'JetBrainsMono Nerd Font';
+      --corner-text: 'Midnight';
 
-/* MATERIAL YOU LIGHT THEME SETTINGS */
-.theme-light {
-	--saturation-modifier: 0.74;
-	--lightness-modifier: 2.125;
-	--text-lightness-modifier: 1.0;
-}
+      --online-indicator: var(--accent-2);
+      --dnd-indicator: var(--accent-3);
+      --idle-indicator: var(--accent-4);
+      --streaming-indicator: var(--accent-5);
 
-:root {
-	/* ACCENT HSL AND TEXT COLOR SETTINGS */
-	--accent-hue: 227;
-	--accent-saturation: 71%;
-	--accent-lightness: 61%;
-	--accent-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
-	--accent-button-action: hsl(0,0%,100%);
+      --spacing: 12px;
+      --list-item-transition: 0.2s ease;
+      --unread-bar-transition: 0.2s ease;
+      --moon-spin-transition: 0.4s ease;
+      --icon-spin-transition: 1s ease;
 
-	/* ALERT HSL AND TEXT COLOR SETTINGS */
-	--alert-hue: 0;
-	--alert-saturation: 85%;
-	--alert-lightness: 61%;
-	--alert-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
+      --roundness-xl: 22px;
+      --roundness-l: 20px;
+      --roundness-m: 16px;
+      --roundness-s: 12px;
+      --roundness-xs: 10px;
+      --roundness-xxs: 8px;
 
-	/* WARNING HSL AND TEXT COLOR SETTINGS*/
-	--warning-hue: 40;
-	--warning-saturation: 86.4%;
-	--warning-lightness: 56.9%;
-	--warning-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
+      --discord-icon: none;
+      --moon-icon: block;
+      --moon-icon-url: url('https://upload.wikimedia.org/wikipedia/commons/c/c4/Font_Awesome_5_solid_moon.svg');
+      --moon-icon-size: auto;
+    }
+  '';
+  xdg.configFile."vesktop/themes/Material-theme.css".text = ''
+        /**
+     * @name Material Discord
+     * @version 3.0.5
+     * @description A theme based on Google's Material Design
+     * @author CapnKitten
+     *
+     * @website http://github.com/CapnKitten
+     * @source https://github.com/CapnKitten/BetterDiscord/blob/master/Themes/Material-Discord/css/source.css
+     * @donate https://paypal.me/capnkitten
+     * @invite jzJkA6Z
+     */
 
-	/* MESSAGE SETTINGS */
-	--message-radius: 18px;
-	--message-padding-top: 8px;
-	--message-padding-side: 12px;
+    @import url(https://capnkitten.github.io/BetterDiscord/Themes/Material-Discord/css/source.css);
 
-	/* MESSAGE MEDIA SETTINGS */
-	--media-radius: 10px;
+    /* Material You addon */
+    @import url(https://capnkitten.github.io/BetterDiscord/Themes/Material-Discord/css/addons/material-you/source.css);
 
-	/* CARD SETTINGS */
-	--card-radius: 8px;
-	--card-radius-big: 18px;
+    /* MATERIAL YOU DARK THEME SETTINGS */
+    .theme-dark {
+    	--saturation-modifier: 0.31;
+    	--lightness-modifier: 0.225;
+    	--text-lightness-modifier: 1.0;
+    	--ui-darkness-modifier: 1.0;
+    }
 
-	/* BUTTON SETTINGS */
-	--button-height: 36px;
-	--button-padding: 0 24px;
-	--button-action-color: hsl(0,0%,100%);
+    /* MATERIAL YOU LIGHT THEME SETTINGS */
+    .theme-light {
+    	--saturation-modifier: 0.74;
+    	--lightness-modifier: 2.125;
+    	--text-lightness-modifier: 1.0;
+    }
 
-	/* INPUT SETTINGS */
-	--input-height: 36px;
-	--input-padding: 0 12px;
+    :root {
+    	/* ACCENT HSL AND TEXT COLOR SETTINGS */
+    	--accent-hue: 227;
+    	--accent-saturation: 71%;
+    	--accent-lightness: 61%;
+    	--accent-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
+    	--accent-button-action: hsl(0,0%,100%);
 
-	/* POPOUT AND MODAL SETTINGS */
-	--popout-radius: 8px;
-	--popout-radius-big: 18px;
+    	/* ALERT HSL AND TEXT COLOR SETTINGS */
+    	--alert-hue: 0;
+    	--alert-saturation: 85%;
+    	--alert-lightness: 61%;
+    	--alert-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
 
-	/* TOOLTIP SETTINGS */
-	--tooltip-color: hsl(0,0%,38%,0.9);
-	--tooltip-text-color: hsl(0,0%,87%);
-	--tooltip-font-size: 12px;
-	--tooltip-padding: 8px;
-	--tooltip-radius: 8px;
+    	/* WARNING HSL AND TEXT COLOR SETTINGS*/
+    	--warning-hue: 40;
+    	--warning-saturation: 86.4%;
+    	--warning-lightness: 56.9%;
+    	--warning-text-color: hsl(0,0%,100%); /* DOES NOTHING WITH MATERIAL YOU ENABLED */
 
-	/* SCROLLBAR SETTINGS */
-	--scrollbar-width: 10px;
-	--scrollbar-thin-width: 6px;
-}
+    	/* MESSAGE SETTINGS */
+    	--message-radius: 18px;
+    	--message-padding-top: 8px;
+    	--message-padding-side: 12px;
 
-     
-    '';
+    	/* MESSAGE MEDIA SETTINGS */
+    	--media-radius: 10px;
 
+    	/* CARD SETTINGS */
+    	--card-radius: 8px;
+    	--card-radius-big: 18px;
 
+    	/* BUTTON SETTINGS */
+    	--button-height: 36px;
+    	--button-padding: 0 24px;
+    	--button-action-color: hsl(0,0%,100%);
 
-#  _   _                  _                 _  
-# | | | |_   _ _ __  _ __| | __ _ _ __   __| | 
-# | |_| | | | | '_ \| '__| |/ _` | '_ \ / _` | 
-# |  _  | |_| | |_) | |  | | (_| | | | | (_| | 
-# |_| |_|\__, | .__/|_|  |_|\__,_|_| |_|\__,_| 
-#        |___/|_|                              
-#  
-# ----------------------------------------------------- 
+    	/* INPUT SETTINGS */
+    	--input-height: 36px;
+    	--input-padding: 0 12px;
+
+    	/* POPOUT AND MODAL SETTINGS */
+    	--popout-radius: 8px;
+    	--popout-radius-big: 18px;
+
+    	/* TOOLTIP SETTINGS */
+    	--tooltip-color: hsl(0,0%,38%,0.9);
+    	--tooltip-text-color: hsl(0,0%,87%);
+    	--tooltip-font-size: 12px;
+    	--tooltip-padding: 8px;
+    	--tooltip-radius: 8px;
+
+    	/* SCROLLBAR SETTINGS */
+    	--scrollbar-width: 10px;
+    	--scrollbar-thin-width: 6px;
+    }
+
+         
+  '';
+
+  #  _   _                  _                 _
+  # | | | |_   _ _ __  _ __| | __ _ _ __   __| |
+  # | |_| | | | | '_ \| '__| |/ _` | '_ \ / _` |
+  # |  _  | |_| | |_) | |  | | (_| | | | | (_| |
+  # |_| |_|\__, | .__/|_|  |_|\__,_|_| |_|\__,_|
+  #        |___/|_|
+  #
+  # -----------------------------------------------------
   # Hyprland configuration
   wayland.windowManager.hyprland = {
     enable = true;
 
+    # extraConfig = ''
+    #       source = $HOME/.cache/wal/colors-hyprland.conf
+    #     '';
 
-# extraConfig = ''
-#       source = $HOME/.cache/wal/colors-hyprland.conf
-#     '';
+    plugins = [
 
-     plugins = [
+      ##Recomended
+      #To import prebuilt plugins
+      #The format is : pkgs.hyprlandPlugins.<plugin name>
+      # pkgs.hyprlandPlugins.hyprtrails
+      #  pkgs.hyprlandPlugins.hyprexpo
+      #pkgs.hyprlandPlugins.hyprscroller
+      #pkgs.hyprlandPlugins.hyprspace #Workspace overview plugin for Hyprland
+      #pkgs.hyprlandPlugins.hypr-dynamic-cursors #pixelated icon when magnified Hyprcursor is not working
+      #pkgs.hyprlandPlugins.hyprbars
 
-  ##Recomended
-    #To import prebuilt plugins 
-    #The format is : pkgs.hyprlandPlugins.<plugin name>
-     # pkgs.hyprlandPlugins.hyprtrails
-    #  pkgs.hyprlandPlugins.hyprexpo
-     #pkgs.hyprlandPlugins.hyprscroller
-     #pkgs.hyprlandPlugins.hyprspace #Workspace overview plugin for Hyprland
-     #pkgs.hyprlandPlugins.hypr-dynamic-cursors #pixelated icon when magnified Hyprcursor is not working
-     #pkgs.hyprlandPlugins.hyprbars
+      ##Not recomended
+      #Format these which are build from source you also need flake for this
+      #inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
 
-
-  ##Not recomended
-    #Format these which are build from source you also need flake for this
-    #inputs.hyprland-plugins.packages.${pkgs.system}.hyprbars
-
-
-
-     ];
+    ];
 
     settings = {
 
-           plugin = {
-                    # hyprtrails = {
-                    #   color = "rgba(140, 0, 255, 0.77)";
-                    #   #color = "${custom.primary_background_rgba}";
-                    #  };
+      plugin = {
+        # hyprtrails = {
+        #   color = "rgba(140, 0, 255, 0.77)";
+        #   #color = "${custom.primary_background_rgba}";
+        #  };
 
-                    # hyprexpo = {
-                    #     columns = 3; # Number of columns in the overview
-                    #     gap_size = 5; # Gap size between windows
-                    #     bg_col = "rgb(111111)"; # Background color of the overview
-                    #     enable_gesture = true; # Enable touchpad gesture for toggling overview
-                    #     gesture_fingers = 3;  # 3 or 4
-                    #     gesture_distance = 300; # Distance required for gesture activation
-                    #     gesture_positive = true; # positive = swipe down. Negative = swipe up.
-                    #   };
+        # hyprexpo = {
+        #     columns = 3; # Number of columns in the overview
+        #     gap_size = 5; # Gap size between windows
+        #     bg_col = "rgb(111111)"; # Background color of the overview
+        #     enable_gesture = true; # Enable touchpad gesture for toggling overview
+        #     gesture_fingers = 3;  # 3 or 4
+        #     gesture_distance = 300; # Distance required for gesture activation
+        #     gesture_positive = true; # positive = swipe down. Negative = swipe up.
+        #   };
 
-                    # hypr-dynamic-cursors = {
-                    #   enabled = true;
+        # hypr-dynamic-cursors = {
+        #   enabled = true;
 
-                    #   # Disable all cursor behavior modes globally
-                    #   mode = "none";
-                      
-                    #   shaperule = [
-                    #     "clientside, none"
-                    #     "left_ptr, none"
-                    #     "default, none"
-                    #     "text, none"
-                    #     "crosshair, none"
-                    #   ];
+        #   # Disable all cursor behavior modes globally
+        #   mode = "none";
 
-                    #   # High-resolution cursor support
-                    #   hyprcursor = {
-                    #     enabled = true;        # Enable high-resolution cursor support
-                    #     nearest = 0;       # 0 / false - never use pixelated scaling, 1 / true  - use pixelated when no highres image, 2 - always use pixleated scaling
-                    #     resolution = -1;       # Automatically adjust resolution based on magnification
-                    #     fallback = "clientside"; # Fallback shape for client-side cursors
-                    #   };
+        #   shaperule = [
+        #     "clientside, none"
+        #     "left_ptr, none"
+        #     "default, none"
+        #     "text, none"
+        #     "crosshair, none"
+        #   ];
 
-                    #   # Shake to Find behavior
-                    #   shake = {
-                    #     enabled = true;
-                    #     nearest = false;        # Use bilinear scaling for smoother results
-                    #     threshold = 0.01;       # Sensitivity for detecting shake (lower is more sensitive)
-                    #     base = 4.0;            # Initial magnification level
-                    #     speed = 0.0;           # Magnification increase per second during shaking
-                    #     influence = 0.0;       # Influence of shake intensity on magnification speed
-                    #     limit = 0.0;           # 0.0-No limit on magnification
-                    #     timeout = 2000;        # Time (ms) cursor stays magnified after shaking stops
-                    #     effects = false;       # Disable additional effects like tilt/rotate during shaking
-                    #     ipc = false;           # Disable IPC events for shake (optional)
-                    #   };
+        #   # High-resolution cursor support
+        #   hyprcursor = {
+        #     enabled = true;        # Enable high-resolution cursor support
+        #     nearest = 0;       # 0 / false - never use pixelated scaling, 1 / true  - use pixelated when no highres image, 2 - always use pixleated scaling
+        #     resolution = -1;       # Automatically adjust resolution based on magnification
+        #     fallback = "clientside"; # Fallback shape for client-side cursors
+        #   };
 
-                    # };
+        #   # Shake to Find behavior
+        #   shake = {
+        #     enabled = true;
+        #     nearest = false;        # Use bilinear scaling for smoother results
+        #     threshold = 2.0;       # Sensitivity for detecting shake (lower is more sensitive)
+        #     base = 4.0;            # Initial magnification level
+        #     speed = 1.0;           # Magnification increase per second during shaking
+        #     influence = 1.0;       # Influence of shake intensity on magnification speed
+        #     limit = 4.0;           # 0.0-No limit on magnification
+        #     timeout = 80;        # Time (ms) cursor stays magnified after shaking stops
+        #     effects = false;       # Disable additional effects like tilt/rotate during shaking
+        #     ipc = false;           # Disable IPC events for shake (optional)
+        #   };
 
+        # };
 
-                  };
-
+      };
 
       "$mainMod" = "SUPER";
       # "$terminal" = "alacritty";
@@ -3615,7 +2730,7 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         #   touchpad {
         #     disable_while_typing = true;
         #     natural_scroll = false;
-        #     clickfinger_behavior = fals;e
+        #     clickfinger_behavior = false;
         #     middle_button_emulation = true;
         #     tap-to-click = true;
         #     drag_lock = false;
@@ -3674,10 +2789,11 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         no_warps = true;
       };
 
-    #Environment variables
+      #Environment variables
       env = [
-    "HYPRCURSOR_THEME, Bibata-Modern-Classic"
-    "HYPRCURSOR_SIZE, 32"
+        #"HYPRCURSOR_THEME, Bibata-Modern-Classic"
+        "HYPRCURSOR_THEME, Bibata-Modern-Classic"
+        "HYPRCURSOR_SIZE, 32"
       ];
 
       exec-once = [
@@ -3686,11 +2802,14 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "wal -R" # Restore previous wallpaper and colorscheme
         "swaync"
         "nm-applet --indicator &"
+
         #bluetooth
         "blueman-applet &"
         #"overskride"
+
         "swayosd-server &"
         "hyprctl setcursor Bibata-Modern-Classic 32"
+        "caffeine"
 
         ##plugins
         #"hyprctl plugin load ${pkgs.hyprlandPlugins.hyprtrails}"
@@ -3735,40 +2854,35 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "$mainMod,       B, exec, firefox"
         "$mainMod,       G, exec, google-chrome-stable"
         "$mainMod,       O, exec, obsidian"
-        "$mainMod,       Z, exec, zen"
+        "$mainMod,       Z, exec, zen-beta"
         "$mainMod CTRL,  space, exec, ulauncher"
         "$mainMod,       L, exec, loginctl lock-session"
         "$mainMod,       P, exec, hyprpicker -an"
         "$mainMod,       N, exec, swaync-client -t"
         ", Print, exec, grimblast --notify --freeze copysave area"
         "$mainMod CTRL,  Q, exec, wlogout -p layer-shell"
-        
-        
+        "$mainMod,       K, exec,keybindings-hint"
+        "$mainMod,       T, exec,telegram-desktop"
         #"$mainMod,grave, hyprexpo:expo, toggle" #grave is the key "~" which is above tab
-        
 
- # SSS
+        # SSS
         # "ALT, Print, exec, screenshot-full"
         # "ALTSHIFT, S, exec, screenshot-area"
 
+        # # Region screenshot with Swappy
+        # "$mainMod, S, exec, grim -g \"$(slurp)\" - | swappy -f -"
 
+        # # Fullscreen screenshot with Swappy
+        # "$mainMod SHIFT, S, exec, grim -o $(hyprctl monitors | jq -r '.[] | select(.focused).name') - | swappy -f -"
 
-      # # Region screenshot with Swappy
-      # "$mainMod, S, exec, grim -g \"$(slurp)\" - | swappy -f -"
+        # # Focused window screenshot with Swappy
+        # "$mainMod CTRL, S, exec, grim -g \"$(hyprctl clients -j | jq '.[] | select(.focused==true).at' | sed 's/,/x/')+$(hyprctl clients -j | jq '.[] | select(.focused==true).size' | sed 's/,/x/')+0x0\" - | swappy -f -"
 
-      # # Fullscreen screenshot with Swappy
-      # "$mainMod SHIFT, S, exec, grim -o $(hyprctl monitors | jq -r '.[] | select(.focused).name') - | swappy -f -"
-
-      # # Focused window screenshot with Swappy
-      # "$mainMod CTRL, S, exec, grim -g \"$(hyprctl clients -j | jq '.[] | select(.focused==true).at' | sed 's/,/x/')+$(hyprctl clients -j | jq '.[] | select(.focused==true).size' | sed 's/,/x/')+0x0\" - | swappy -f -"
-        
         # Launch Flameshot GUI with Print Screen key
         "$mainMod , S, exec, flameshot gui"
-        
 
         # Take a fullscreen screenshot with Flameshot
         "$mainMod SHIFT , S, exec, flameshot full -p ~/Pictures"
-
 
         # Moving focus
         "$mainMod, left, movefocus, l"
@@ -3799,7 +2913,6 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "$mainMod, 8, workspace, 8"
         "$mainMod, 9, workspace, 9"
         "$mainMod, 0, workspace, 10"
-
 
         # Moving windows to workspaces
         "$mainMod SHIFT, 1, movetoworkspace, 1" # Move active window to workspace 1
@@ -3875,9 +2988,9 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "col.active_border" = "rgba(33ccffee)";
         "col.inactive_border" = "rgba(595959aa)";
         # "col.active_border" = "rgba(b4befeee)";
-         #"col.inactive_border" = "rgba(7aa2f7ee) rgba(87aaf8ee) 45deg";
-         #"col.active_border" = "$color12" ;
-         #"col.inactive_border" = "$color10";
+        #"col.inactive_border" = "rgba(7aa2f7ee) rgba(87aaf8ee) 45deg";
+        #"col.active_border" = "$color12" ;
+        #"col.inactive_border" = "$color10";
         allow_tearing = false;
         # layout = "master";
       };
@@ -3892,25 +3005,26 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         dim_strength = 0.1;
         dim_special = 0.8;
 
-        # blur = {
-        #   enabled = true;
-        #   size = 6;
-        #   passes = 2;
-        #   new_optimizations = true;
-        #   ignore_opacity = true;
-        #   xray = true;
-        #   # blurls = waybar;
-        #   vibrancy = 0.1696;
-        # };
-         blur = {
+        blur = {
           enabled = true;
-          xray = true;
-          size = 4;
+          size = 6;
           passes = 2;
           new_optimizations = true;
           ignore_opacity = true;
-          brightness = 1.1;
-          };
+          xray = true;
+          # blurls = waybar;
+          vibrancy = 0.1696;
+        };
+        #  blur = {
+        #   enabled = true;
+        #   xray = true;
+        #   size = 4;
+        #   passes = 2;
+        #   new_optimizations = true;
+        #   ignore_opacity = true;
+        #   brightness = 1.1;
+        #   };
+
         shadow = {
           enabled = true;
           range = 3;
@@ -3923,15 +3037,16 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
 
       layerrule = [
         "blur, waybar"
-        
+
         "blur, swaync-control-center"
         "blur, swaync-notification-window"
         "ignorezero, swaync-control-center"
         "ignorezero, swaync-notification-window"
         #"ignorealpha 0.5, swaync-control-center"
-        #"ignorealpha 0.5, swaync-notification-window" 
-        
-        
+        #"ignorealpha 0.5, swaync-notification-window"
+        "blur,notifications"
+        "ignorezero,notifications"
+
         "blur, rofi"
         "ignorezero, rofi"
 
@@ -3940,58 +3055,16 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "blur, nwg-dock-hyprland-window"
         "ignorezero, nwg-dock-hyprland-window"
 
+        "blur,logout_dialog"
+
+        "blur, zen-beta"
+        #"ignorezero, rofi"
+        "blur,firefox"
+        "ignorezero,firefox"
+        
+
       ];
 
-      # animations = {
-      #   enabled = true;
-      #   bezier = [
-      #     "pace,0.46, 1, 0.29, 0.99"
-      #     "overshot,0.13,0.99,0.29,1.1"
-      #     "md3_decel, 0.05, 0.7, 0.1, 1"
-      #   ];
-      #   animation = [
-      #     "windowsIn,1,6,md3_decel,slide"
-      #     "windowsOut,1,6,md3_decel,slide"
-      #     "windowsMove,1,6,md3_decel,slide"
-      #     "fade,1,10,md3_decel"
-      #     "workspaces,1,9,md3_decel,slide"
-      #     "workspaces, 1, 6, default"
-      #     "specialWorkspace,1,8,md3_decel,slide"
-      #     "border,1,10,md3_decel"
-      #     #"borderangle, 1, 180, liner, loop" #used by rainbow borders and rotating colors
-      #   ];
-      # };
-
-      # general = {
-      #     gaps_in = 10;
-      #     gaps_out = 40;
-      #     border_size = 3;
-      #     "col.active_border" = "rgba(fab387ff) rgba(fab387ff) 45deg";
-      #     "col.inactive_border" = "rgba(00000000)";
-      #     resize_on_border = false;
-      #     allow_tearing = false;
-      #     # layout = dwindle;
-      # };
-
-      # decoration = {
-      #     rounding = 10;
-      #     active_opacity = 0.8;
-      #     inactive_opacity = 0.3;
-      #     shadow = {
-      #         enabled = true;
-      #         range = 25;
-      #         render_power = 1000;
-      #         color = "rgba(fab387ff)";
-      #         color_inactive = "rgba(00000000)";
-      #     };
-      #     blur = {
-      #         enabled = true;
-      #         size = 1;
-      #         passes = 5;
-
-      #         vibrancy = 0.1696;
-      #     };
-      # };
       animations = {
         enabled = true;
         bezier = [
@@ -3999,31 +3072,51 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
           "winIn, 0.1, 1.1, 0.1, 1.1"
           "winOut, 0.3, -0.3, 0, 1"
           "liner, 1, 1, 1, 1"
-          "overshot, 0.05, 0.9, 0.1, 1.05"
-          "smoothOut, 0.5, 0, 0.99, 0.99"
-          "smoothIn, 0.5, -0.5, 0.68, 1.5"
-          "easeOutQuint,0.23,1,0.32,1"
-          "easeInOutCubic,0.65,0.05,0.36,1"
-          "linear,0,0,1,1"
-          "almostLinear,0.5,0.5,0.75,1.0"
-          "quick,0.15,0,0.1,1"
         ];
         animation = [
           "windows, 1, 6, wind, slide"
-          "windowsIn, 1, 5, winIn, slide"
-          "windowsOut, 1, 3, smoothOut, slide"
+          "windowsIn, 1, 6, winIn, slide"
+          "windowsOut, 1, 5, winOut, slide"
           "windowsMove, 1, 5, wind, slide"
           "border, 1, 1, liner"
-          "borderangle, 1, 180, liner, loop"
-          "fade, 1, 3, smoothOut"
-          "workspaces, 1, 5, overshot"
-          "workspacesIn, 1, 5, winIn, slide"
-          "workspacesOut, 1, 5, winOut, slide"
-          "layers, 1, 3.81, easeOutQuint"
-          "layersIn, 1, 4, easeOutQuint, popin 50%"
-          "layersOut, 1, 3, easeOutQuint, slide"
+          "borderangle, 1, 30, liner, once"
+          "fade, 1, 10, default"
+          "workspaces, 1, 5, wind"
         ];
       };
+
+      # animations = {
+      #   enabled = true;
+      #   bezier = [
+      #     "wind, 0.05, 0.9, 0.1, 1.05"
+      #     "winIn, 0.1, 1.1, 0.1, 1.1"
+      #     "winOut, 0.3, -0.3, 0, 1"
+      #     "liner, 1, 1, 1, 1"
+      #     "overshot, 0.05, 0.9, 0.1, 1.05"
+      #     "smoothOut, 0.5, 0, 0.99, 0.99"
+      #     "smoothIn, 0.5, -0.5, 0.68, 1.5"
+      #     "easeOutQuint,0.23,1,0.32,1"
+      #     "easeInOutCubic,0.65,0.05,0.36,1"
+      #     "linear,0,0,1,1"
+      #     "almostLinear,0.5,0.5,0.75,1.0"
+      #     "quick,0.15,0,0.1,1"
+      #   ];
+      #   animation = [
+      #     "windows, 1, 6, wind, slide"
+      #     "windowsIn, 1, 5, winIn, slide"
+      #     "windowsOut, 1, 3, smoothOut, slide"
+      #     "windowsMove, 1, 5, wind, slide"
+      #     "border, 1, 1, liner"
+      #     "borderangle, 1, 180, liner, loop"
+      #     "fade, 1, 3, smoothOut"
+      #     "workspaces, 1, 5, overshot"
+      #     "workspacesIn, 1, 5, winIn, slide"
+      #     "workspacesOut, 1, 5, winOut, slide"
+      #     "layers, 1, 3.81, easeOutQuint"
+      #     "layersIn, 1, 4, easeOutQuint, popin 50%"
+      #     "layersOut, 1, 3, easeOutQuint, slide"
+      #   ];
+      # };
 
       # dwindle = {
       #     pseudotile = true;
@@ -4057,17 +3150,39 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
 
       windowrule = [
         # Window rules
-        "tile,title:^(kitty)$"
-        "float,title:^(fly_is_kitty)$"
-        #"float,^(kitty)$" #float animation
-        #"size 640 400,^(kitty)$"
-        "tile,^(Spotify)$"
-        "tile,^(wps)$"
-        "float, ^(waypaper)$"
-        "float, ^(missioncenter)$"
-        "size 840 680,^(missioncenter)$"
-       
 
+        "float,class:(kitty)"
+        "size 1100 900,class:(kitty)"
+        "center,class:(kitty)"
+        "float,title:^(fly_is_kitty)$"
+        
+
+        # Waypaper
+        "float,class:(.*waypaper.*)"
+        "size 900 700,class:(.*waypaper.*)"
+        "center,class:(.*waypaper.*)"
+        "pin,class:(.*waypaper.*)"
+
+        # Blueman Manager
+        "float,class:(blueman-manager)"
+        "size 800 600,class:(blueman-manager)"
+        "center,class:(blueman-manager)"
+
+        # System Mission Center
+        "float, class:(io.missioncenter.MissionCenter)"
+        "pin, class:(io.missioncenter.MissionCenter)"
+        "center, class:(io.missioncenter.MissionCenter)"
+        "size 900 600, class:(io.missioncenter.MissionCenter)"
+
+        # System Mission Center Preference Window
+        "float, class:(missioncenter), title:^(Preferences)$"
+        "pin, class:(missioncenter), title:^(Preferences)$"
+        "center, class:(missioncenter), title:^(Preferences)$"
+
+        # Gnome Calculator
+        "float,class:(org.gnome.Calculator)"
+        "size 700 600,class:(org.gnome.Calculator)"
+        "center,class:(org.gnome.Calculator)"
       ];
 
       #   # Window rules
@@ -4082,6 +3197,12 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
       #   windowrule = float, ^(missioncenter)$
 
       windowrulev2 = [
+        
+        # "float, class:^(zen-beta)$"
+        #"opacity 0.8,class:^(zen-beta)$"
+        # "center, class:(zen-beta)"
+        # "size 1572 998, class:(zen-beta)"
+
         #Flameshot
         "float,title:^(flameshot)"
         "move 0 0,title:^(flameshot)"
@@ -4089,21 +3210,16 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "float, class:^(flameshot)$"
         "noanim, class:^(flameshot)$"
         "pin, class:^(flameshot)$"
-        "monitor 1, class:^(flameshot)$" # Adjust monitor ID as needed 
-
+        "monitor 1, class:^(flameshot)$" # Adjust monitor ID as needed
 
         #Ulauncher
         # ULauncher window rules
-       "float, class:^Ulauncher$"
-       "size 800 600, class:^Ulauncher$"
-       "center, class:^Ulauncher$"
-       "noanim, class:^Ulauncher$"
+        "float, class:^Ulauncher$"
+        "size 800 600, class:^Ulauncher$"
+        "center, class:^Ulauncher$"
+        "noanim, class:^Ulauncher$"
 
-
-
-
-        "opacity ${opacity} ${opacity},class:^(com.mitchellh.ghostty)$"
-        #"opacity ${opacity} ${opacity},class:^(zen)$"
+        
         "opacity,0.99,0.99,title:^(obsidian)$" # Use 'Electron' for older Obsidian versions
         #"opacity 1.0 1.0,class:^(wofi)$"
         "opacity ${opacity} ${opacity},class:^(nwg-dock-hyprland)$"
@@ -4121,108 +3237,110 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
         "float,title:^(Confirm to replace files)$"
         "float,title:^(File Operation Progress)$"
         "float,title:^(mpv)$"
+
+
+        "opacity 0.8,class:^(org.gnome.Nautilus)$"
         
+
+
       ];
 
     };
   };
 
-   ##############################
-   ### nwg-dock configuration ###
-   ##############################
-
+  ##############################
+  ### nwg-dock configuration ###
+  ##############################
 
   xdg.configFile."nwg-dock-hyprland/style.css".text = ''
-       	 /* importing waybar colors as i am using same colours here */
-	 @import url("../../.cache/wal/colors-waybar.css");
-	 window {
-		background: rgba(0, 0, 0, 0.5);
-		border-radius: 30px;
-		border-style: solid;
-		border-width: 6px;
-		border-color: ${custom.primary_accent};
-	  }
-	  
-	  #box {
-		padding: 8px;
-		margin-left: 20px;
-		margin-right: 20px;
-		margin-top: 6px;
-		margin-bottom: 6px;
-		border-radius: 80px;
-		border-bottom-right-radius: 80px;
-		border-bottom-left-radius: 80px;
-		background:  rgba(0, 0, 0, 0.5);
-	  }
-	  
-	  #active {
-		border-radius: 10px;
-		background:${custom.secondary_accent};
-	  }
-	  
-	  button, image {
-		background: none;
-		border-style: none;
-		box-shadow: none;
-		color: ${custom.primary_accent};
-	  }
-	  
-	  /* Baseline appearance for icons using background images. */
-	  button {
-		padding: 6px;
-		margin: 4px;
-		background-repeat: no-repeat;
-		background-position: center;
-		background-size: contain;
-		font-size: 12px;
-		color: ${custom.tertiary_accent};
-		transition:
-		  background-size 0.15s ease-in-out,
-		  margin 0.15s ease-in-out,
-		  background-color 0.15s ease-in-out,
-		  box-shadow 0.15s ease-in-out;
-	  }
-	  
-	  /* On hover, dramatically increase the background-size to mimic a stronger zoom. */
-	  button:hover {
-		background-size: 400% auto; /* <-- Increase or decrease this value for a bigger or smaller zoom */
-		margin-top: 2px;
-		margin-bottom: 2px;
-		border-radius: 10px;
-		background-color: rgba(204, 208, 218, 1);
-		box-shadow: 0 0 8px;
-	  }
-	  
-	  button:focus {
-		box-shadow: none;
-	  }
+           	 /* importing waybar colors as i am using same colours here */
+    	 @import url("../../.cache/wal/colors-waybar.css");
+    	 window {
+    		background: rgba(0, 0, 0, 0.5);
+    		border-radius: 30px;
+    		border-style: solid;
+    		border-width: 6px;
+    		border-color: ${custom.primary_accent};
+    	  }
+    	  
+    	  #box {
+    		padding: 8px;
+    		margin-left: 20px;
+    		margin-right: 20px;
+    		margin-top: 6px;
+    		margin-bottom: 6px;
+    		border-radius: 80px;
+    		border-bottom-right-radius: 80px;
+    		border-bottom-left-radius: 80px;
+    		background:  rgba(0, 0, 0, 0.5);
+    	  }
+    	  
+    	  #active {
+    		border-radius: 10px;
+    		background:${custom.secondary_accent};
+    	  }
+    	  
+    	  button, image {
+    		background: none;
+    		border-style: none;
+    		box-shadow: none;
+    		color: ${custom.primary_accent};
+    	  }
+    	  
+    	  /* Baseline appearance for icons using background images. */
+    	  button {
+    		padding: 6px;
+    		margin: 4px;
+    		background-repeat: no-repeat;
+    		background-position: center;
+    		background-size: contain;
+    		font-size: 12px;
+    		color: ${custom.tertiary_accent};
+    		transition:
+    		  background-size 0.15s ease-in-out,
+    		  margin 0.15s ease-in-out,
+    		  background-color 0.15s ease-in-out,
+    		  box-shadow 0.15s ease-in-out;
+    	  }
+    	  
+    	  /* On hover, dramatically increase the background-size to mimic a stronger zoom. */
+    	  button:hover {
+    		background-size: 400% auto; /* <-- Increase or decrease this value for a bigger or smaller zoom */
+    		margin-top: 2px;
+    		margin-bottom: 2px;
+    		border-radius: 10px;
+    		background-color: rgba(204, 208, 218, 1);
+    		box-shadow: 0 0 8px;
+    	  }
+    	  
+    	  button:focus {
+    		box-shadow: none;
+    	  }
 
-           
+               
   '';
 
-##nwg-dock-pinned apps
+  ##nwg-dock-pinned apps
   home.file = {
     ".cache/nwg-dock-pinned" = {
       text = ''
-    zen
-    obsidian
-    varia
-    firefox
-    chrome
-    kitty
-    vesktop
-    nwg-displays
-    code
+        zen-beta
+        obsidian
+        varia
+        firefox
+        chrome
+        kitty
+        vesktop
+        code
 
-    '';
-      };
+      '';
+    };
   };
 
-
   ##Fuzzel
-   home.file = {
+  home.file = {
     ".config/fuzzel/fuzzel.ini" = {
-     text = ''
+      text = ''
         font=Gabarito
         terminal=foot -e
         prompt=">>  "
@@ -4244,13 +3362,11 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
 
         [dmenu]
         exit-immediately-if-empty=yes
-            '';
-              };
-          };
-
+      '';
+    };
+  };
 
   # Wlogout configuration
-
 
   #############
   ### newer ###
@@ -4554,131 +3670,117 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
   #   }
   # '';
 
-
-# #Guifetch
-#  programs.guifetch = {
-#     enable = true;
-#     config = {
-#       backgroundColor = "FF2E3440";
-#       osId = "nixos";
-#     };
-#  };
-
-
-
+  
 
   #Fastfetch
   programs.fastfetch = {
     enable = true;
 
     settings = {
-      display = {
-        color = {
-          keys = "35";
-          output = "90";
-        };
-      };
-
       logo = {
-        #source = ./nixos.png;
+        source = "/etc/nixos/NixOS-Logo.png";
         type = "kitty-direct";
-        height = 15;
-        width = 30;
         padding = {
-          top = 3;
-          left = 3;
+          #		"top" = 2;
+          "left" = 4;
         };
+        width = 40;
+        height = 22;
+      };
+      display = {
+        separator = " ";
       };
 
       modules = [
         "break"
+        "break"
         {
-          type = "custom";
-          format = "┌──────────────────────Hardware────────────────────────┐";
+          "type" = "os";
+          "key" = " ";
+          "keyColor" = "34";
         }
         {
-          type = "cpu";
-          key = "│  ";
+          "type" = "kernel";
+          "key" = " ";
+          "keyColor" = "34";
         }
         {
-          type = "gpu";
-          key = "│ 󰍛 ";
+          "type" = "packages";
+          "key" = " ";
+          "keyColor" = "34";
         }
         {
-          type = "memory";
-          key = "│ 󰑭 ";
-        }
-        {
-          type = "custom";
-          format = "└──────────────────────────────────────────────────────┘";
+          "type" = "shell";
+          "key" = " ";
+          "keyColor" = "34";
         }
         "break"
         {
-          type = "custom";
-          format = "┌──────────────────────Software────────────────────────┐";
+          "type" = "terminal";
+          "key" = " ";
+          "keyColor" = "34";
         }
         {
-          type = "custom";
-          format = " OS -> Nix-Os";
+          "type" = "wm";
+          "key" = " ";
+          "keyColor" = "34";
         }
         {
-          type = "kernel";
-          key = "│ ├ ";
+          "type" = "cursor";
+          "key" = " ";
+          "keyColor" = "34";
         }
         {
-          type = "packages";
-          key = "│ ├󰏖 ";
+          "type" = "terminalfont";
+          "key" = " ";
+          "keyColor" = "34";
         }
         {
-          type = "shell";
-          key = "└ └ ";
+          "type" = "uptime";
+          "key" = " ";
+          "keyColor" = "34";
+        }
+        {
+          "type" = "command";
+          "key" = "󱦟 ";
+          "keyColor" = "34";
+          "text" =
+            "birth_install=$(stat -c %W /); current=$(date +%s); time_progression=$((current - birth_install)); days_difference=$((time_progression / 86400)); echo $days_difference days";
+        }
+        {
+          "type" = "datetime";
+          "format" = "{1}-{3}-{11}";
+          "key" = " ";
+          "keyColor" = "34";
         }
         "break"
-        {
-          type = "wm";
-          key = " WM";
-        }
-        {
-          type = "wmtheme";
-          key = "│ ├󰉼 ";
-        }
-        {
-          type = "terminal";
-          key = "└ └ ";
-        }
-        {
-          type = "custom";
-          format = "└──────────────────────────────────────────────────────┘";
-        }
         "break"
         {
-          type = "custom";
-          format = "┌────────────────────Uptime / Age────────────────────┐";
+          "type" = "cpu";
+          "key" = " ";
+          "keyColor" = "blue";
         }
         {
-          type = "command";
-          key = "│  ";
-          text = # bash
-            ''
-              birth_install=$(stat -c %W /)
-              current=$(date +%s)
-              delta=$((current - birth_install))
-              delta_days=$((delta / 86400))
-              echo $delta_days days
-            '';
+          "type" = "gpu";
+          "key" = " ";
+          "keyColor" = "blue";
         }
         {
-          type = "uptime";
-          key = "│  ";
+          "type" = "memory";
+          "key" = " ";
+          "keyColor" = "blue";
         }
-        {
-          type = "custom";
-          format = "└────────────────────────────────────────────────────┘";
-        }
+        "break"
         "break"
       ];
+
     };
   };
+
+
+
+
+
 
   # Cursor configuration
   home.pointerCursor = {
@@ -4717,10 +3819,10 @@ xdg.configFile."vesktop/themes/Material-theme.css".text = ''
     #   '';
     # };
 
-     gtk3.extraConfig = {
-       gtk-application-prefer-dark-theme = 1;
-     };
-gtk4.extraConfig = {
+    gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = 1;
+    };
+    gtk4.extraConfig = {
       gtk-application-prefer-dark-theme = 1;
     };
     font = {
@@ -4728,9 +3830,7 @@ gtk4.extraConfig = {
       size = 14;
     };
 
-
   };
-
 
   # gtk = {
   #   iconTheme = {

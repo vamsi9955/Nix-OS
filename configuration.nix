@@ -10,33 +10,73 @@
       ./hardware-configuration.nix
     ];
 
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
+#   # Bootloader.
+#   boot.loader.systemd-boot.enable = false; #systemd enabled then grub doent work
+#   boot.loader.efi.canTouchEfiVariables = true;
+
+# ##Bootloader Theme
+# boot.loader.grub.theme = pkgs.stdenv.mkDerivation {
+#     pname = "distro-grub-themes";
+#     version = "3.1";
+#     src = pkgs.fetchFromGitHub {
+#       owner = "AdisonCavani";
+#       repo = "distro-grub-themes";
+#       rev = "v3.1";
+#       hash = "sha256-ZcoGbbOMDDwjLhsvs77C7G7vINQnprdfI37a9ccrmPs=";
+#     };
+#     installPhase = "cp -r customize/nixos $out";
+#   };
+
+
+  boot.loader.systemd-boot.enable = false;
   boot.loader.efi.canTouchEfiVariables = true;
 
-##Bootloader Theme
-boot.loader.grub.theme = pkgs.stdenv.mkDerivation {
-    pname = "distro-grub-themes";
-    version = "3.1";
-    src = pkgs.fetchFromGitHub {
-      owner = "AdisonCavani";
-      repo = "distro-grub-themes";
-      rev = "v3.1";
-      hash = "sha256-ZcoGbbOMDDwjLhsvs77C7G7vINQnprdfI37a9ccrmPs=";
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    useOSProber = true;
+    device = "nodev";
+    theme = pkgs.stdenv.mkDerivation {
+      pname = "distro-grub-themes";
+      version = "3.1";
+      src = pkgs.fetchFromGitHub {
+        owner = "AdisonCavani";
+        repo = "distro-grub-themes";
+        rev = "v3.1";
+        hash = "sha256-ZcoGbbOMDDwjLhsvs77C7G7vINQnprdfI37a9ccrmPs=";
+      };
+      installPhase = "cp -r customize/nixos $out";
     };
-    installPhase = "cp -r customize/nixos $out";
+    extraConfig = ''
+      insmod usb
+      insmod xhci
+      insmod usbkbd
+      terminal_input usb_keyboard
+    '';
   };
 
-#boot.plymouth = {
-#  enable = true;
-#  themePackages = [ pkgs.adi1090x-plymouth-themes ];
-#  theme = "deus_ex";
-#  #theme ="cybernetic";
-  # pack_1 cubes,cross_hud,circuit,circle_hud,abstract_ring_alt;
-  # pack_2 hexagon_hud,hexagon_dots_alt,glitch,deus_ex,cybernetic
-  # pack_3 metal_ball,loader,ironman,hud_2,
-  # pack_4 spinner_alt,target_2
-#};
+
+
+
+###Out of memory: Killed process .... during builds
+
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 4096;
+    }
+  ];
+
+  nix.settings = {
+    max-jobs = 4;
+    cores = 6;
+    
+  };
+
+
+
+
+
 
 ########
 ##Ntfs##
@@ -149,7 +189,7 @@ virtualisation = {
     # waydroid.enable = true;  # If you want Waydroid (Android in Linux Containers), make sure GPU passthrough works properly.
   };
 
- 
+ virtualisation.docker.enable = true;
 
 #Bluetooth
 hardware.bluetooth.enable = true;
@@ -157,8 +197,8 @@ hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
 # Extra Logitech Support
-  hardware.logitech.wireless.enable = false;
-  hardware.logitech.wireless.enableGraphical = false;
+  hardware.logitech.wireless.enable = true;
+  hardware.logitech.wireless.enableGraphical = true;
 
  # Enable MAC Randomize
 #  systemd.services.macchanger = {
@@ -184,15 +224,18 @@ nixpkgs.overlays = [
   })
 ];
 
-
+#DB errors "command-not-found"
+programs.command-not-found.enable = false;
 
 #NvidiaConfig
   # Enable OpenGL
-  hardware.opengl = {
-    enable = true;
+  #hardware.opengl = {
+    #enable = true;              ##depriciated
    # driSupport = true;
    # driSupport32Bit = true;
-  };
+  #};
+
+  hardware.graphics.enable = true;   ##use this
 
 # Load nvidia driver for Xorg and Wayland
 services.xserver.videoDrivers = ["nvidia"];
@@ -238,8 +281,11 @@ services.xserver.videoDrivers = ["nvidia"];
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
-    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-    portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+    
+    
+    # If using flake
+    # package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+    # portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
   };
 
   # Enable the X11 windowing system.
@@ -305,7 +351,7 @@ services.xserver.videoDrivers = ["nvidia"];
   services.printing.enable = true;
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+ services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -408,7 +454,8 @@ environment.systemPackages = with pkgs;
     polkit
     polkit_gnome
     hyprcursor
-    bibata-cursors  
+    bibata-cursors
+    #rose-pine-hyprcursor  
     xdg-desktop-portal-gtk  # For Cinnamon
     sddm-astronaut
     #adi1090x-plymouth-themes
@@ -418,7 +465,6 @@ environment.systemPackages = with pkgs;
     google-chrome
     wf-recorder
     libreoffice-fresh
-    ollama
     cudaPackages.cudatoolkit  # Automatically resolves to the latest version
     virt-manager   # Virt-Manager GUI
     #gnome-boxes 
@@ -437,11 +483,7 @@ environment.systemPackages = with pkgs;
 };
 
 
- #Ollama not required for ollama.cuda pacakge
-  services.ollama = {
-    enable = true;
-    acceleration = "cuda"; # Use "rocm" if you have AMD GPU, or remove if using CPU
-  };
+
 
 
 
@@ -510,7 +552,7 @@ nix.gc = {
   };
 
 #SVG support for cursor
-services.xserver.gdk-pixbuf.modulePackages = [ pkgs.librsvg ];
+programs.gdk-pixbuf.modulePackages = [ pkgs.librsvg ];
 
 ##Some Scecurity Stuff #---------------------------
  # Some programs need SUID wrappers, can be configured further or are

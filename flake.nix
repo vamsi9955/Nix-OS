@@ -8,11 +8,11 @@
    url = "github:nix-community/home-manager";
    inputs.nixpkgs.follows = "nixpkgs";
   };
-  # Hyprland flake for Wayland window manager
-    hyprland = {
-      url = "github:hyprwm/Hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
-     }; 
+  # # Hyprland flake for Wayland window manager
+  #   hyprland = {
+  #     url = "github:hyprwm/Hyprland";
+  #     inputs.nixpkgs.follows = "nixpkgs";
+  #    }; 
    
 
    spicetify-nix = {
@@ -20,10 +20,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-     hyprpanel = {
-      url = "github:Jas-SinghFSU/HyprPanel";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    #  hyprpanel = {
+    #   url = "github:Jas-SinghFSU/HyprPanel";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
 
   # #Zen-Browser
@@ -31,13 +31,13 @@
           
 };
 
-outputs = { self, nixpkgs, home-manager, hyprland,spicetify-nix,zen-browser, ... }@inputs: {
+outputs = { self, nixpkgs, home-manager,spicetify-nix,zen-browser, ... }@inputs: {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
       modules = [
         ./configuration.nix
-        hyprland.nixosModules.default
+        #hyprland.nixosModules.default
         home-manager.nixosModules.home-manager
         
         {
@@ -50,11 +50,11 @@ outputs = { self, nixpkgs, home-manager, hyprland,spicetify-nix,zen-browser, ...
           };
         }
      
-            {
-            nixpkgs.overlays = [
-              inputs.hyprpanel.overlay
-            ];
-          }
+          #   {
+          #   nixpkgs.overlays = [
+          #     inputs.hyprpanel.overlay
+          #   ];
+          # }
 
       ];
       

@@ -68,13 +68,21 @@
 
       cp ~/.cache/wal/colors-swaync.css ~/.config/swaync/style.css
 
-        p ~/.cache/wal/btop-colors.theme ~/.config/btop/themes/pywal.theme
+      cp ~/.cache/wal/btop-colors.theme ~/.config/btop/themes/pywal.theme
 
 
       cp ~/.cache/wal/colors-wlogout.css ~/.config/wlogout/colors.css
 
       cp ~/.cache/wal/templates/colors-hyprland.conf ~/.config/wal/templates/colors-hyprland.conf
 
+
+ # Copy Rofi colors file to the right location
+      cp ~/.cache/wal/colors-rofi.rasi ~/.config/rofi/colors.rasi
+
+      
+
+      # Ensure Rofi colors are properly copied
+      cp ~/.cache/wal/colors-rofi.rasi ~/.config/rofi/colors.rasi
 
 
                         
@@ -117,8 +125,70 @@
                    # Generate colors using wpgtk
                     wpg -s "$WALLPAPER"
 
-        ## Reload Apps
+                  wal -i "$WALLPAPER" --saturate 0.8
 
+
+
+# -----------------------------------------------------
+# Create blurred and square wallpapers
+# -----------------------------------------------------
+
+# Define variables
+WALLPAPER_FILENAME=$(basename "$WALLPAPER")
+WALLPAPER_NAME=$(echo "$WALLPAPER_FILENAME" | sed 's/\.[^.]*$//')
+
+GENERATED_VERSIONS="$HOME/.cache/wallpapers/generated"
+BLURRED_WALLPAPER="$GENERATED_VERSIONS/blurred.png"
+SQUARE_WALLPAPER="$GENERATED_VERSIONS/square-$WALLPAPER_NAME.png"
+BLUR="0x8"
+EFFECT="none"
+FORCE_GENERATE="0"
+USE_CACHE="1"
+TMP_WALLPAPER="$HOME/.cache/wallpapers/tmp-$WALLPAPER_NAME.png"
+ROFI_BG_FILE="$HOME/.config/rofi/current_wallpaper_bg.rasi"
+RASI_FILE="$HOME/.cache/wallpapers/current_wallpaper.rasi"
+
+# Create cache directory
+mkdir -p "$GENERATED_VERSIONS"
+
+# Create temporary resized wallpaper
+cp "$WALLPAPER" "$TMP_WALLPAPER"
+
+# Create blurred wallpaper
+if [ -f "$GENERATED_VERSIONS/blur-$BLUR-$EFFECT-$WALLPAPER_NAME.png" ] && [ "$FORCE_GENERATE" = "0" ] && [ "$USE_CACHE" = "1" ]; then
+    echo ":: Using cached blurred wallpaper"
+    cp "$GENERATED_VERSIONS/blur-$BLUR-$EFFECT-$WALLPAPER_NAME.png" "$BLURRED_WALLPAPER"
+else
+    echo ":: Generating blurred wallpaper"
+    magick "$TMP_WALLPAPER" -resize 75% "$BLURRED_WALLPAPER"
+    if [ "$BLUR" != "0x0" ]; then
+        magick "$BLURRED_WALLPAPER" -blur "$BLUR" "$BLURRED_WALLPAPER"
+    fi
+    cp "$BLURRED_WALLPAPER" "$GENERATED_VERSIONS/blur-$BLUR-$EFFECT-$WALLPAPER_NAME.png"
+fi
+
+# Create Rofi background file
+echo "* { background-image: url(\"$BLURRED_WALLPAPER\", height); }" > "$ROFI_BG_FILE"
+
+# Create Rasi file for wallpaper
+echo "* { current-image: url(\"$BLURRED_WALLPAPER\", height); }" > "$RASI_FILE"
+
+# Create square wallpaper
+echo ":: Generating square wallpaper"
+magick "$TMP_WALLPAPER" -gravity center -extent 1:1 "$SQUARE_WALLPAPER"
+
+
+
+
+
+# -----------------------------------------------------
+    ## Reload Apps
+# -----------------------------------------------------
+
+# Update Pywalfox if available
+if type pywalfox >/dev/null 2>&1; then
+    pywalfox update
+fi
         #Hyprlock
         "wallpaperHyprlock"
         "song-script"
@@ -141,10 +211,10 @@
           swaync-client -rs
 
           # #nwg-dock
-          did=$(ps -eaf | grep nwg-dock-hyprland | grep -v "grep nwg-dock-hyprland" | awk '{print $2}' | xargs)
-           kill -9 $did
-           #nwg-dock-hyprland &
-           'toggle-dock'
+          # did=$(ps -eaf | grep nwg-dock-hyprland | grep -v "grep nwg-dock-hyprland" | awk '{print $2}' | xargs)
+          #  kill -9 $did
+          #  #nwg-dock-hyprland &
+          #  'toggle-dock'
 
            # #Hyprpanel
           did=$(ps -eaf | grep hyprpanel | grep -v "grep hyprpanel" | awk '{print $2}' | xargs)
@@ -153,7 +223,7 @@
            'toggle-hyprpanel'
 
           #cava
-          pkill -USR1 cava
+          #pkill -USR1 cava
 
     '')
 
@@ -405,203 +475,37 @@
   '';
     };
 
-    # #Rofi
-    # ".config/wal/templates/colors-rofi.rasi" = {
-    #   text = ''
-
-    #       background: {background};
-    #     foreground: {foreground};
-    #     color0: {color0};
-    #     color1: {color1};
-    #     color2: {color2};
-    #     color3: {color3};
-    #     color4: {color4};
-    #     color5: {color5};
-    #     color6: {color6};
-    #     color7: {color7};
-    #     color8: {color8};
-    #     color9: {color9};
-    #     color10: {color10};
-    #     color11: {color11};
-    #     color12: {color12};
-    #     color13: {color13};
-    #     color14: {color14};
-    #     color15: {color15};
-
-    #   '';
-    # };
-
-
-
-    #Rofi 2
+    #Rofi
+    # Rofi color variables template
     ".config/wal/templates/colors-rofi.rasi" = {
       text = ''
+/* Pywal color variables for Rofi */
 * {{
-    active-background: {color2}88;
-    active-foreground: @foreground;
-    normal-background: transparent;
-    normal-foreground: @foreground;
-    urgent-background: {color1}88;
-    urgent-foreground: @foreground;
-
-    alternate-active-background: @background;
-    alternate-active-foreground: @foreground;
-    alternate-normal-background: transparent;
-    alternate-normal-foreground: @foreground;
-    alternate-urgent-background: @background;
-    alternate-urgent-foreground: @foreground;
-
-    selected-active-background: {color1}AA;
-    selected-active-foreground: @foreground;
-    selected-normal-background: {color2}AA;
-    selected-normal-foreground: @foreground;
-    selected-urgent-background: {color3}AA;
-    selected-urgent-foreground: @foreground;
-
-    background-color: @background;
-    background: {background}88;
+    background: rgba({background.rgb}, 0.8);
     foreground: {foreground};
-    border-color: @background;
-    spacing: 2;
+    color0: {color0};
+    color1: {color1};
+    color2: {color2};
+    color3: {color3};
+    color4: {color4};
+    color5: {color5};
+    color6: {color6};
+    color7: {color7};
+    color8: {color8};
+    color9: {color9};
+    color10: {color10};
+    color11: {color11};
+    color12: {color12};
+    color13: {color13};
+    color14: {color14};
+    color15: {color15};
 }}
-
-#window {{
-    background-color: @background;
-    border: 0;
-    padding: 2.5ch;
-}}
-
-#mainbox {{
-    border: 0;
-    padding: 0;
-}}
-
-#message {{
-    border: 2px 0px 0px;
-    border-color: @border-color;
-    padding: 1px;
-}}
-
-#textbox {{
-    text-color: @foreground;
-}}
-
-#inputbar {{
-    children:   [ prompt,textbox-prompt-colon,entry,case-indicator ];
-}}
-
-#textbox-prompt-colon {{
-    expand: false;
-    str: ">";
-    margin: 0px 0.3em 0em 0em;
-    text-color: @normal-foreground;
-}}
-
-#listview {{
-    fixed-height: 0;
-    border-color: @border-color;
-    spacing: 2px;
-    scrollbar: true;
-    padding: 2px 0px 0px;
-}}
-
-#element {{
-    border: 0;
-    padding: 1px;
-}}
-
-#element-text, element-icon {{
-    background-color: @normal-background;
-    text-color:       inherit;
-}}
-
-#element.normal.normal {{
-    background-color: @normal-background;
-    text-color: @normal-foreground;
-}}
-
-#element.normal.urgent {{
-    background-color: @urgent-background;
-    text-color: @urgent-foreground;
-}}
-
-#element.normal.active {{
-    background-color: @active-background;
-    text-color: @active-foreground;
-}}
-
-#element.selected.normal {{
-    background-color: @selected-normal-background;
-    text-color: @selected-normal-foreground;
-}}
-
-#element.selected.urgent {{
-    background-color: @selected-urgent-background;
-    text-color: @selected-urgent-foreground;
-}}
-
-#element.selected.active {{
-    background-color: @selected-active-background;
-    text-color: @selected-active-foreground;
-}}
-
-#element.alternate.normal {{
-    background-color: @alternate-normal-background;
-    text-color: @alternate-normal-foreground;
-}}
-
-#element.alternate.urgent {{
-    background-color: @alternate-urgent-background;
-    text-color: @alternate-urgent-foreground;
-}}
-
-#element.alternate.active {{
-    background-color: @alternate-active-background;
-    text-color: @alternate-active-foreground;
-}}
-
-#scrollbar {{
-    width: 4px;
-    handle-width: 8px;
-    padding: 0;
-    border-radius: 100px;
-}}
-
-#sidebar {{
-    border-radius: 100px;
-}}
-
-#button {{
-    text-color: @normal-foreground;
-}}
-
-#button.selected {{
-    background-color: @selected-normal-background;
-    text-color: @selected-normal-foreground;
-}}
-
-#inputbar {{
-    spacing: 0;
-    text-color: @normal-foreground;
-}}
-
-#case-indicator {{
-    spacing: 0;
-    text-color: @normal-foreground;
-}}
-
-#entry {{
-    spacing: 0;
-    text-color: @normal-foreground;
-}}
-
-#prompt {{
-    spacing: 0;
-    text-color: @normal-foreground;
-}}
-
       '';
     };
+
+
+
+
 
 
 
