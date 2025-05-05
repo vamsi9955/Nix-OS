@@ -405,6 +405,7 @@ programs.steam = {
 };
   # Install firefox.
   programs.firefox.enable = true;
+  programs.firefox.nativeMessagingHosts.packages = with pkgs; [ uget-integrator ]; 
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

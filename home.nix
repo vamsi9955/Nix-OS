@@ -100,8 +100,8 @@ in
 
     packages = with pkgs; [
       # Only 'x86_64-linux' and 'aarch64-linux' are supported
-      inputs.zen-browser.packages."${system}".default # beta
-      #inputs.zen-browser.packages."${system}".beta
+      #inputs.zen-browser.packages."${system}".default # beta
+      inputs.zen-browser.packages."${system}".beta
       #inputs.zen-browser.packages."${system}".twilight
 
       home-manager
@@ -155,6 +155,7 @@ in
       # vimPlugins.nvchad
       #firefox
       #qbittorrent
+      uget
       qbittorrent-enhanced
       starship
       cmatrix
@@ -188,7 +189,7 @@ in
       ncdu
       kdePackages.filelight
       #easyeffects
-      #plugins for eassyeffects
+      ##plugins for eassyeffects
       zita-convolver
       #calf
       #zam-plugins
@@ -253,6 +254,7 @@ in
       curl
       appimage-run
       varia
+      vdhcoapp
 
       sqlite
 
@@ -2704,8 +2706,14 @@ in
       "$fileManager" = "nautilus";
 
       monitor = [
-        "eDP-1,1920x1080@120.00,0x0,1"
-        "HDMI-A-1,1920x1080@180.00,1920x0,1"
+        "eDP-1,1920x1080@120.00,1920x0,1"
+        "HDMI-A-1,1920x1080@180.00,0x0,1"
+
+
+
+        ##Old Config
+        #  "eDP-1,1920x1080@120.00,0x0,1"
+        # "HDMI-A-1,1920x1080@180.00,1920x0,1"
         # ",preferred,auto,1"
       ];
 
@@ -3151,10 +3159,17 @@ in
       windowrule = [
         # Window rules
 
+        #Kitty
         "float,class:(kitty)"
         "size 1100 900,class:(kitty)"
         "center,class:(kitty)"
         "float,title:^(fly_is_kitty)$"
+
+        #U-get
+        "float,class:(uget-gtk)"
+        "size 700 600,class:(uget-gtk)"
+        "center,class:(uget-gtk)"
+        "float,title:^(uget-gtk)$"
         
 
         # Waypaper
