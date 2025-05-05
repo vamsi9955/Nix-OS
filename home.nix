@@ -2133,12 +2133,52 @@ in
         sensible
         yank
         prefix-highlight
+        # {
+        #   plugin = power-theme;
+        #   extraConfig = ''
+        #     set -g @tmux_power_theme 'gold'
+        #   '';
+        # }
+        
         {
-          plugin = power-theme;
+          plugin = catppuccin;
           extraConfig = ''
-            set -g @tmux_power_theme 'gold'
+            set -g @catppuccin_flavor 'mocha'
+            set -g @catppuccin_window_status_style "rounded"
+
+
+            # Make the status line pretty and add some modules
+            set -g status-right-length 100
+            set -g status-left-length 100
+            set -g status-left ""
+            set -g status-right "#{E:@catppuccin_status_application}"
+            set -agF status-right "#{E:@catppuccin_status_cpu}"
+            set -ag status-right "#{E:@catppuccin_status_session}"
+            set -ag status-right "#{E:@catppuccin_status_uptime}"
+            set -agF status-right "#{E:@catppuccin_status_battery}"
+
+            ##omerxx 
+            # set -g @catppuccin_window_left_separator ""
+            # set -g @catppuccin_window_right_separator " "
+            # set -g @catppuccin_window_middle_separator " █"
+            # set -g @catppuccin_window_number_position "right"
+            # set -g @catppuccin_window_default_fill "number"
+            # set -g @catppuccin_window_default_text "#W"
+            # set -g @catppuccin_window_current_fill "number"
+            # set -g @catppuccin_window_current_text "#W#{?window_zoomed_flag,(),}"
+            # set -g @catppuccin_status_modules_right "directory date_time"
+            # set -g @catppuccin_status_modules_left "session"
+            # set -g @catppuccin_status_left_separator  " "
+            # set -g @catppuccin_status_right_separator " "
+            # set -g @catppuccin_status_right_separator_inverse "no"
+            # set -g @catppuccin_status_fill "icon"
+            # set -g @catppuccin_status_connect_separator "no"
+            # set -g @catppuccin_directory_text "#{b:pane_current_path}"
+            # set -g @catppuccin_meetings_text "#($HOME/.config/tmux/scripts/cal.sh)"
+            # set -g @catppuccin_date_time_text "%H:%M"
           '';
         }
+
         {
           plugin = resurrect; # Used by tmux-continuum
 
@@ -2171,6 +2211,10 @@ in
 
         # Enable full mouse support
         set -g mouse on
+
+        # Overides colors of terminal
+        set-option -sa terminal-overrides ",xterm*:Tc"
+        
 
         # -----------------------------------------------------------------------------
         # Key bindings
