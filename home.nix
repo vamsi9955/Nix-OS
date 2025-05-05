@@ -2094,7 +2094,7 @@ in
         ll = "eza -lh --icons --grid --group-directories-first";
         la = "eza -lah --icons --grid --group-directories-first";
         ".." = "cd ..";
-        btop = "btop --utf-force";
+        #btop = "btop --utf-force";
         pipes = "pipes-rs";
         py-env = "cd ~/Documents/Python-Environment && nix-shell shell.nix";
         #comfy-ui = "cd ~/Documents/Python-Environment && nix-shell shell.nix && cd Tools/ComfyUI && python main.py";
