@@ -490,6 +490,8 @@ environment.systemPackages = with pkgs;
     cudaPackages.cudatoolkit  # Automatically resolves to the latest version
     virt-manager   # Virt-Manager GUI
     #gnome-boxes 
+
+    uwsm
   ];
   
   # Enable XDG Portal

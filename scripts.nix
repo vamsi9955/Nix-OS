@@ -12,123 +12,337 @@
 
 
 
-##Rofi wallpaper
-      (writeShellScriptBin "wallpaperRofi" ''
-        #!/bin/bash
+(writeShellScriptBin "wallpaperHyprlock" ''
+  #!/bin/bash
 
-        # Define paths
-        WAYPAPER_CONFIG="$HOME/.config/waypaper/config.ini"
-        # ROFI_PATH="$HOME/.config/rofi/wall"
-        # ROFI_WALLPAPER="$ROFI_PATH/wall.png"
+  # Define paths
+  WAYPAPER_CONFIG="$HOME/.config/waypaper/config.ini"
+  HYPRLOCK_PATH="$HOME/.config/hypr"
+  HYPRLOCK_WALLPAPER="$HYPRLOCK_PATH/hyprlock.png"
+
+  # Create hypr directory if it doesn't exist
+  mkdir -p "$HYPRLOCK_PATH"
+
+  # Check if ImageMagick is installed
+  if ! command -v convert >/dev/null 2>&1; then
+      echo "Error: ImageMagick is not installed. Please install it first."
+      exit 1
+  fi
+
+  # Get current wallpaper path from waypaper config.ini
+  if [ -f "$WAYPAPER_CONFIG" ]; then
+      # Get current wallpaper path from waypaper config
+      CURRENT_WALLPAPER="$(grep "^wallpaper" "$WAYPAPER_CONFIG" \
+          | cut -d '=' -f2- \
+          | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+
+      echo "Detected wallpaper path: $CURRENT_WALLPAPER"
+      CURRENT_WALLPAPER="$(eval echo "$CURRENT_WALLPAPER")"
+
+      # Check if we got a wallpaper path
+      if [ -n "$CURRENT_WALLPAPER" ] && [ -f "$CURRENT_WALLPAPER" ]; then
+          # Get file extension
+          FILE_EXT="''${CURRENT_WALLPAPER##*.}"
+          
+          if [ "''${FILE_EXT,,}" = "png" ]; then
+              # If it's already PNG, just copy
+              cp "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
+          else
+              # Convert to PNG using ImageMagick
+              magick "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
+          fi
+          
+          echo "Successfully copied/converted wallpaper to $HYPRLOCK_WALLPAPER"
+      else
+          echo "Error: Current wallpaper not found"
+          exit 1
+      fi
+  else
+      echo "Error: Waypaper config.ini not found"
+      exit 1
+  fi
+'')
+
+# ##Rofi wallpaper
+      # (writeShellScriptBin "wallpaperRofi" ''
+      #   #!/bin/bash
+
+      #   # Define paths
+      #   WAYPAPER_CONFIG="$HOME/.config/waypaper/config.ini"
+      #   # ROFI_PATH="$HOME/.config/rofi/wall"
+      #   # ROFI_WALLPAPER="$ROFI_PATH/wall.png"
 
 
-        # Create hypr directory if it doesn't exist
-        mkdir -p "$ROFI_PATH"
+      #   # Create hypr directory if it doesn't exist
+      #   mkdir -p "$ROFI_PATH"
 
-        # Check if ImageMagick is installed
-        if ! command -v convert >/dev/null 2>&1; then
-            echo "Error: ImageMagick is not installed. Please install it first."
-            exit 1
-        fi
+      #   # Check if ImageMagick is installed
+      #   if ! command -v convert >/dev/null 2>&1; then
+      #       echo "Error: ImageMagick is not installed. Please install it first."
+      #       exit 1
+      #   fi
 
-        # Get current wallpaper path from waypaper config.ini
-        if [ -f "$WAYPAPER_CONFIG" ]; then
-            # Get current wallpaper path from waypaper config
-            CURRENT_WALLPAPER="$(grep "^wallpaper" "$WAYPAPER_CONFIG" \
-                | cut -d '=' -f2- \
-                | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+      #   # Get current wallpaper path from waypaper config.ini
+      #   if [ -f "$WAYPAPER_CONFIG" ]; then
+      #       # Get current wallpaper path from waypaper config
+      #       CURRENT_WALLPAPER="$(grep "^wallpaper" "$WAYPAPER_CONFIG" \
+      #           | cut -d '=' -f2- \
+      #           | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
 
-            echo "Detected wallpaper path: $CURRENT_WALLPAPER"
-            CURRENT_WALLPAPER="$(eval echo "$CURRENT_WALLPAPER")"
+      #       echo "Detected wallpaper path: $CURRENT_WALLPAPER"
+      #       CURRENT_WALLPAPER="$(eval echo "$CURRENT_WALLPAPER")"
 
-            # Check if we got a wallpaper path
-            if [ -n "$CURRENT_WALLPAPER" ] && [ -f "$CURRENT_WALLPAPER" ]; then
-                # Get file extension
-                FILE_EXT="''${CURRENT_WALLPAPER##*.}"
+      #       # Check if we got a wallpaper path
+      #       if [ -n "$CURRENT_WALLPAPER" ] && [ -f "$CURRENT_WALLPAPER" ]; then
+      #           # Get file extension
+      #           FILE_EXT="''${CURRENT_WALLPAPER##*.}"
                 
-                if [ "''${FILE_EXT,,}" = "png" ]; then
-                    # If it's already PNG, just copy
-                    cp "$CURRENT_WALLPAPER" "$ROFI_WALLPAPER"
-                else
-                    # Convert to PNG using ImageMagick
-                    magick "$CURRENT_WALLPAPER" "$ROFI_WALLPAPER"
-                fi
+      #           if [ "''${FILE_EXT,,}" = "png" ]; then
+      #               # If it's already PNG, just copy
+      #               cp "$CURRENT_WALLPAPER" "$ROFI_WALLPAPER"
+      #           else
+      #               # Convert to PNG using ImageMagick
+      #               magick "$CURRENT_WALLPAPER" "$ROFI_WALLPAPER"
+      #           fi
                 
-                echo "Successfully copied/converted wallpaper to $ROFI_WALLPAPER"
-            else
-                echo "Error: Current wallpaper not found"
-                exit 1
-            fi
-        else
-            echo "Error: Waypaper config.ini not found"
-            exit 1
-        fi
-      '')
+      #           echo "Successfully copied/converted wallpaper to $ROFI_WALLPAPER"
+      #       else
+      #           echo "Error: Current wallpaper not found"
+      #           exit 1
+      #       fi
+      #   else
+      #       echo "Error: Waypaper config.ini not found"
+      #       exit 1
+      #   fi
+      # '')
+
+     
+
+
+(writeShellScriptBin "wallpaperRofi" ''
+#!/bin/bash
+# Define paths
+WAYPAPER_CONFIG="$HOME/.config/waypaper/config.ini"
+CACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/rofi"
+ROFI_WALLPAPER="$CACHE_DIR/wall.png"
+
+# Create necessary directory
+mkdir -p "$CACHE_DIR"
+
+# Check if ImageMagick is installed (using convert or magick)
+if command -v magick >/dev/null 2>&1; then
+  MAGICK_CMD="magick"
+elif command -v convert >/dev/null 2>&1; then
+  MAGICK_CMD="convert"
+else
+  echo "Error: ImageMagick is not installed. Please install it first."
+  exit 1
+fi
+#____________________________________________
+## For Video wallpapers
+
+# # # Check if file command is available
+# # if ! command -v file >/dev/null 2>&1; then
+# #   echo "Error: 'file' command is not installed. Please install it first."
+# #   exit 1
+# # fi
+
+# # # Function to extract thumbnail from video
+# # extract_thumbnail() {
+# #   local video="$1" out="$2"
+# #   if command -v ffmpeg >/dev/null 2>&1; then
+# #     ffmpeg -i "$video" -vframes 1 "$out" -y 2>/dev/null
+# #   else
+# #     echo "Error: ffmpeg required for video thumbnails."
+# #     exit 1
+# #   fi
+# # }
+
+# # Function to create preview images
+# create_previews() {
+#   local hash="$1" wall="$2" tmp
+#   # Check if it's a video
+#   if file --mime-type -b "$wall" | grep -q '^video/'; then
+#     tmp="/tmp/''${hash}.png"
+#     extract_thumbnail "$wall" "$tmp"
+#     wall="$tmp"
+#   fi
+#_________________________________________
+
+# Function to create preview images with fixed names
+create_previews() {
+  local wall="$1"
+  
+  # Generate thumbnails with fixed filenames
+  $MAGICK_CMD "$wall"[0] -strip -resize 1000x -gravity center -extent 1000x1000 -quality 90 "$CACHE_DIR/wall.thmb"
+  $MAGICK_CMD "$wall"[0] -strip -thumbnail 500x500^ -gravity center -extent 500x500 "$CACHE_DIR/wall.sqre.png" && mv "$CACHE_DIR/wall.sqre.png" "$CACHE_DIR/wall.sqre"
+  $MAGICK_CMD "$wall"[0] -strip -scale 10% -blur 0x3 -resize 100% "$CACHE_DIR/wall.blur"
+  $MAGICK_CMD "$CACHE_DIR/wall.sqre" \
+    \( -size 500x500 xc:white -fill "rgba(0,0,0,0.7)" -draw "polygon 400,500 500,500 500,0 450,0" \
+    -fill black -draw "polygon 500,500 500,0 450,500" \) \
+    -alpha Off -compose CopyOpacity -composite "$CACHE_DIR/wall.quad.png" && mv "$CACHE_DIR/wall.quad.png" "$CACHE_DIR/wall.quad"
+}
+
+# Get current wallpaper path from waypaper config.ini
+if [ -f "$WAYPAPER_CONFIG" ]; then
+  # Get current wallpaper path from waypaper config
+  CURRENT_WALLPAPER="$(grep "^wallpaper" "$WAYPAPER_CONFIG" \
+    | cut -d '=' -f2- \
+    | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  
+  echo "Detected wallpaper path: $CURRENT_WALLPAPER"
+  CURRENT_WALLPAPER="$(eval echo "$CURRENT_WALLPAPER")"
+  
+  # Check if we got a wallpaper path
+  if [ -n "$CURRENT_WALLPAPER" ] && [ -f "$CURRENT_WALLPAPER" ]; then
+    # Copy to rofi cache
+    cp "$CURRENT_WALLPAPER" "$ROFI_WALLPAPER"
+    
+    # Create preview images with fixed names
+    create_previews "$CURRENT_WALLPAPER"
+    
+    echo "Successfully processed wallpaper images:"
+    echo "- Main copy: $ROFI_WALLPAPER"
+    echo "- Thumbnail: $CACHE_DIR/wall.thmb"
+    echo "- Square: $CACHE_DIR/wall.sqre"
+    echo "- Blur: $CACHE_DIR/wall.blur"
+    echo "- Quad: $CACHE_DIR/wall.quad"
+  else
+    echo "Error: Current wallpaper not found"
+    exit 1
+  fi
+else
+  echo "Error: Waypaper config.ini not found"
+  exit 1
+fi
+'')
+
 
       ##__________________________________________________________
 
       (pkgs.writeShellScriptBin "rofiselect" ''
-        #!/usr/bin/env bash
+#!/usr/bin/env bash
+#Copying previews
+"copyRofiPreviews_Styles"
 
-        #// set variables
-        rofiStyleDir="$HOME/.config/rofi/styles"
-        rofiAssetDir="$HOME/.config/rofi/assets"
+# Set variables
+rofiStyleDir="$HOME/.config/rofi/styles"
+rofiAssetDir="$HOME/.config/rofi/assets"
 
-        #// set rofi scaling
-        font_scale=$ROFI_SELECT_SCALE
-        [[ "''${font_scale}" =~ ^[0-9]+$ ]] || font_scale=''${ROFI_SCALE:-10}
+# Debug: Check if directories exist
+if [ ! -d "''${rofiStyleDir}" ]; then
+  notify-send -a "Rofi Style Error" -u critical "Style directory does not exist: ''${rofiStyleDir}"
+  exit 1
+fi
 
-        # set font name
-        font_name=''${ROFI_SELECT_FONT:-$ROFI_FONT}
-        font_name=''${font_name:-"JetBrainsMono Nerd Font"}
+if [ ! -d "''${rofiAssetDir}" ]; then
+  notify-send -a "Rofi Style Error" -u critical "Asset directory does not exist: ''${rofiAssetDir}"
+  exit 1
+fi
 
-        # set rofi font override
-        font_override="* {font: \"''${font_name:-"JetBrainsMono Nerd Font"} ''${font_scale}\";}"
+# Debug: List available styles and assets
+styleCount=$(find "''${rofiStyleDir}" -type f -name "*.rasi" | wc -l)
+assetCount=$(find "''${rofiAssetDir}" -type f -name "*.png" | wc -l)
+notify-send -a "Rofi Style Info" -t 2000 "Found ''${styleCount} styles and ''${assetCount} assets"
 
-        elem_border=$((hypr_border * 5))
-        icon_border=$((elem_border - 5))
+# Set rofi scaling
+font_scale=''${ROFI_SELECT_SCALE}
+[[ "''${font_scale}" =~ ^[0-9]+$ ]] || font_scale=''${ROFI_SCALE:-10}
 
-        #// scale for monitor
-        mon_data=$(hyprctl -j monitors)
-        mon_x_res=$(jq '.[] | select(.focused==true) | if (.transform % 2 == 0) then .width else .height end' <<<"''${mon_data}")
-        mon_scale=$(jq '.[] | select(.focused==true) | .scale' <<<"''${mon_data}" | sed "s/\.//")
-        mon_x_res=$((mon_x_res * 100 / mon_scale))
+# Set font name
+font_name=''${ROFI_SELECT_FONT:-''${ROFI_FONT}}
+font_name=''${font_name:-"JetBrainsMono Nerd Font"}
 
-        #// generate config
-        elm_width=$(((20 + 12 + 16) * font_scale))
-        max_avail=$((mon_x_res - (4 * font_scale)))
-        col_count=$((max_avail / elm_width))
-        [[ "''${col_count}" -gt 5 ]] && col_count=5
-        r_override="window{width:100%;} 
-            listview{columns:''${col_count};}
-            element{orientation:vertical;border-radius:''${elem_border}px;}
-            element-icon{border-radius:''${icon_border}px;size:20em;} 
-            element-text{enabled:false;}"
+# Set rofi font override
+font_override="* {font: \"''${font_name:-"JetBrainsMono Nerd Font"} ''${font_scale}\";}"
 
-        #// launch rofi menu
-        RofiSel=$(
-            find "''${rofiStyleDir}" -type f -exec grep -l "Attr.*launcher.*" {} \; |
-                while read -r file; do
-                    baseName=$(basename "''${file}" .rasi)
-                    assetFile="''${rofiAssetDir}/''${baseName}.png"
-                    echo -en "''${baseName}\x00icon\x1f''${assetFile}\n"
-                done | sort -n | rofi -dmenu \
-                -theme-str "''${font_override}" \
-                -theme-str "''${r_override}" \
-                -theme "''${ROFI_SELECT_STYLE:-selector}" \
-                -select "''${rofiStyle}"
-        )
+# Set border values
+hypr_border=''${hypr_border:-10}  # Default value if not set
+elem_border=$((hypr_border * 5))
+icon_border=$((elem_border - 5))
 
-        #// apply rofi style
-        if [ -n "''${RofiSel}" ]; then
-            # instead of using set_conf, write to a file that can be used to track the style
-            echo "''${RofiSel}" > "$HOME/.config/rofi/current_style"
-            notify-send -a "Rofi Style" -r 2 -t 2200 -i "''${rofiAssetDir}/''${RofiSel}.png" " style ''${RofiSel} applied..."
-        fi
-        if [ -n "$ROFI_LAUNCH_STYLE" ]; then
-            notify-send -a "Rofi Style" -r 3 -u critical "Style: '$ROFI_LAUNCH_STYLE' is explicitly set in your environment."
-        fi
-      '')
+# Scale for monitor
+mon_data=$(hyprctl -j monitors 2>/dev/null)
+if [ $? -ne 0 ]; then
+  # Fallback if hyprctl fails
+  mon_x_res=1920
+  mon_scale=100
+else
+  mon_x_res=$(jq '.[] | select(.focused==true) | if (.transform % 2 == 0) then .width else .height end' <<<"''${mon_data}")
+  mon_scale=$(jq '.[] | select(.focused==true) | .scale' <<<"''${mon_data}" | sed "s/\.//")
+  if [ -z "''${mon_scale}" ] || [ "''${mon_scale}" -eq 0 ]; then
+    mon_scale=100
+  fi
+  if [ -z "''${mon_x_res}" ] || [ "''${mon_x_res}" -eq 0 ]; then
+    mon_x_res=1920
+  fi
+fi
+mon_x_res=$((mon_x_res * 100 / mon_scale))
+
+# Generate config
+elm_width=$(((20 + 12 + 16) * font_scale))
+max_avail=$((mon_x_res - (4 * font_scale)))
+col_count=$((max_avail / elm_width))
+[[ "''${col_count}" -gt 5 ]] && col_count=5
+
+r_override="window{width:100%;}
+listview{columns:''${col_count};}
+element{orientation:vertical;border-radius:''${elem_border}px;}
+element-icon{border-radius:''${icon_border}px;size:20em;}
+element-text{enabled:true;}"  # Changed to true to show names
+
+# Create temporary file to see what we're finding
+temp_file=$(mktemp)
+echo "Searching for style files in: ''${rofiStyleDir}" > "''${temp_file}"
+
+# Modified approach to find all .rasi files instead of relying on grep pattern
+find "''${rofiStyleDir}" -type f -name "*.rasi" | while read -r file; do
+  baseName=$(basename "''${file}" .rasi)
+  assetFile="''${rofiAssetDir}/''${baseName}.png"
+  
+  # Check if asset file exists
+  if [ -f "''${assetFile}" ]; then
+    echo "Found style: ''${baseName} with matching asset" >> "''${temp_file}"
+    echo -en "''${baseName}\x00icon\x1f''${assetFile}\n"
+  else
+    echo "Style ''${baseName} has no matching asset at ''${assetFile}" >> "''${temp_file}"
+    # Still show the style even without an asset
+    echo -en "''${baseName}\x00icon\x1f\n"
+  fi
+done | sort -n > /tmp/rofi_items.txt
+
+# Debug: Store results for inspection
+cat /tmp/rofi_items.txt | wc -l > /tmp/rofi_item_count.txt
+
+# Launch rofi menu
+RofiSel=$(cat /tmp/rofi_items.txt | rofi -dmenu \
+  -theme-str "''${font_override}" \
+  -theme-str "''${r_override}" \
+  -theme "''${ROFI_SELECT_STYLE:-selector}" \
+  -select "''${rofiStyle}"
+)
+
+# Apply rofi style
+if [ -n "''${RofiSel}" ]; then
+  # Instead of using set_conf, write to a file that can be used to track the style
+  echo "''${RofiSel}" > "$HOME/.config/rofi/current_style"
+  assetPath="''${rofiAssetDir}/''${RofiSel}.png"
+  
+  if [ -f "''${assetPath}" ]; then
+    notify-send -a "Rofi Style" -r 2 -t 2200 -i "''${assetPath}" " Style ''${RofiSel} applied..."
+  else
+    notify-send -a "Rofi Style" -r 2 -t 2200 " Style ''${RofiSel} applied (no image found)..."
+  fi
+fi
+
+if [ -n "''${ROFI_LAUNCH_STYLE}" ]; then
+  notify-send -a "Rofi Style" -r 3 -u critical "Style: ''${ROFI_LAUNCH_STYLE} is explicitly set in your environment."
+fi
+
+# Debug: Show log
+notify-send -a "Rofi Debug" -t 3000 "Check log at ''${temp_file}"
+
+'')
 
       #___________________________________________
       (writeShellScriptBin "rofilaunch" ''
@@ -238,7 +452,20 @@
         disown
       '')
       ##____________________________________________________________
+(writeShellScriptBin "copyRofiPreviews_Styles" ''
+#!/bin/bash
 
+TARGET="$HOME/.config/rofi/assets"
+SOURCE="/etc/nixos/rofi/assets"
+STYLES="/etc/nixos/rofi/styles"
+
+  mkdir -p "$HOME/.config/rofi/assets"
+  cp -r "$SOURCE/"* "$HOME/.config/rofi/assets"
+
+mkdir -p "$HOME/.config/rofi/styles"
+cp -r "$STYLES/"* "$HOME/.config/rofi/styles"
+
+'')
       #Dock Toggle
       (pkgs.writeShellScriptBin "toggle-dock" ''
         #!/usr/bin/env bash

@@ -25,13 +25,18 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
+ax-shell.url = "github:maotseantonio/AX-Shell";
+ nur = {
+        url = "github:nix-community/NUR";
+        inputs.nixpkgs.follows = "nixpkgs";
+     };
 
   # #Zen-Browser
      zen-browser.url = "github:0xc000022070/zen-browser-flake";
           
 };
 
-outputs = { self, nixpkgs, home-manager,spicetify-nix,zen-browser, ... }@inputs: {
+outputs = { self, nixpkgs, home-manager,spicetify-nix,zen-browser,nur,ax-shell, ... }@inputs: {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
@@ -39,6 +44,10 @@ outputs = { self, nixpkgs, home-manager,spicetify-nix,zen-browser, ... }@inputs:
         ./configuration.nix
         #hyprland.nixosModules.default
         home-manager.nixosModules.home-manager
+
+      # Add NUR nixpkgs overlay
+      nur.modules.nixos.default
+
         
         {
           home-manager = {
@@ -52,9 +61,12 @@ outputs = { self, nixpkgs, home-manager,spicetify-nix,zen-browser, ... }@inputs:
      
           #   {
           #   nixpkgs.overlays = [
-          #     inputs.hyprpanel.overlay
+          #     #inputs.hyprpanel.overlay
+          #     # nur.overlays.default
           #   ];
           # }
+
+          
 
       ];
       

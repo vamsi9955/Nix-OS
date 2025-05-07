@@ -80,16 +80,19 @@ in
 {
 
   imports = [
+     inputs.nur.modules.homeManager.default
     # For NixOS
     # inputs.spicetify-nix.nixosModules.default
     # For home-manager
     #inputs.spicetify-nix.homeManagerModules.default
     # inputs.hyprpanel.homeManagerModules.hyprpanel
     ./pywal.nix
+    #./matugen.nix
     ./rofi.nix
     ./flameshot-overlay.nix
     ./scripts.nix
     ./hyprlock.nix
+    ./Ax-shell.nix
 
   ];
 
@@ -119,6 +122,9 @@ in
 
       #clamav #antivirus
       gnupg
+
+      gpu-screen-recorder
+      grimblast
 
       # Wayland essentials
       hyprland
@@ -172,6 +178,7 @@ in
       #wallust
       pywal
       pywalfox-native
+      matugen
 
       # music
       #spotify
@@ -199,7 +206,7 @@ in
       #Productivity
       hugo
       glow
-      nodejs_23
+      #nodejs_23
 
       # dev tools
       #postman
@@ -241,7 +248,7 @@ in
 
       linux-wallpaperengine
       telegram-desktop
-      microsoft-edge
+      #microsoft-edge
 
       swaynotificationcenter # notification service
       ulauncher
@@ -538,7 +545,8 @@ in
     };
 
     style = ''
-           @import url("../../.cache/wal/colors-swaync.css");
+            @import url("../../.cache/wal/colors-swaync.css"); 
+           /* @import url("../../.cache/matugen/colors-swaync.css"); */
           * {
             font-family: "JetBrainsMono Nerd Font";
             font-weight: normal;
@@ -1253,7 +1261,8 @@ in
         };
       };
       style = ''
-             @import url("../../.cache/wal/colors-waybar.css");
+              @import url("../../.cache/wal/colors-waybar.css"); 
+            /* @import url("../../.cache/matugen/colors-waybar.css"); */
 
               * {
                   border: none;
@@ -1714,6 +1723,7 @@ in
 
         # Import pywal colors
         include ~/.cache/wal/colors-kitty.conf
+        #include ~/.cache/matugen/colors-kitty.conf
       '';
       settings = {
         bold_font = "auto";
@@ -2889,7 +2899,9 @@ in
         "$mainMod SHIFT, Q, exit,"
         "$mainMod,       E, exec, $fileManager"
         "$mainMod,       F, togglefloating,"
-        "$mainMod,       A, exec, 'rofi-run' "
+        #"$mainMod,       A, exec, 'rofi-run' "
+        "$mainMod,       A, exec, 'rofilaunch' "
+        "$mainMod SHIFT, A, exec, 'rofiselect' "
         "$mainMod,       space, exec, pkill rofi || rofi -show drun -replace -i"
         "$mainMod,       P, exec, gnome-text-editor"
         "$mainMod,       M, exec, missioncenter" # Open Mission Center
@@ -3313,7 +3325,8 @@ in
 
   xdg.configFile."nwg-dock-hyprland/style.css".text = ''
            	 /* importing waybar colors as i am using same colours here */
-    	 @import url("../../.cache/wal/colors-waybar.css");
+    	  @import url("../../.cache/wal/colors-waybar.css"); 
+       /* @import url("../../.cache/matugen/colors-waybar.css"); */
     	 window {
     		background: rgba(0, 0, 0, 0.5);
     		border-radius: 30px;
@@ -3472,7 +3485,8 @@ in
 
   xdg.configFile."wlogout/style.css".text = ''
     /* Import pywal colors */
-    @import url("../../.cache/wal/colors-wlogout.css");
+     @import url("../../.cache/wal/colors-wlogout.css"); 
+    /* @import url("../../.cache/matugen/colors-wlogout.css"); */
 
     * {
         background-image: none;

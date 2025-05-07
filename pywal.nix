@@ -1,28 +1,3 @@
-# { config,lib, pkgs, ... }:
-
-# {
-#   home.packages = with pkgs; [
-#     pywal
-#     pywalfox-native
-#   ];
-
-#   # Create necessary directories and templates
-#   home.file.".config/wal/templates" = {
-#     text = "";
-#     directory = true;
-#   };
-
-#   # Add activation script to ensure cache directory exists
-#   home.activation.createPywalCache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-#     $DRY_RUN_CMD mkdir -p $HOME/.cache/wal
-#   '';
-
-#   # Optional: Add pywalfox for Firefox theming
-#   # home.activation.installPywalfox = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-#   #   $DRY_RUN_CMD ${pkgs.pywalfox-native}/bin/pywalfox install
-#   # '';
-# }
-
 {
   config,
   lib,
@@ -182,7 +157,7 @@ magick "$TMP_WALLPAPER" -gravity center -extent 1:1 "$SQUARE_WALLPAPER"
 
 
 # -----------------------------------------------------
-    ## Reload Apps
+    ## Reload Apps & Scripts
 # -----------------------------------------------------
 
 # Update Pywalfox if available
@@ -191,6 +166,7 @@ if type pywalfox >/dev/null 2>&1; then
 fi
         #Hyprlock
         "wallpaperHyprlock"
+        "wallpaperRofi" #rofi wallpapers
         "song-script"
          
          #Waybar
@@ -228,56 +204,7 @@ fi
     '')
 
 
-(writeShellScriptBin "wallpaperHyprlock" ''
-  #!/bin/bash
 
-  # Define paths
-  WAYPAPER_CONFIG="$HOME/.config/waypaper/config.ini"
-  HYPRLOCK_PATH="$HOME/.config/hypr"
-  HYPRLOCK_WALLPAPER="$HYPRLOCK_PATH/hyprlock.png"
-
-  # Create hypr directory if it doesn't exist
-  mkdir -p "$HYPRLOCK_PATH"
-
-  # Check if ImageMagick is installed
-  if ! command -v convert >/dev/null 2>&1; then
-      echo "Error: ImageMagick is not installed. Please install it first."
-      exit 1
-  fi
-
-  # Get current wallpaper path from waypaper config.ini
-  if [ -f "$WAYPAPER_CONFIG" ]; then
-      # Get current wallpaper path from waypaper config
-      CURRENT_WALLPAPER="$(grep "^wallpaper" "$WAYPAPER_CONFIG" \
-          | cut -d '=' -f2- \
-          | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
-
-      echo "Detected wallpaper path: $CURRENT_WALLPAPER"
-      CURRENT_WALLPAPER="$(eval echo "$CURRENT_WALLPAPER")"
-
-      # Check if we got a wallpaper path
-      if [ -n "$CURRENT_WALLPAPER" ] && [ -f "$CURRENT_WALLPAPER" ]; then
-          # Get file extension
-          FILE_EXT="''${CURRENT_WALLPAPER##*.}"
-          
-          if [ "''${FILE_EXT,,}" = "png" ]; then
-              # If it's already PNG, just copy
-              cp "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
-          else
-              # Convert to PNG using ImageMagick
-              magick "$CURRENT_WALLPAPER" "$HYPRLOCK_WALLPAPER"
-          fi
-          
-          echo "Successfully copied/converted wallpaper to $HYPRLOCK_WALLPAPER"
-      else
-          echo "Error: Current wallpaper not found"
-          exit 1
-      fi
-  else
-      echo "Error: Waypaper config.ini not found"
-      exit 1
-  fi
-'')
 
 # Add wallpaper change script
  
@@ -477,7 +404,33 @@ fi
 
     #Rofi
     # Rofi color variables template
-    ".config/wal/templates/colors-rofi.rasi" = {
+#     ".config/wal/templates/colors-rofi.rasi" = {
+#       text = ''
+# /* Pywal color variables for Rofi */
+# * {{
+#     background: rgba({background.rgb}, 0.8);
+#     foreground: {foreground};
+#     color0: {color0};
+#     color1: {color1};
+#     color2: {color2};
+#     color3: {color3};
+#     color4: {color4};
+#     color5: {color5};
+#     color6: {color6};
+#     color7: {color7};
+#     color8: {color8};
+#     color9: {color9};
+#     color10: {color10};
+#     color11: {color11};
+#     color12: {color12};
+#     color13: {color13};
+#     color14: {color14};
+#     color15: {color15};
+# }}
+#       '';
+#     };
+
+".config/wal/templates/colors-rofi.rasi" = {
       text = ''
 /* Pywal color variables for Rofi */
 * {{
@@ -488,21 +441,21 @@ fi
     color2: {color2};
     color3: {color3};
     color4: {color4};
-    color5: {color5};
-    color6: {color6};
-    color7: {color7};
-    color8: {color8};
-    color9: {color9};
-    color10: {color10};
+    main-bg: rgba({color5.rgb}, 0.07);
+    main-fg: rgba({color6.rgb}, 0.48);
+    select-fg: rgba({color7.rgb}, 0.9);
+    main-ex: rgba({color8.rgb}, 0.9);
+    main-br: rgba({color9.rgb}, 0.9);
+    select-bg: rgba({color10.rgb}, 0.7);
     color11: {color11};
     color12: {color12};
     color13: {color13};
-    color14: {color14};
-    color15: {color15};
+    border-color: {color14};
+    separatorcolor: {color15};
+    
 }}
       '';
     };
-
 
 
 
