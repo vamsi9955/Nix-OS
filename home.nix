@@ -110,6 +110,8 @@ in
       home-manager
       # Add your user-specific packages here
       fastfetch
+      neofetch
+      kdePackages.dolphin
       nautilus
       xfce.thunar
       mission-center
@@ -2100,7 +2102,9 @@ in
         v = "nvim";
         sv = "sudo nvim";
         cat = "bat";
-        ls = "eza --icons";
+        l="eza -lh  --icons=auto"; # long list
+        #ls = "eza --icons";
+        ls="eza -1   --icons=auto"; # short list
         ll = "eza -lh --icons --grid --group-directories-first";
         la = "eza -lah --icons --grid --group-directories-first";
         ".." = "cd ..";
@@ -3061,13 +3065,13 @@ in
 
       decoration = {
         rounding = 14;
-        active_opacity = 1.0;
-        inactive_opacity = 0.9;
+        active_opacity = 0.90;
+        inactive_opacity = 0.75;
         fullscreen_opacity = 1.0;
 
         dim_inactive = true;
         dim_strength = 0.1;
-        dim_special = 0.8;
+        dim_special = 0.3;
 
         blur = {
           enabled = true;
@@ -3076,7 +3080,7 @@ in
           new_optimizations = true;
           ignore_opacity = true;
           xray = true;
-          # blurls = waybar;
+          special = true;
           vibrancy = 0.1696;
         };
         #  blur = {
@@ -3235,9 +3239,9 @@ in
         "pin,class:(.*waypaper.*)"
 
         # Blueman Manager
-        "float,class:(blueman-manager)"
-        "size 800 600,class:(blueman-manager)"
-        "center,class:(blueman-manager)"
+        "float,class:(.blueman-manager-wrapped)"
+        "size 800 600,class:(.blueman-manager-wrapped)"
+        "center,class:(.blueman-manager-wrapped)"
 
         # System Mission Center
         "float, class:(io.missioncenter.MissionCenter)"
@@ -3268,9 +3272,13 @@ in
       #   windowrule = float, ^(missioncenter)$
 
       windowrulev2 = [
+
+        # Dolphin
+        "float,class:^(org.kde.dolphin)$,title:^(Progress Dialog — Dolphin)$"
+        "float,class:^(org.kde.dolphin)$,title:^(Copying — Dolphin)$"
+        "opacity 0.80 $& 0.80 $& 1,class:^(org.kde.dolphin)$"
         
         # "float, class:^(zen-beta)$"
-        #"opacity 0.8,class:^(zen-beta)$"
         # "center, class:(zen-beta)"
         # "size 1572 998, class:(zen-beta)"
 
@@ -3409,6 +3417,57 @@ in
     };
   };
 
+#Dolphin
+##nwg-dock-pinned apps
+  home.file = {
+    ".config/dolphinrc" = {
+      text = ''
+       
+
+[$Version]
+update_info=dolphin_detailsmodesettings.upd:rename-leading-padding
+
+[General]
+ShowSelectionToggle=false
+ShowStatusBar=false
+Version=202
+ViewPropsTimestamp=2023,4,26,16,58,48.324
+
+[IconsMode]
+MaximumTextLines=1
+PreviewSize=112
+
+[InformationPanel]
+dateFormat=ShortFormat
+
+[KFileDialog Settings]
+Places Icons Auto-resize=false
+Places Icons Static Size=16
+
+[KPropertiesDialog]
+2560x1080 screen: Window-Maximized=true
+
+[MainWindow]
+MenuBar=Disabled
+ToolBarsMovable=Disabled
+
+[MainWindow][Toolbar mainToolBar]
+IconSize=16
+ToolButtonStyle=IconOnly
+
+[PlacesPanel]
+IconSize=16
+
+[PreviewSettings]
+Plugins=appimagethumbnail,audiothumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,imagethumbnail,jpegthumbnail,kraorathumbnail,windowsexethumbnail,windowsimagethumbnail,opendocumentthumbnail,svgthumbnail,ffmpegthumbs
+
+[Toolbar mainToolBar]
+ToolButtonStyle=IconOnly
+
+
+      '';
+    };
+  };
   ##Fuzzel
   home.file = {
     ".config/fuzzel/fuzzel.ini" = {

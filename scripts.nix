@@ -243,7 +243,7 @@ fi
 # Debug: List available styles and assets
 styleCount=$(find "''${rofiStyleDir}" -type f -name "*.rasi" | wc -l)
 assetCount=$(find "''${rofiAssetDir}" -type f -name "*.png" | wc -l)
-notify-send -a "Rofi Style Info" -t 2000 "Found ''${styleCount} styles and ''${assetCount} assets"
+#notify-send -a "Rofi Style Info" -t 2000 "Found ''${styleCount} styles and ''${assetCount} assets"
 
 # Set rofi scaling
 font_scale=''${ROFI_SELECT_SCALE}
@@ -340,7 +340,7 @@ if [ -n "''${ROFI_LAUNCH_STYLE}" ]; then
 fi
 
 # Debug: Show log
-notify-send -a "Rofi Debug" -t 3000 "Check log at ''${temp_file}"
+#notify-send -a "Rofi Debug" -t 3000 "Check log at ''${temp_file}"
 
 '')
 
